@@ -58,6 +58,10 @@ def setup_logging(log_file="system.log", level=logging.INFO):
     file_handler = logging.FileHandler(log_path, encoding="utf-8")
     file_handler.setFormatter(formatter)
 
+    # Console handler (prints to terminal)
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+    
     # Configure root logger
     root_logger = logging.getLogger()
     root_logger.setLevel(level)
