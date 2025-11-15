@@ -1,0 +1,35 @@
+"""
+demo_tasks.py - Interactive task demonstration
+Run with: python -m autom8.demo_tasks
+"""
+from autom8.tasks import TaskFactory, run_task
+from autom8.core import log
+
+def main():
+    print("=" * 60)
+    print("AUTOM8 TASK SYSTEM DEMONSTRATION")
+    print("=" * 60)
+
+    # List available task types
+    print("\n Available task types:")
+    for task_type in TaskFactory.list_types():
+        print(f"  - {task_type}")
+    
+    # Execute each task type
+    print("\n Executing tasks...\n")
+
+    for task_type in ["backup", "cleanup", "report"]:
+        print(f"\n--- Running {task_type.upper()} task ---")
+        result = run_task(task_type)
+        print(f"Status: {result['status']}")
+        if result['status'] == 'success':
+            for key, value in result.items():
+                if key != 'status':
+                    print(f"  {key}: {value}")
+    
+    print("\n" + "=" * 60)
+    print("All tasks completed. Check 99-Logs/system.log for details.")
+    print("=" * 60)
+
+if __name__ == "__main__":
+    main()
