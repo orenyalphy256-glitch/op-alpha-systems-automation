@@ -43,6 +43,7 @@ data/
 *.sqlite
 *.sqlite3
 *.log
+99-Logs/
 
 # Environment variables
 .env
