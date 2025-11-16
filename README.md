@@ -6,7 +6,7 @@ Project Type: Systems Management & Automation
 Tech Stack: Python 3.14, Flask, SQLAlchemy, Docker
 Status: Active Development (Batch 5)
 
-### Project Overview
+## Project Overview
 Autom8 is a production-grade automation system featuring:
 -RESTful API for contact management
 -SQLAlchemy ORM database layer
@@ -14,7 +14,7 @@ Autom8 is a production-grade automation system featuring:
 -Structured logging & monitoring
 -Containerized deployment with Docker
 
-### Architecture
+## Architecture
 autom8/
 ├── core.py        # Shared utilities, config, logging
 ├── models.py      # SQLAlchemy ORM models
@@ -25,7 +25,7 @@ autom8/
 - Python 3.9+
 - Virtual environment recommended
 
-### Installation
+## Installation
 
 # Clone repository
 git clone https://github.com/orenyalphy256-glitch/op-alpha-systems-automation.git
@@ -39,7 +39,7 @@ venv\Scripts\activate
 # Install in editable mode
 pip install -e
 
-### Usage
+## Usage
 python
 from autom8 import log
 from autom8.core import load_json, save_json
@@ -52,7 +52,7 @@ log.info("System initialized")
 data = {"name": "Alphonce", "role": "Engineer"}
 save_json("output.json", data)
 
-### Development Log
+## Development Log
 - Project structure established
 - Core utilities module implemented
 - Logging infrastructure configured
@@ -67,7 +67,7 @@ save_json("output.json", data)
 - Database initialization and seeding
 - Interactive database shell
 
-### License
+## License
 MIT License - See LICENSE file for details
 
 Contact email: orenyalphy256@gmail.com
