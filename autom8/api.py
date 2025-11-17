@@ -200,70 +200,55 @@ def create_contact_endpoint():
 @app.route('/api/v1/contacts/<int:contact_id>', methods=['PUT'])
 def update_contact_endpoint(contact_id):
     session = get_session()
-
+    
     try:
         existing = get_contact_by_id(session, contact_id)
         if not existing:
             abort(404, description=f"Contact with ID {contact_id} not found")
-
-        # Get JSON data
+        
         data = request.get_json()
-
-        # Validate data
+        
         is_valid, error_msg = validate_contact_data(data)
         if not is_valid:
             abort(400, description=error_msg)
-
-        # If updating phone, check for conflicts
+        
         if 'phone' in data and data['phone'] != existing.phone:
             phone_conflict = get_contact_by_phone(session, data['phone'])
             if phone_conflict:
                 abort(409, description=f"Contact with phone {data['phone']} already exists")
-
-        # Update contact
+        
         updated = update_contact(session, contact_id, **data)
-
+        
         log.info(f"Updated contact ID {contact_id}")
-
+        
         return jsonify(updated.to_dict()), 200
-    
+        
     except IntegrityError as e:
         session.rollback()
         log.error(f"Integrity error updating contact: {e}")
         abort(409, description="Phone number already exists")
-
-    except Exception as e:
-        session.rollback()
-        log.error(f"Error updating contact: {e}")
-        abort(500)
-    
+        
     finally:
         session.close()
 
 @app.route('/api/v1/contacts/<int:contact_id>', methods=['DELETE'])
 def delete_contact_endpoint(contact_id):
     session = get_session()
-
+    
     try:
         existing = get_contact_by_id(session, contact_id)
         if not existing:
             abort(404, description=f"Contact with ID {contact_id} not found")
-
-        # Delete contact
+        
         deleted = delete_contact(session, contact_id)
-
+        
         if deleted:
             log.info(f"Deleted contact ID {contact_id}")
-            return '', 204 # No content response
+            return '', 204
         else:
             abort(500)
-    
-    except Exception as e:
-        session.rollback()
-        log.error(f"Error deleting contact: {e}")
-        abort(500)
-
-    finally:
+            
+    finally: 
         session.close()
 
 # Root Endpoint
