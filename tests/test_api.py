@@ -111,7 +111,7 @@ def test_create_contact(client):
 
 def test_create_contact_missing_fields(client):
     """Test creating contact with missing required fields."""
-    response = client.post('/api/v1/contacts',  # ✅ Fixed typo: was '/api.v1/contacts'
+    response = client.post('/api/v1/contacts', 
                            data=json.dumps({'name': 'Test'}),
                            content_type='application/json')
     
@@ -168,7 +168,7 @@ def test_update_contact(client, sample_contact):
     data = response.get_json()
     assert data['name'] == 'Updated Name'
     assert data['email'] == 'updated@example.com'
-    assert data['phone'] == sample_contact['phone']  # Unchanged
+    assert data['phone'] == sample_contact['phone']
 
 
 def test_update_contact_not_found(client):
@@ -223,10 +223,16 @@ def test_search_contacts(client):
     """Test searching contacts by name."""
     # Create test contacts
     client.post('/api/v1/contacts',
-               data=json.dumps({'name': 'John Doe', 'phone': '0701111111'}),
+               data=json.dumps({
+                   'name': 'John Doe', 
+                   'phone': '0701111111'
+               }),
                content_type='application/json')
     client.post('/api/v1/contacts',
-               data=json.dumps({'name': 'Jane Smith', 'phone': '0702222222'}),
+               data=json.dumps({
+                   'name': 'Jane Smith', 
+                   'phone': '0702222222'
+               }),
                content_type='application/json')
     
     # Search for John
