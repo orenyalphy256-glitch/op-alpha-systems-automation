@@ -1,6 +1,6 @@
 """
 test_api.py - API integration tests
-Run with: pytest tests/test_api.py -v
+Run with: python -m pytest tests/test_api.py -v
 """
 import pytest
 import json
