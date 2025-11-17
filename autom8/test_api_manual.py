@@ -31,12 +31,14 @@ def main():
     print_response(response, "GET /health")
     sleep(1)
     
+
     # Test 2: List contacts (should be empty or have seed data)
     print("\n[TEST 2] List All Contacts")
     response = requests.get(f"{BASE_URL}/contacts")
     print_response(response, "GET /contacts")
     sleep(1)
     
+
     # Test 3: Create new contact
     print("\n[TEST 3] Create New Contact")
     new_contact = {
@@ -52,40 +54,41 @@ def main():
         print(f"\nContact created with ID: {contact_id}")
         sleep(1)
         
-        # Test 4: Get single contact
-        print("\n[TEST 4] Get Single Contact")
-        response = requests.get(f"{BASE_URL}/contacts/{contact_id}")
-        print_response(response, f"GET /contacts/{contact_id}")
-        sleep(1)
+
+    # Test 4: Get single contact
+    print("\n[TEST 4] Get Single Contact")
+    response = requests.get(f"{BASE_URL}/contacts/{contact_id}")
+    print_response(response, f"GET /contacts/{contact_id}")
+    sleep(1)
         
-        # Test 5: Update contact
-        print("\n[TEST 5] Update Contact")
-        update_data = {"email": "updated@example.com"}
-        response = requests.put(f"{BASE_URL}/contacts/{contact_id}", json=update_data)
-        print_response(response, f"PUT /contacts/{contact_id}")
-        sleep(1)
+    # Test 5: Update contact
+    print("\n[TEST 5] Update Contact")
+    update_data = {"email": "updated@example.com"}
+    response = requests.put(f"{BASE_URL}/contacts/{contact_id}", json=update_data)
+    print_response(response, f"PUT /contacts/{contact_id}")
+    sleep(1)
         
-        # Test 6: Search contacts
-        print("\n[TEST 6] Search Contacts")
-        response = requests.get(f"{BASE_URL}/contacts?search=API")
-        print_response(response, "GET /contacts?search=API")
-        sleep(1)
+    # Test 6: Search contacts
+    print("\n[TEST 6] Search Contacts")
+    response = requests.get(f"{BASE_URL}/contacts?search=API")
+    print_response(response, "GET /contacts?search=API")
+    sleep(1)
         
-        # Test 7: Delete contact
-        print("\n[TEST 7] Delete Contact")
-        response = requests.delete(f"{BASE_URL}/contacts/{contact_id}")
-        print(f"\n{'='*60}")
-        print(f"DELETE /contacts/{contact_id}")
-        print(f"{'='*60}")
-        print(f"Status: {response.status_code}")
-        if response.status_code == 204:
-            print("Contact deleted successfully (204 No Content)")
-        sleep(1)
+    # Test 7: Delete contact
+    print("\n[TEST 7] Delete Contact")
+    response = requests.delete(f"{BASE_URL}/contacts/{contact_id}")
+    print(f"\n{'='*60}")
+    print(f"DELETE /contacts/{contact_id}")
+    print(f"{'='*60}")
+    print(f"Status: {response.status_code}")
+    if response.status_code == 204:
+        print("Contact deleted successfully (204 No Content)")
+    sleep(1)
         
-        # Test 8: Verify deletion
-        print("\n[TEST 8] Verify Deletion (should return 404)")
-        response = requests.get(f"{BASE_URL}/contacts/{contact_id}")
-        print_response(response, f"GET /contacts/{contact_id} (after delete)")
+    # Test 8: Verify deletion
+    print("\n[TEST 8] Verify Deletion (should return 404)")
+    response = requests.get(f"{BASE_URL}/contacts/{contact_id}")
+    print_response(response, f"GET /contacts/{contact_id} (after delete)")
     
     # Test 9: Error handling - duplicate phone
     print("\n[TEST 9] Error Handling - Duplicate Phone")
@@ -106,6 +109,7 @@ def main():
     print("\n" + "="*60)
     print("ALL TESTS COMPLETED")
     print("="*60)
+
 
 if __name__ == "__main__":
     try:
