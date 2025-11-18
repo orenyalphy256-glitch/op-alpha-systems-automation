@@ -129,10 +129,10 @@ def search_contacts(session, query):
         Contact.name.ilike(pattern)
     ).all()
 
-def update_contact(session, contact_id, kwargs):
+def update_contact(session, contact_id, **kwargs):
     contact = get_contact_by_id(session, contact_id)
     if contact:
-        for key, value in kwargs.item():
+        for key, value in kwargs.items():
             if hasattr(contact, key):
                 setattr(contact, key, value)
         session.commit()
