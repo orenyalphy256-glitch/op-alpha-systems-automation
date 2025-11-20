@@ -46,7 +46,9 @@ pip install -e
 
 ## API Usage
 
-- Start the server: python run_api.py
+- API only: python run_api.py
+- Combined (API + Scheduler): python run_combined.py
+- Real-time monitoring dashboard: python -m autom8.monitor_scheduler
 
 ## Example Usage
 
@@ -98,6 +100,10 @@ save_json("output.json", data)
 - Pagination and search functionality
 - Comprehensive automated tests (17 test cases)
 - Health check and API documentation
+- APScheduler integration for job automation
+- Background management API endpoints
+- Combined service (API + Scheduler)
+- Real-time monitoring dashboard
 
 ## License
 
