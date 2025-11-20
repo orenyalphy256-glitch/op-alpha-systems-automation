@@ -261,38 +261,6 @@ def delete_contact_endpoint(contact_id):
     finally: 
         session.close()
 
-# Root Endpoint
-@app.route('/', methods=['GET'])
-def index():
-    """
-    API root - shows available endpoints.
-    """
-    return jsonify({
-        "service": "Autom8 API",
-        "version": "1.0",
-        "endpoints": {
-            "health": "/api/v1/health",
-            "contacts": {
-                "list": "GET /api/v1/contacts",
-                "get": "GET /api/v1/contacts/{id}",
-                "create": "POST /api/v1/contacts",
-                "update": "PUT /api/v1/contacts/{id}",
-                "delete": "DELETE /api/v1/contacts/{id}"
-            },
-            "scheduler": {
-                "status": "GET /api/v1/scheduler/status",
-                "trigger_job": "POST /api/v1/scheduler/jobs/{job_id}/run",
-                "pause_job": "POST /api/v1/scheduler/jobs/{job_id}/pause",
-                "resume_job": "POST /api/v1/scheduler/jobs/{job_id}/resume"
-            },
-            "task_logs": {
-                "list": "GET /api/v1/task_logs",
-                "stats": "GET /api/v1/task_logs/stats"
-            }
-        },
-        "documentation": "https://github.com/orenyalphy256-glitch/op-alpha-systems-automation"
-        }), 200
-
 # Scheduler management endpoints
 @app.route('/api/v1/scheduler/status', methods=['GET'])
 def scheduler_status():
@@ -409,6 +377,38 @@ def get_task_stats():
     
     finally:
         session.close()
+
+# Root Endpoint
+@app.route('/', methods=['GET'])
+def index():
+    """
+    API root - shows available endpoints.
+    """
+    return jsonify({
+        "service": "Autom8 API",
+        "version": "1.0",
+        "endpoints": {
+            "health": "/api/v1/health",
+            "contacts": {
+                "list": "GET /api/v1/contacts",
+                "get": "GET /api/v1/contacts/{id}",
+                "create": "POST /api/v1/contacts",
+                "update": "PUT /api/v1/contacts/{id}",
+                "delete": "DELETE /api/v1/contacts/{id}"
+            },
+            "scheduler": {
+                "status": "GET /api/v1/scheduler/status",
+                "trigger_job": "POST /api/v1/scheduler/jobs/{job_id}/run",
+                "pause_job": "POST /api/v1/scheduler/jobs/{job_id}/pause",
+                "resume_job": "POST /api/v1/scheduler/jobs/{job_id}/resume"
+            },
+            "task_logs": {
+                "list": "GET /api/v1/task_logs",
+                "stats": "GET /api/v1/task_logs/stats"
+            }
+        },
+        "documentation": "https://github.com/orenyalphy256-glitch/op-alpha-systems-automation"
+        }), 200
 
 # Module Exports
 __all__ = ["app"]
