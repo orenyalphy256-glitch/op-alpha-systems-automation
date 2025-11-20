@@ -17,6 +17,16 @@ from autom8.models import (
     init_db,
 )
 from autom8.core import log
+from autom8.scheduler import (
+    init_scheduler,
+    start_scheduler,
+    stop_scheduler,
+    get_scheduled_jobs,
+    pause_job,
+    resume_job,
+    run_job_now,
+)
+from autom8.models import TaskLog
 
 # Flask Application Setup
 app = Flask(__name__)
@@ -268,12 +278,137 @@ def index():
                 "create": "POST /api/v1/contacts",
                 "update": "PUT /api/v1/contacts/{id}",
                 "delete": "DELETE /api/v1/contacts/{id}"
+            },
+            "scheduler": {
+                "status": "GET /api/v1/scheduler/status",
+                "trigger_job": "POST /api/v1/scheduler/jobs/{job_id}/run",
+                "pause_job": "POST /api/v1/scheduler/jobs/{job_id}/pause",
+                "resume_job": "POST /api/v1/scheduler/jobs/{job_id}/resume"
+            },
+            "task_logs": {
+                "list": "GET /api/v1/task_logs",
+                "stats": "GET /api/v1/task_logs/stats"
             }
         },
         "documentation": "https://github.com/orenyalphy256-glitch/op-alpha-systems-automation"
+        }), 200
+
+# Scheduler management endpoints
+@app.route('/api/v1/scheduler/status', methods=['GET'])
+def scheduler_status():
+    from autom8.scheduler import scheduler
+    
+    if scheduler is None:
+        return jsonify({
+            "running": False,
+            "jobs": []
+        }), 200
+    
+    return jsonify({
+        "running": scheduler.running,
+        "jobs": get_scheduled_jobs()
     }), 200
+
+@app.route('/api/v1/scheduler/jobs/<job_id>/run', methods=['POST'])
+def trigger_job(job_id):
+    try:
+        run_job_now(job_id)
+        log.info(f"Manually executed job {job_id} successfully")
+        return jsonify({
+            "status": "success",
+            "message": f"Job {job_id} triggered successfully"
+        }), 200
+    except ValueError as e:
+        abort(404, description=str(e))
+    except Exception as e:
+        log.error(f"Error triggering job {job_id}: {e}")
+        abort(500)
+
+@app.route('/api/v1/scheduler/jobs/<job_id>/pause', methods=['POST'])
+def pause_job_endpoint(job_id):
+    try:
+        pause_job(job_id)
+        log.info(f"Job {job_id} paused successfully")
+        return jsonify({
+            "status": "success",
+            "message": f"Job {job_id} paused successfully"
+        }), 200
+    except Exception as e:
+        log.error(f"Error pausing job {job_id}: {e}")
+        abort(500)
+
+@app.route('/api/v1/scheduler/jobs/<job_id>/resume', methods=['POST'])
+def resume_job_endpoint(job_id):
+    try:
+        resume_job(job_id)
+        log.info(f"Job {job_id} resumed successfully")
+        return jsonify({
+            "status": "success",
+            "message": f"Job {job_id} resumed successfully"
+        }), 200
+    except Exception as e:
+        log.error(f"Error resuming job {job_id}: {e}")
+        abort(500)
+
+@app.route('/api/v1/tasklogs', methods=['GET'])
+def get_task_logs():
+    session = get_session()
+    
+    try:
+        # Get query parameters
+        task_type = request.args.get('task_type', None)
+        status = request.args.get('status', None)
+        limit = request.args.get('limit', 50, type=int)
+
+        # Build query
+        query = session.query(TaskLog)
+
+        if task_type:
+            query = query.filter(TaskLog.task_type == task_type)
+
+        if status:
+            query = query.filter(TaskLog.status == status)
+
+        # Order by most recent first
+        query = query.order_by(TaskLog.started_at.desc())
+
+        # Limit results
+        logs = query.limit(limit).all()
+
+        # Serialize
+        result = [log.to_dict() for log in logs]
+
+        return jsonify({
+            "count": len(result),
+            "logs": result
+        }), 200
+    
+    finally:
+        session.close()
+
+@app.route('/api/v1/tasklogs/stats', methods=['GET'])
+def get_task_stats():
+    session = get_session()
+
+    try:
+        total = session.query(TaskLog).count()
+        completed = session.query(TaskLog).filter(TaskLog.status == "completed").count()
+        failed = session.query(TaskLog).filter(TaskLog.status == "failed").count()
+        running = session.query(TaskLog).filter(TaskLog.status == "running").count()
+
+        # Success rate
+        success_rate = (completed / total * 100) if total > 0 else 0
+
+        return jsonify({
+            "total_executions": total,
+            "completed": completed,
+            "failed": failed,
+            "running": running,
+            "success_rate": round(success_rate, 2)
+        }), 200
+    
+    finally:
+        session.close()
 
 # Module Exports
 __all__ = ["app"]
-
-
