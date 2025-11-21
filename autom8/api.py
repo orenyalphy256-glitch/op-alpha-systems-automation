@@ -27,6 +27,9 @@ from autom8.scheduler import (
     run_job_now,
 )
 from autom8.models import TaskLog
+from autom8.metrics import get_all_metrics, get_system_metrics, get_task_metrics
+from datetime import datetime
+from autom8.core import LOGS_DIR
 
 # Flask Application Setup
 app = Flask(__name__)
@@ -377,6 +380,84 @@ def get_task_stats():
     
     finally:
         session.close()
+
+# Monitoring & Metrics Endpoints
+@app.route('/api/v1/health/detailed', methods=['GET'])
+def detailed_health():
+    try:
+        metrics = get_all_metrics()
+
+        # Determine overall health
+        system_healthy = (
+            metrics['system']['cpu']['percent'] < 90 and
+            metrics['system']['memory']['percent'] < 90 and
+            metrics['system']['disk']['percent'] < 90
+        )
+
+        tasks_healthy = metrics['tasks']['success_rate'] > 80
+
+        overall_status = "healthy" if (system_healthy and tasks_healthy) else "degraded"
+
+        return jsonify({
+            "status": overall_status,
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "metrics": metrics,
+            "checks": {
+                "system": "pass" if system_healthy else "fail",
+                "tasks": "pass" if tasks_healthy else "fail"
+            }
+        }), 200
+    except Exception as e:
+        log.error(f"Health check failed: {e}")
+        return jsonify({
+            "status": "unhealthy",
+            "error": str(e)
+        }), 500
+
+@app.route('/api/v1/metrics', methods=['GET'])
+def get_metrics():
+    try:
+        metrics = get_all_metrics()
+        return jsonify(metrics), 200
+    except Exception as e:
+        log.error(f"Error fetching metrics: {e}")
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/api/v1/metrics/system', methods=['GET'])
+def get_system_metrics_endpoint():
+    """Get system metric only."""
+    try:
+        metrics = get_system_metrics()
+        return jsonify(metrics), 200
+    except Exception as e:
+        log.error(f"Error fetching system metrics: {e}")
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/api/v1/logs/errors', methods=['GET'])
+def get_error_logs():
+    try:
+        limit = request.args.get('limit', 50, type=int)
+
+        # Read error log file
+        error_log_path = LOGS_DIR / "autom8_errors.log"
+
+        if not error_log_path.exists():
+            return jsonify({"errors": []}), 200
+        
+        with open(error_log_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+        
+        # Get last N lines
+        recent_errors = lines[-limit:] if len(lines) > limit else lines
+
+        return jsonify({
+            "count": len(recent_errors),
+            "errors": [line.strip() for line in recent_errors]
+        }), 200
+    
+    except Exception as e:
+        log.error(f"Error reading error logs: {e}")
+        return jsonify({"error": str(e)}), 500
 
 # Root Endpoint
 @app.route('/', methods=['GET'])
