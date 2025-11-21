@@ -11,6 +11,7 @@ from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 from autom8.core import log, DATA_DIR
 from autom8.tasks import TaskFactory, run_task
 from autom8.models import get_session, TaskLog, init_db
+from autom8.alerts import alert_task_failure
 
 # Scheduler configuration
 scheduler = None # Global scheduler instance
@@ -56,6 +57,9 @@ def execute_task_with_logging(task_type, task_name=None):
         session.commit()
 
         log.error(f"Failed scheduled task: {task_type} (log ID: {task_log.id}): {e}")
+
+        # Send alert
+        alert_task_failure(task_type, str(e))
 
         return {"status": "failed", "error": str(e)}
     
