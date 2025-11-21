@@ -183,7 +183,7 @@ def get_scheduled_jobs():
         jobs.append({
             'id': job.id,
             'name': job.name,
-            'next_run_time': job.next_run_time.isoformat() if job.next_run_time else None,
+            'next_run_time': (job.next_run_time.isoformat() if getattr(job, 'next_run_time', None) else 'N/A'),
             'trigger': str(job.trigger)
         })
 

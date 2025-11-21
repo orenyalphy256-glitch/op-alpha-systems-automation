@@ -12,7 +12,7 @@ from autom8.scheduler import (
     init_scheduler,
     start_scheduler,
     stop_scheduler,
-    scheduler_all_jobs,
+    schedule_all_jobs,
     get_scheduled_jobs,
 )
 from autom8.core import log
@@ -44,7 +44,7 @@ def main():
 
     # Schedule all jobs
     log.info("Scheduling jobs")
-    scheduler_all_jobs()
+    schedule_all_jobs()
 
     # Display scheduled jobs
     jobs = get_scheduled_jobs()
