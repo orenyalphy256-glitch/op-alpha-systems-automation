@@ -4,6 +4,7 @@ Purpose: Centralize common functions and configurations used across the applicat
 """
 import os
 import json
+from autom8.logging_config import setup_advanced_logging, ContextLogger
 import logging
 from pathlib import Path
 
@@ -71,7 +72,18 @@ def setup_logging(log_file="system.log", level=logging.INFO):
     return root_logger
 
 # Initialize logging on module import
-log = setup_logging()
+log = setup_advanced_logging(
+    app_name="autom8",
+    log_level=logging.INFO,
+    console_output=True,
+    json_logs=True,
+    text_logs=True,
+    rotation_size_mb=10,
+    backup_count=5
+)
+
+# Create a context logger for structured logging
+context_logger = ContextLogger("autom8.core")
 
 # MODULE-LEVEL EXPORTS
 __all__ = [
@@ -82,4 +94,5 @@ __all__ = [
     "load_json",
     "save_json",
     "log",
+    "context_logger"
 ]
