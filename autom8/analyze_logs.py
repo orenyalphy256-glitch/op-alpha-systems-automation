@@ -1,6 +1,8 @@
 """
 analyze_logs.py - Log analysis tool
-Parse and analyze JSON logs.
+Parse and analyze JSON logs
+Usage: python -m autom8.analyze_logs # Run for last 24 hours
+python -m autom8.analyze_logs --hours 48 # Run for last 48 hours
 """
 import json
 from pathlib import Path
