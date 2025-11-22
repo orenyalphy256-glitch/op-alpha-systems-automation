@@ -69,6 +69,15 @@ curl -X PUT <http://localhost:5000/api/v1/contacts/1> \
 ** Delete contact
 curl -X DELETE <http://localhost:5000/api/v1/contacts/1>
 
+** View all metrics
+curl http://localhost:5000/api/v1/metrics
+
+** System metrics only
+curl http://localhost:5000/api/v1/metrics/system
+
+** Detailed health check
+curl http://localhost:5000/api/v1/health/detailed
+
 ## Logging Example
 
 ** Logging example
@@ -104,6 +113,13 @@ save_json("output.json", data)
 - Background management API endpoints
 - Combined service (API + Scheduler)
 - Real-time monitoring dashboard
+- Advanced structured logging (JSON/text/errors)
+- Log rotation and management
+- System metrics (tasks stats, database stats)
+- Health check endpoints with detailed metrics
+- Email alerting on task failures
+- Real-time monitoring dashboard
+- Log analysis tools
 
 ## License
 
