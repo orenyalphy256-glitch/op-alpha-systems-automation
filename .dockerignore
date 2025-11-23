@@ -1,0 +1,48 @@
+# .dockerignore - Files to exclude from the Docker build
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Git
+.git/
+.gitignore
+
+# Logs
+99-Logs/
+*.log
+
+# Data files (we'll use volumes)
+data/
+*.db
+*.sqlite
+
+# Test files
+.pytest_cache/
+htmlcov/
+.coverage
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+docs/
+
+# Other
+.env
+*.txt
+!requirements.txt
