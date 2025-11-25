@@ -12,6 +12,7 @@ LABEL version="1.0."
 RUN apt-get update && apt-get install -y \
     gcc \
     git \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Application Setup
