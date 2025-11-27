@@ -33,21 +33,21 @@ COPY . .
 # Install application in editable mode
 RUN pip install -e .
 
-# Runtime configuration
-
 # Create directories for logs and data
-RUN mkdir -p /app/data /app/logs
+RUN mkdir -p /app/data /app/../99-Logs
+
+# Environment variables
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+ENV API_HOST=0.0.0.0
+ENV API_PORT=5000
 
 # Expose port
 EXPOSE 5000
 
-# Environment variables
-ENV FLASK_APP=run_api.py
-ENV PYTHONUNBUFFERED=1
-
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import requests;requests.get('http"//localhost:5000/api/v1/health')" || exit 1
+    CMD python -c "import requests;requests.get('http://localhost:5000/api/v1/health')" || exit 1
 
 # Default command
 CMD ["python", "run_combined.py"]

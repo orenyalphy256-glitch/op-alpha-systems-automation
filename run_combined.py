@@ -5,8 +5,14 @@ Usage: python run_combined.py
 import os
 import signal
 import sys
-from threading import Thread
-from autom8.api import app
+
+# Import core FIRST (no dependencies)
+from autom8.core import log
+
+# Import models (depends on core)
+from autom8.models import init_db
+
+# Import scheduler (depends on models + core)
 from autom8.scheduler import (
     init_scheduler,
     start_scheduler,
@@ -14,7 +20,9 @@ from autom8.scheduler import (
     schedule_all_jobs,
     get_scheduled_jobs
 )
-from autom8.core import log
+
+# Import API (depends on everything)
+from autom8.api import app
 
 # Global flag for graceful shutdown
 shutdown_requested = False
@@ -36,6 +44,11 @@ def main():
     print("API + SCHEDULER")
     print("=" * 60)
 
+    # Initialize database
+    print("\n Initializing database...")
+    init_db()
+    print(" Database ready")
+
     # Initialize scheduler
     print("\nInitializing scheduler...")
     init_scheduler()
@@ -53,17 +66,16 @@ def main():
     print("Scheduler running")
 
     # Configuration
-    host = os.getenv('API_HOST', '127.0.0.1')
+    host = os.getenv('API_HOST', '0.0.0.0')
     port = int(os.getenv('API_PORT', 5000))
     debug = os.getenv('API_DEBUG', 'False').lower() == 'true'
 
     # Start Flask API
-    print(f"\nStarting Flask API on {host}:{port}")
-    print(f"    Debug mode: {debug}")
-    print(f"    Access API at: http://{host}:{port}/")
-    print(f"    Scheduler status: http://{host}:{port}/api/v1/scheduler/status")
-    print(f"    Task logs: http://{host}:{port}/api/v1/tasklogs")
-    print("\nPress Ctrl+C to stop both services\n")
+    print(f"\n Starting Flask API on {host}:{port}")
+    print(f"   Debug mode: {debug}")
+    print(f"   API: http://{host}:{port}/")
+    print(f"   Health: http://{host}:{port}/api/v1/health")
+    print("\n Press Ctrl+C to stop both services\n")
 
     log.info("Combined service started (API + Scheduler)")
 

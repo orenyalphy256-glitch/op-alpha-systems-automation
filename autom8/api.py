@@ -4,6 +4,7 @@ Implements: RESTful endpoints using SQLAlchemy ORM
 """
 from flask import Flask, request, jsonify, abort
 from sqlalchemy.exc import IntegrityError
+from autom8.core import log
 from autom8.models import (
     get_session,
     Contact,
@@ -15,8 +16,8 @@ from autom8.models import (
     update_contact,
     delete_contact,
     init_db,
+    TaskLog
 )
-from autom8.core import log
 from autom8.scheduler import (
     init_scheduler,
     start_scheduler,
@@ -26,7 +27,6 @@ from autom8.scheduler import (
     resume_job,
     run_job_now,
 )
-from autom8.models import TaskLog
 from autom8.metrics import get_all_metrics, get_system_metrics, get_task_metrics
 from datetime import datetime
 from autom8.core import LOGS_DIR
