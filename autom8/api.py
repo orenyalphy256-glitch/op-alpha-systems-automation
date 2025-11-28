@@ -460,7 +460,7 @@ def index():
         "service": "Autom8 API",
         "version": "1.0",
         "endpoints": {
-            "health": "/api/v1/health/detailed",
+            "health": "/api/v1/health",
             "contacts": {
                 "list": "GET /api/v1/contacts",
                 "get": "GET /api/v1/contacts/{id}",
