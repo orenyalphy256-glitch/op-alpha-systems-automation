@@ -105,8 +105,8 @@ def validate_contact_data(data, required_fields=None):
     return True, None
 
 # API Routes - Contacts
-@app.route('/api/v1/health/detailed', methods=['GET'])
-def detailed_health():
+@app.route('/api/v1/health', methods=['GET'])
+def health_check():
     try:
         metrics = get_all_metrics()
 
