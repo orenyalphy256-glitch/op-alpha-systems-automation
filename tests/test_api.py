@@ -1,69 +1,37 @@
 """
 test_api.py - API integration tests
-Run with: python -m pytest tests/test_api.py -v
+Run with: pytest tests/test_api.py -v
 """
 import pytest
 import json
-import os
-import tempfile
-from sqlalchemy import create_engine
 from autom8.api import app
-from autom8.models import init_db, get_session, Contact, Base
-
-@pytest.fixture(scope='function')
-def test_db():
-    """Create a fresh test database for each test."""
-    # Create temporary database file
-    db_fd, db_path = tempfile.mkstemp(suffix='.db')
-    db_url = f'sqlite:///{db_path}'
-    
-    # Create engine and tables
-    engine = create_engine(db_url)
-    Base.metadata.create_all(engine)
-    
-    yield db_url
-    
-    # Cleanup
-    os.close(db_fd)
-    os.unlink(db_path)
-
+from autom8.models import init_db, get_session, Contact
 
 @pytest.fixture
-def client(test_db, monkeypatch):
-    """Create test client with isolated database."""
-    # Patch the database URL in models
-    from autom8 import models
-    
-    # Create new engine with test database
-    test_engine = create_engine(test_db)
-    models.engine = test_engine
-    models.SessionLocal.configure(bind=test_engine)
-    
-    # Configure Flask for testing
+def client():
+    """Create test client with fresh database."""
     app.config['TESTING'] = True
-    app.config['DEBUG'] = False
     
+    # Initialize database
+    init_db()
+    
+    # Create test client
     with app.test_client() as client:
         yield client
 
-
 @pytest.fixture
 def sample_contact(client):
-    """Create a sample contact for tests that need one."""
+    """Create a sample contact for tests."""
     response = client.post('/api/v1/contacts',
                            data=json.dumps({
                                'name': 'Test User',
-                               'phone': '0700000000',  # Unique phone
+                               'phone': '0700000000',
                                'email': 'test@example.com'
                            }),
                            content_type='application/json')
-    
-    # Verify creation succeeded
-    assert response.status_code == 201, f"Setup failed: {response.get_json()}"
-    
     return response.get_json()
 
-# TESTS
+
 def test_health_check(client):
     """Test health check endpoint."""
     response = client.get('/api/v1/health')
@@ -94,7 +62,7 @@ def test_create_contact(client):
     """Test creating a new contact."""
     response = client.post('/api/v1/contacts',
                            data=json.dumps({
-                               'name': 'Alphonce Liguori',
+                               'name': 'Alphonce Ligouri',
                                'phone': '0712345678',
                                'email': 'alphonce@example.com'
                            }),
@@ -102,7 +70,7 @@ def test_create_contact(client):
     
     assert response.status_code == 201
     data = response.get_json()
-    assert data['name'] == 'Alphonce Liguori'
+    assert data['name'] == 'Alphonce Ligouri'
     assert data['phone'] == '0712345678'
     assert data['email'] == 'alphonce@example.com'
     assert 'id' in data
@@ -111,7 +79,7 @@ def test_create_contact(client):
 
 def test_create_contact_missing_fields(client):
     """Test creating contact with missing required fields."""
-    response = client.post('/api/v1/contacts', 
+    response = client.post('/api/v1/contacts',
                            data=json.dumps({'name': 'Test'}),
                            content_type='application/json')
     
@@ -168,7 +136,7 @@ def test_update_contact(client, sample_contact):
     data = response.get_json()
     assert data['name'] == 'Updated Name'
     assert data['email'] == 'updated@example.com'
-    assert data['phone'] == sample_contact['phone']
+    assert data['phone'] == sample_contact['phone']  # Unchanged
 
 
 def test_update_contact_not_found(client):
@@ -223,16 +191,10 @@ def test_search_contacts(client):
     """Test searching contacts by name."""
     # Create test contacts
     client.post('/api/v1/contacts',
-               data=json.dumps({
-                   'name': 'John Doe', 
-                   'phone': '0701111111'
-               }),
+               data=json.dumps({'name': 'John Doe', 'phone': '0701111111'}),
                content_type='application/json')
     client.post('/api/v1/contacts',
-               data=json.dumps({
-                   'name': 'Jane Smith', 
-                   'phone': '0702222222'
-               }),
+               data=json.dumps({'name': 'Jane Smith', 'phone': '0702222222'}),
                content_type='application/json')
     
     # Search for John

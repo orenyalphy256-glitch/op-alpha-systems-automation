@@ -4,7 +4,7 @@ Implements: RESTful endpoints using SQLAlchemy ORM
 """
 from flask import Flask, request, jsonify, abort
 from sqlalchemy.exc import IntegrityError
-from autom8.core import log
+from autom8.core import log, LOGS_DIR
 from autom8.models import (
     get_session,
     Contact,
@@ -29,7 +29,6 @@ from autom8.scheduler import (
 )
 from autom8.metrics import get_all_metrics, get_system_metrics, get_task_metrics
 from datetime import datetime
-from autom8.core import LOGS_DIR
 
 # Flask Application Setup
 app = Flask(__name__)
@@ -106,13 +105,37 @@ def validate_contact_data(data, required_fields=None):
     return True, None
 
 # API Routes - Contacts
-@app.route('/api/v1/health', methods=['GET'])
-def health_check():
-    return jsonify({
-        "status": "healthy",
-        "service": "autom8-api",
-        "version": "1.0"
-    }), 200
+@app.route('/api/v1/health/detailed', methods=['GET'])
+def detailed_health():
+    try:
+        metrics = get_all_metrics()
+
+        # Determine overall health
+        system_healthy = (
+            metrics['system']['cpu']['percent'] < 90 and
+            metrics['system']['memory']['percent'] < 90 and
+            metrics['system']['disk']['percent'] < 90
+        )
+
+        tasks_healthy = metrics['tasks']['success_rate'] > 80
+
+        overall_status = "healthy" if (system_healthy and tasks_healthy) else "degraded"
+
+        return jsonify({
+            "status": overall_status,
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "metrics": metrics,
+            "checks": {
+                "system": "pass" if system_healthy else "fail",
+                "tasks": "pass" if tasks_healthy else "fail"
+            }
+        }), 200
+    except Exception as e:
+        log.error(f"Health check failed: {e}")
+        return jsonify({
+            "status": "unhealthy",
+            "error": str(e)
+        }), 500
 
 @app.route('/api/v1/contacts', methods=['GET'])
 def get_contacts():
@@ -382,38 +405,6 @@ def get_task_stats():
         session.close()
 
 # Monitoring & Metrics Endpoints
-@app.route('/api/v1/health/detailed', methods=['GET'])
-def detailed_health():
-    try:
-        metrics = get_all_metrics()
-
-        # Determine overall health
-        system_healthy = (
-            metrics['system']['cpu']['percent'] < 90 and
-            metrics['system']['memory']['percent'] < 90 and
-            metrics['system']['disk']['percent'] < 90
-        )
-
-        tasks_healthy = metrics['tasks']['success_rate'] > 80
-
-        overall_status = "healthy" if (system_healthy and tasks_healthy) else "degraded"
-
-        return jsonify({
-            "status": overall_status,
-            "timestamp": datetime.utcnow().isoformat() + "Z",
-            "metrics": metrics,
-            "checks": {
-                "system": "pass" if system_healthy else "fail",
-                "tasks": "pass" if tasks_healthy else "fail"
-            }
-        }), 200
-    except Exception as e:
-        log.error(f"Health check failed: {e}")
-        return jsonify({
-            "status": "unhealthy",
-            "error": str(e)
-        }), 500
-
 @app.route('/api/v1/metrics', methods=['GET'])
 def get_metrics():
     try:
@@ -469,7 +460,7 @@ def index():
         "service": "Autom8 API",
         "version": "1.0",
         "endpoints": {
-            "health": "/api/v1/health",
+            "health": "/api/v1/health/detailed",
             "contacts": {
                 "list": "GET /api/v1/contacts",
                 "get": "GET /api/v1/contacts/{id}",
@@ -481,15 +472,19 @@ def index():
                 "status": "GET /api/v1/scheduler/status",
                 "trigger_job": "POST /api/v1/scheduler/jobs/{job_id}/run",
                 "pause_job": "POST /api/v1/scheduler/jobs/{job_id}/pause",
-                "resume_job": "POST /api/v1/scheduler/jobs/{job_id}/resume"
+                "resume_job": "POST /api/v1/scheduler/jobs/{job_id}/pause"
             },
             "task_logs": {
                 "list": "GET /api/v1/task_logs",
                 "stats": "GET /api/v1/task_logs/stats"
-            }
-        },
+            },
+            "metrics": {
+                "get_metrics": "GET /api/v1/metrics",
+                "get_system_metrics_endpoint": "GET /api/v1/metrics/system",
+                "get_error_logs": "GET /api/v1/logs/errors"
+            },
         "documentation": "https://github.com/orenyalphy256-glitch/op-alpha-systems-automation"
-        }), 200
+    }}), 200
 
 # Module Exports
 __all__ = ["app"]
