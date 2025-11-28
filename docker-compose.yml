@@ -6,7 +6,7 @@ services:
   api:
     build: .
     image: autom8:latest
-    container_name: autom8_api_new
+    container_name: autom8_api
     ports:
       - "5000:5000"
     volumes:
@@ -23,21 +23,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
-    networks:
-      - autom8_network
-
-# Monitoring dashboard
-  dashboard:
-    build: .
-    image: autom8:latest
-    container_name: autom8_dashboard
-    command: python -m autom8.dashboard
-    volumes:
-      - autom8_data:/app/data
-      - autom8_logs:/app/logs
-    depends_on:
-      - api
-    restart: unless-stopped
     networks:
       - autom8_network
 
