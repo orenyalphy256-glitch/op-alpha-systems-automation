@@ -3,10 +3,9 @@ test_monitoring.py - Automated System Monitoring Tests
 Tests: CPU, disk usage, task statistics
 """
 import logging
-from autom8.logging_config import setup_advanced_logging, ContextLogger
 from autom8.metrics import get_all_metrics
 from autom8.alerts import send_email_alert
-from autom8.core import log
+from autom8.core import log, setup_logging, ContextLogger
 
 def test_logging_levels():
     """Test different log levels."""
