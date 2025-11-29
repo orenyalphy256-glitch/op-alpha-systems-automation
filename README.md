@@ -50,6 +50,32 @@ pip install -e
 - Combined (API + Scheduler): python run_combined.py
 - Real-time monitoring dashboard: python -m autom8.monitor_scheduler
 
+## Build and Run
+docker compose up -d
+
+## View logs
+docker compose logs -f
+
+## Stop services
+docker compose down
+
+## Build image
+docker build -t autom8:latest .
+
+## Run container
+docker run -d \
+  --name autom8_api \
+  -p 5000:5000 \
+  -v autom8_data:/app/data \
+  -v autom8_logs:/app/logs \
+  autom8:latest
+
+## View logs in real-time
+docker logs -f autom8_api
+
+## Stop container
+docker stop autom8_api
+
 ## Example Usage
 
 bash
@@ -120,6 +146,13 @@ save_json("output.json", data)
 - Email alerting on task failures
 - Real-time monitoring dashboard
 - Log analysis tools
+- Docker containerization setup
+- Created Dockerfile with multi-stage optimization
+- Implemented Docker Compose for multi-service orchestration
+- Volume management for persistent data
+- Container networking configuration
+- Health checks and monitoring
+- Helper scripts for container management
 
 ## License
 
