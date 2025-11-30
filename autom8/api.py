@@ -107,35 +107,17 @@ def validate_contact_data(data, required_fields=None):
 # API Routes - Contacts
 @app.route('/api/v1/health', methods=['GET'])
 def health_check():
-    try:
-        metrics = get_all_metrics()
-
-        # Determine overall health
-        system_healthy = (
-            metrics['system']['cpu']['percent'] < 90 and
-            metrics['system']['memory']['percent'] < 90 and
-            metrics['system']['disk']['percent'] < 90
-        )
-
-        tasks_healthy = metrics['tasks']['success_rate'] > 80
-
-        overall_status = "healthy" if (system_healthy and tasks_healthy) else "degraded"
-
-        return jsonify({
-            "status": overall_status,
-            "timestamp": datetime.utcnow().isoformat() + "Z",
-            "metrics": metrics,
-            "checks": {
-                "system": "pass" if system_healthy else "fail",
-                "tasks": "pass" if tasks_healthy else "fail"
-            }
-        }), 200
-    except Exception as e:
-        log.error(f"Health check failed: {e}")
-        return jsonify({
-            "status": "unhealthy",
-            "error": str(e)
-        }), 500
+    """
+    Health check endpoint.
+    
+    Returns:
+        JSON: API status
+    """
+    return jsonify({
+        "status": "healthy",
+        "service": "autom8-api",
+        "version": "1.0"
+    }), 200
 
 @app.route('/api/v1/contacts', methods=['GET'])
 def get_contacts():
