@@ -18,7 +18,6 @@ Complete guide to multi-service orchestration for Autom8.
 
 ### First Time Setup
 
-bash
 # 1. Test configuration
 docker-test.bat
 
@@ -30,7 +29,6 @@ docker-status.bat
 
 ### Daily Usage
 
-bash
 # Start
 docker-start.bat
 
@@ -93,7 +91,7 @@ Logs (autom8_logs volume)
 **Configuration:**
 - **Image:** autom8:latest
 - **Port:** 5000 (configurable via API_PORT env var)
-- **Resources:** 
+- **Resources:**
   - CPU Limit: 1.0 core
   - Memory Limit: 512MB
 - **Health Check:** HTTP GET /api/v1/health every 30s
@@ -121,7 +119,7 @@ Logs (autom8_logs volume)
 - `/app/data` → autom8_data (read-only)
 - `/app/logs` → autom8_logs (read-only)
 
-**Dependencies:** 
+**Dependencies:**
 - Waits for `api` service to be healthy
 
 ### DB-Init Service
@@ -171,124 +169,98 @@ SMTP_PORT=587
 ### Development vs Production
 
 **Development (default):**
-bash
+
 # Uses docker-compose.override.yml automatically
 docker compose up -d
 
 # Features:
-# - Source code mounted (live reload)
-# - Debug mode enabled
-# - Verbose logging
-# - Higher resource limits
+ - Source code mounted (live reload)
+ - Debug mode enabled
+ - Verbose logging
+ - Higher resource limits
 
 **Production:**
-bash
+
 # Explicitly use production config
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 
 # Features:
-# - No source code mount
-# - Debug mode disabled
-# - Warning-level logging
-# - Strict resource limits
-# - Always restart policy
+ - No source code mount
+ - Debug mode disabled
+ - Warning-level logging
+ - Strict resource limits
+ - Always restart policy
 
 ## Commands Reference
 
 ### Basic Operations
 
-bash
 # Start services
 docker compose up -d
 
 # Stop services
-
 docker compose down
 
 # Restart services
-
 docker compose restart
 
 # View status
-
 docker compose ps
 
 # View logs (all services)
-
 docker compose logs -f
 
 # View logs (specific service)
-
 docker compose logs -f api
 
 ### Building
 
-bash
 # Build images
-
 docker compose build
 
 # Build without cache
-
 docker compose build --no-cache
 
 # Build and start
-
 docker compose up -d --build
 
 ### Service Management
 
-bash
 # Start specific service
-
 docker compose start api
 
 # Stop specific service
-
 docker compose stop api
 
 # Restart specific service
-
 docker compose restart api
 
 # Remove service container (keeps volumes)
-
 docker compose rm api
 
 ### Inspection
 
-bash
-
 # Show configuration
-
 docker compose config
 
 # Validate configuration
-
 docker compose config --quiet
 
 # Show images
-
 docker compose images
 
 # Show volumes
-
 docker volume ls | findstr autom8
 
 ### Resource Monitoring
 
-bash
-
 # Real-time resource usage
-
 docker stats
 
 # Service health
-
 docker compose ps
 
 # Detailed inspection
-
 docker inspect autom8_api
 
 ## Scaling
@@ -296,7 +268,6 @@ docker inspect autom8_api
 ### Horizontal Scaling
 
 **Scale API service to 3 instances:**
-bash
 docker compose up -d --scale api=3
 
 **Result:**
@@ -306,7 +277,6 @@ autom8_api_2  (172.25.0.3:5000)
 autom8_api_3  (172.25.0.4:5000)
 
 **Using helper script:**
-bash
 docker-scale.bat 3
 
 ### Important Notes
@@ -353,12 +323,10 @@ services:
 ### Service Won't Start
 
 **Check logs:**
-bash
 docker compose logs api
 
 **Common causes:**
 1. Port already in use
-   bash
    # Find process using port
    netstat -ano | findstr :5000
 
@@ -366,14 +334,13 @@ docker compose logs api
    taskkill /PID <pid> /F
 
 2. Missing environment variables
-   bash
    # Verify .env file exists
    type .env
 
 3. Database locked
-   bash
    # Stop all services
    docker compose down
+
    # Remove volumes and restart
    docker compose down -v
    docker compose up -d
@@ -381,95 +348,74 @@ docker compose logs api
 ### Container Exits Immediately
 
 **Debug interactively:**
-bash
-# Run container with shell
 
+# Run container with shell
 docker compose run --rm api bash
 
 # Inside container, test manually
-
 python run_combined.py
 
 **Check health:**
-bash
 docker inspect autom8_api | findstr Health
 
 ### Changes Not Reflected
 
 **Rebuild images:**
-bash
-# Stop services
 
+# Stop services
 docker compose down
 
 # Rebuild without cache
-
 docker compose build --no-cache
 
 # Start fresh
-
 docker compose up -d
 
 **Or use helper:**
-
-bash
 docker-rebuild.bat
 
 ### Network Issues
 
 **Reset network:**
-bash
 
 # Stop everything
-
 docker compose down
 
 # Remove network
-
 docker network rm autom8_network
 
 # Restart
-
 docker compose up -d
 
 **Test connectivity:**
-bash
 
 # Enter API container
-
 docker exec -it autom8_api bash
 
 # Try to ping dashboard
-
 ping autom8_dashboard
 
 # Test DNS resolution
-
 nslookup autom8_dashboard
 
 ### Volume Issues
 
 **Check volume mounts:**
-bash
-
 docker inspect autom8_api | findstr -A 5 Mounts
 
 **Backup volume data:**
-bash
 
 # Create backup
 docker run --rm -v autom8_data:/data -v %cd%:/backup alpine tar czf /backup/data-backup.tar.gz /data
 
 **Restore volume data:**
-bash
-# Restore from backup
 
+# Restore from backup
 docker run --rm -v autom8_data:/data -v %cd%:/backup alpine tar xzf /backup/data-backup.tar.gz -C /
 
 ### Resource Exhaustion
 
 **Check resource usage:**
-bash
 docker stats --no-stream
 
 **If memory limit reached:**
@@ -509,56 +455,46 @@ deploy:
 bash
 
 # 1. Prepare environment
-
 cp .env.example .env.prod
 
 # Edit .env.prod with production values
 
 # 2. Test configuration
-
 docker compose -f docker-compose.yml -f docker-compose.prod.yml config
 
 # 3. Deploy
-
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 
 # 4. Verify
-
 docker compose ps
 curl http://localhost:5000/api/v1/health
 
 # 5. Monitor
-
 docker compose logs -f
 
 ### Production Environment Variables
 
 # .env.prod
-
 ENVIRONMENT=production
 DEBUG=false
 LOG_LEVEL=WARNING
 
 # Use secure secrets
-
 SECRET_KEY=<generate-secure-random-string>
 API_KEY=<generate-secure-api-key>
 
 # Production SMTP
-
 SMTP_HOST=smtp.gmail.com
 SMTP_USER=prod@company.com
 SMTP_PASSWORD=<app-specific-password>
 
 # Resource optimization
-
 WORKERS=4
 THREADS_PER_WORKER=2
 
 ### Backup Strategy
 
 **Automated backup script:**
-batch
 @echo off
 REM backup-volumes.bat
 
@@ -573,10 +509,8 @@ docker run --rm ^
 echo Backup complete: data-%DATE%.tar.gz
 
 **Schedule with Task Scheduler:**
-bash
 
 # Run daily at 2 AM
-
 schtasks /create /tn "Autom8 Backup" /tr "C:\path\to\backup-volumes.bat" /sc daily /st 02:00
 
 ### Monitoring
@@ -584,14 +518,12 @@ schtasks /create /tn "Autom8 Backup" /tr "C:\path\to\backup-volumes.bat" /sc dai
 **Health check endpoint:**
 
 # Add to monitoring system (Nagios, Zabbix, etc.)
-
 curl http://localhost:5000/api/v1/health
 
 **Log aggregation:**
 yaml
 
 # Add to docker-compose.prod.yml
-
 services:
   api:
     logging:
@@ -604,49 +536,37 @@ services:
 **Update to new version:**
 
 # 1. Pull new code
-
 git pull origin main
 
 # 2. Rebuild
-
 docker compose build
 
 # 3. Rolling update (minimal downtime)
-
 docker compose up -d --no-deps --build api
 
 # 4. Verify
-
 curl http://localhost:5000/api/v1/health
 
 **Rollback:**
 
 # 1. Stop current version
-
 docker compose down
 
 # 2. Checkout previous version
-
 git checkout <previous-commit>
 
 # 3. Rebuild and start
-
 docker compose up -d --build
 
 ## 📊 Performance Tuning
 
 ### Optimize Image Size
-
-**Current multi-layer approach is good, but can improve:**
-
 dockerfile
 
 # Use slim base images
-
 FROM python:3.11-slim
 
 # Combine RUN commands (fewer layers)
-
 RUN apt-get update && \
     apt-get install -y gcc && \
     rm -rf /var/lib/apt/lists/*
@@ -654,11 +574,9 @@ RUN apt-get update && \
 # Use .dockerignore (already done!)
 
 # Multi-stage builds (advanced)
-
 FROM python:3.11 as builder
 
 # Build dependencies
-
 FROM python:3.11-slim
 
 # Copy only what's needed
@@ -676,13 +594,11 @@ services:
 **Monitor and adjust:**
 
 # Check actual usage
-
 docker stats --no-stream
 
 # If API uses 200MB consistently
 
 # Adjust limits
-
 deploy:
   resources:
     limits:
@@ -691,7 +607,6 @@ deploy:
 ## Best Practices
 
 ### DO ✅
-
 - Use named volumes for persistent data
 - Set resource limits
 - Configure health checks
@@ -704,7 +619,6 @@ deploy:
 - Use docker-compose.override.yml for local development
 
 ### DON'T ❌
-
 - Hardcode secrets in docker-compose.yml
 - Use `latest` tag in production
 - Ignore health check failures
@@ -717,13 +631,11 @@ deploy:
 - Scale stateful services without planning
 
 ### Official Documentation
-
 - [Docker Compose Docs](https://docs.docker.com/compose/)
 - [Compose File Reference](https://docs.docker.com/compose/compose-file/)
 - [Docker Networks](https://docs.docker.com/network/)
 
 ### Autom8-Specific
-
 - `debugging-cheat-sheet.md` - Docker debugging commands
 - `README.md` - Project overview
 - `.env.example` - Environment variable template
