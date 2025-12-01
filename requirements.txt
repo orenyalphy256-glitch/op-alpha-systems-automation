@@ -1,6 +1,6 @@
 annotated-types==0.7.0
 APScheduler==3.11.0
--e git+https://github.com/orenyalphy256-glitch/op-alpha-systems-automation.git@39bbca214c88b6efec760777f927249ec79aa98a#egg=autom8
+-e git+https://github.com/orenyalphy256-glitch/op-alpha-systems-automation.git@32bd746d70eb10639072194bc9e7b92d6550b954#egg=autom8
 beautifulsoup4==4.14.2
 black==25.11.0
 blinker==1.9.0
@@ -11,6 +11,7 @@ colorama==0.4.6
 -e git+https://github.com/orenyalphy256-glitch/op-alpha-advanced-python.git@b4b52d4eb8e0918923dda5ae9526477d8ccb602f#egg=contact_manager
 Flask==3.1.2
 greenlet==3.2.4
+gunicorn==23.0.0
 idna==3.11
 iniconfig==2.3.0
 itsdangerous==2.2.0
