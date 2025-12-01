@@ -84,7 +84,7 @@ REM Test 8: Network configuration
 echo [8/8] Testing network configuration...
 docker network ls | findstr autom8 >nul 2>&1
 if errorlevel 1 (
-    echo     ℹ  INFO: Network will be created on first run
+    echo      [INFO] Network will be created on first run
 ) else (
     echo     ✅ PASSED: Network exists
 )
