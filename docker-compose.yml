@@ -1,39 +1,205 @@
-# docker-compose.yml - Multi-container setup
+# AUTOM8 SYSTEMS - PRODUCTION-GRADE DOCKER COMPOSE
+# Multi-Service Orchestration with Advanced Patterns
+# Agent ALO - Docker Compose
+
 version: '3.8'
 
+# SERVICES DEFINITION
 services:
-  # Autom8 API + Scheduler service
+  
+  # PRIMARY API + SCHEDULER SERVICE
   api:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - PYTHON_VERSION=3.11
     image: autom8:latest
     container_name: autom8_api
+    
+    # Port mapping
     ports:
-      - "5000:5000"
+      - "${API_PORT:-5000}:5000"
+    
+    # Volume mounts for persistent data
     volumes:
       - autom8_data:/app/data
       - autom8_logs:/app/logs
+      # Uncomment for development (live code reload)
+      # - .:/app
+    
+    # Environment variables
     environment:
       - PYTHONUNBUFFERED=1
       - API_HOST=0.0.0.0
       - API_PORT=5000
-    restart: unless-stopped
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - TZ=Africa/Nairobi
+    
+    # Load additional env vars from file
+    env_file:
+      - .env
+    
+    # Health check configuration
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5000/api/v1/health')"]
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5000/api/v1/health', timeout=5).raise_for_status()"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 10s
+      start_period: 40s
+    
+    # Restart policy
+    restart: unless-stopped
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512MB
+        reservations:
+          cpus: '0.5'
+          memory: 256MB
+    
+    # Network configuration
     networks:
       - autom8_network
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10mb"
+        max-file: "3"
+    
+    # Labels for organization
+    labels:
+      com.autom8.service: "api"
+      com.autom8.version: "1.0"
+      com.autom8.description: "Main API and Scheduler Service"
+  
+  # --------------------------------------------------------------------------
+  # MONITORING DASHBOARD SERVICE
+  # --------------------------------------------------------------------------
+  dashboard:
+    image: autom8:latest
+    container_name: autom8_dashboard
+    
+    # Override default command
+    command: python -m autom8.dashboard
+    
+    # Share volumes with API
+    volumes:
+      - autom8_data:/app/data:ro  # Read-only access
+      - autom8_logs:/app/logs:ro
+    
+    # Environment variables
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TZ=Africa/Nairobi
+    
+    # Depends on API being healthy
+    depends_on:
+      api:
+        condition: service_healthy
+    
+    # Restart policy
+    restart: unless-stopped
+    
+    # Resource limits (lighter than API)
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256MB
+        reservations:
+          cpus: '0.25'
+          memory: 128MB
+    
+    # Network configuration
+    networks:
+      - autom8_network
+    
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5mb"
+        max-file: "2"
+    
+    # Labels
+    labels:
+      com.autom8.service: "dashboard"
+      com.autom8.version: "1.0"
+      com.autom8.description: "Monitoring Dashboard"
+  
+  # DATABASE INITIALIZATION SERVICE (Run Once)
+  db-init:
+    image: autom8:latest
+    container_name: autom8_db_init
+    
+    # Run initialization script and exit
+    command: python -m autom8.init_database
+    
+    # Share data volume
+    volumes:
+      - autom8_data:/app/data
+    
+    # Environment
+    environment:
+      - PYTHONUNBUFFERED=1
+    
+    # Only run once (don't restart)
+    restart: "no"
+    
+    # Network
+    networks:
+      - autom8_network
+    
+    # Labels
+    labels:
+      com.autom8.service: "db-init"
+      com.autom8.type: "initialization"
 
-# Volumes
+# VOLUMES - PERSISTENT STORAGE
 volumes:
+  # Application data (database, uploads, etc.)
   autom8_data:
     driver: local
+    labels:
+      com.autom8.description: "Application data storage"
+  
+  # Application logs
   autom8_logs:
     driver: local
+    labels:
+      com.autom8.description: "Application logs storage"
 
-# Networks
+# NETWORKS - ISOLATED COMMUNICATION
 networks:
   autom8_network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16
+    labels:
+      com.autom8.description: "Internal service communication network"
+
+# CONFIGURATION NOTES
+# USAGE:
+#   Development:  docker compose up -d
+#   Production:   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#   Scaling:      docker compose up -d --scale api=3
+#
+# HEALTH MONITORING:
+#   Check status: docker compose ps
+#   View logs:    docker compose logs -f
+#   Inspect:      docker inspect autom8_api
+#
+# RESOURCE MONITORING:
+#   docker stats
+#
+# MAINTENANCE:
+#   Stop:    docker compose down
+#   Clean:   docker compose down -v (removes volumes!)
+#   Rebuild: docker compose up -d --build
