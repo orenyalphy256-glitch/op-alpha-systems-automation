@@ -1,28 +1,38 @@
 @echo off
 REM ============================================================================
-REM Stop Autom8 Services
+REM Rebuild and Restart Autom8 Services
 REM ============================================================================
 
 echo.
 echo ════════════════════════════════════════════════════════════════════════
-echo   AUTOM8 SYSTEMS - Stopping Services
+echo   AUTOM8 SYSTEMS - Rebuild Services
 echo ════════════════════════════════════════════════════════════════════════
 echo.
 
-REM Show current status
-echo 📊 Current Status:
-echo.
-docker compose ps
-
-echo.
-echo 🛑 Stopping services...
-echo.
-
+echo 🛑 Stopping current services...
 docker compose down
+
+echo.
+echo 🔨 Rebuilding images...
+echo.
+docker compose build --no-cache
 
 if errorlevel 1 (
     echo.
-    echo ❌ Failed to stop services
+    echo ❌ Build failed
+    echo.
+    pause
+    exit /b 1
+)
+
+echo.
+echo 🚀 Starting rebuilt services...
+echo.
+docker compose up -d
+
+if errorlevel 1 (
+    echo.
+    echo ❌ Failed to start
     echo.
     pause
     exit /b 1
@@ -30,16 +40,12 @@ if errorlevel 1 (
 
 echo.
 echo ════════════════════════════════════════════════════════════════════════
-echo   Services Stopped Successfully!
-echo ════════════════════════════════════════════════════════════════════════
-echo.
-echo   💾 Data volumes preserved
-echo   📝 Logs preserved
-echo.
-echo   To start again: docker-start.bat
-echo   To remove all data: docker compose down -v
-echo.
+echo   Rebuild Complete!
 echo ════════════════════════════════════════════════════════════════════════
 echo.
 
+REM Show status
+docker compose ps
+
+echo.
 pause
