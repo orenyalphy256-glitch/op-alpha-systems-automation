@@ -49,6 +49,16 @@ pip install -e
 - API only: python run_api.py
 - Combined (API + Scheduler): python run_combined.py
 - Real-time monitoring dashboard: python -m autom8.monitor_scheduler
+- DB-Init Service:** One-time database initialization
+
+## Test configuration
+docker-test.bat
+
+## Start all services
+docker-start.bat
+
+## Check status
+docker-status.bat
 
 ## Build and Run
 docker compose up -d
@@ -75,6 +85,12 @@ docker logs -f autom8_api
 
 ## Stop container
 docker stop autom8_api
+
+## Rebuild
+docker-rebuild.bat
+
+## Scale API
+docker-scale.bat
 
 ## Example Usage
 
@@ -153,6 +169,16 @@ save_json("output.json", data)
 - Container networking configuration
 - Health checks and monitoring
 - Helper scripts for container management
+- docker compose up -d
+# Auto-loads docker-compose.override.yml
+# - Source code mounted for live reload
+# - Debug mode enabled in development
+# - Verbose logging
+**Production:**
+- docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# - Optimized for production
+# - Strict resource limits
+# - Always restart policy
 
 ## License
 
