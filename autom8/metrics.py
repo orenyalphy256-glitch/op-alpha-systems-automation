@@ -22,7 +22,7 @@ def get_system_metrics():
                 "count": psutil.cpu_count()
             },
             "memory": {
-                "total": memory.total // (1024 * 1024),
+                "total_mb": memory.total // (1024 * 1024),
                 "available_mb": memory.available // (1024 * 1024),
                 "used_mb": memory.used // (1024 * 1024),
                 "percent": memory.percent   
@@ -92,7 +92,7 @@ def get_database_metrics():
 def get_all_metrics():
         return {
             "system": get_system_metrics(),
-            "task": get_task_metrics(),
+            "tasks": get_task_metrics(),
             "database": get_database_metrics()
         }
     

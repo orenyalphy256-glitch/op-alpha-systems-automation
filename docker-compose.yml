@@ -1,12 +1,11 @@
 # AUTOM8 SYSTEMS - PRODUCTION-GRADE DOCKER COMPOSE
 # Multi-Service Orchestration with Advanced Patterns
-# Agent ALO - Docker Compose
+# Agent ALO - Batch 5, Day 64
 
 version: '3.8'
 
 # SERVICES DEFINITION
 services:
-  
   # PRIMARY API + SCHEDULER SERVICE
   api:
     build:
@@ -34,12 +33,13 @@ services:
       - API_HOST=0.0.0.0
       - API_PORT=5000
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
-      - TZ=Africa/Nairobi
+      - TZ=${TZ:-Etc/UTC}
+      - TERM=xterm-256color
     
     # Load additional env vars from file
     env_file:
       - .env
-    
+      
     # Health check configuration
     healthcheck:
       test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5000/api/v1/health', timeout=5).raise_for_status()"]
@@ -56,10 +56,10 @@ services:
       resources:
         limits:
           cpus: '1.0'
-          memory: 512MB
+          memory: 512M
         reservations:
           cpus: '0.5'
-          memory: 256MB
+          memory: 256M
     
     # Network configuration
     networks:
@@ -69,7 +69,7 @@ services:
     logging:
       driver: "json-file"
       options:
-        max-size: "10mb"
+        max-size: "10m"
         max-file: "3"
     
     # Labels for organization
@@ -78,9 +78,8 @@ services:
       com.autom8.version: "1.0"
       com.autom8.description: "Main API and Scheduler Service"
   
-  # --------------------------------------------------------------------------
   # MONITORING DASHBOARD SERVICE
-  # --------------------------------------------------------------------------
+
   dashboard:
     image: autom8:latest
     container_name: autom8_dashboard
@@ -96,7 +95,7 @@ services:
     # Environment variables
     environment:
       - PYTHONUNBUFFERED=1
-      - TZ=Africa/Nairobi
+      - TZ=${TZ:-Etc/UTC}
     
     # Depends on API being healthy
     depends_on:
@@ -111,10 +110,10 @@ services:
       resources:
         limits:
           cpus: '0.5'
-          memory: 256MB
+          memory: 256M
         reservations:
           cpus: '0.25'
-          memory: 128MB
+          memory: 128M
     
     # Network configuration
     networks:
@@ -124,7 +123,7 @@ services:
     logging:
       driver: "json-file"
       options:
-        max-size: "5mb"
+        max-size: "5m"
         max-file: "2"
     
     # Labels
@@ -132,7 +131,7 @@ services:
       com.autom8.service: "dashboard"
       com.autom8.version: "1.0"
       com.autom8.description: "Monitoring Dashboard"
-  
+
   # DATABASE INITIALIZATION SERVICE (Run Once)
   db-init:
     image: autom8:latest
