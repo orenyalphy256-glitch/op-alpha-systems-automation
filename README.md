@@ -1,5 +1,10 @@
 # Autom8 - Professional Systems Automation Toolkit
 
+![Python Version](https://img.shields.io/badge/python-3.9%2B-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Test Coverage](https://img.shields.io/badge/coverage-80%25%2B-brightgreen)
+![Build Status](https://img.shields.io/badge/build-passing-success)
+
 **Developer:** Alphonce Liguori Oreny  
 **Project Type:** Systems Management & Automation  
 **Tech Stack:** Python 3.14, Flask, SQLAlchemy, APScheduler, Docker  
