@@ -1,9 +1,19 @@
 # Autom8 - Professional Systems Automation Toolkit
 
-![Python Version](https://img.shields.io/badge/python-3.9%2B-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
-![Test Coverage](https://img.shields.io/badge/coverage-80%25%2B-brightgreen)
-![Build Status](https://img.shields.io/badge/build-passing-success)
+<div align="center">
+
+![Python Version](https://img.shields.io/badge/python-3.9%2B-blue?style=for-the-badge&logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/flask-3.0%2B-black?style=for-the-badge&logo=flask&logoColor=white)
+![Docker](https://img.shields.io/badge/docker-ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)
+![Test Coverage](https://img.shields.io/badge/coverage-80%25%2B-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)
+![Build Status](https://img.shields.io/badge/build-passing-success?style=for-the-badge)
+![Code Style](https://img.shields.io/badge/code%20style-professional-blueviolet?style=for-the-badge)
+![Deployment](https://img.shields.io/badge/deployment-ready-orange?style=for-the-badge&logo=rocket&logoColor=white)
+
+</div>
+
+---
 
 **Developer:** Alphonce Liguori Oreny  
 **Project Type:** Systems Management & Automation  
