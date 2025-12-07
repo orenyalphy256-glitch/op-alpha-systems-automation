@@ -1,6 +1,6 @@
 annotated-types==0.7.0
 APScheduler==3.11.0
--e git+https://github.com/orenyalphy256-glitch/op-alpha-systems-automation.git@e276f3819061e2355eb9ee0d7f301b0693095052#egg=autom8
+-e git+https://github.com/orenyalphy256-glitch/op-alpha-systems-automation.git@f01098112ab9feba4339cd5aaf0b50973f839b71#egg=autom8
 beautifulsoup4==4.14.2
 black==25.11.0
 blinker==1.9.0
