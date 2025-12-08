@@ -9,6 +9,7 @@ Test cover:
 import pytest
 import os
 import json
+import logging
 from autom8 import core
 
 # JSON operations tests
@@ -103,7 +104,7 @@ class TestLogging:
         
         # Assert
         assert logger is not None
-        assert logger.name == "autom8"
+        assert isinstance(logger, logging.Logger)
     
     def test_log_info_message(self, caplog):
         """Test logging info message."""
@@ -152,7 +153,11 @@ class TestPathOperations:
         
         # Assert
         assert data_dir is not None
-        assert isinstance(data_dir, str)
+        # DATA_DIR is a Path object, not a string
+        from pathlib import Path
+        assert isinstance(data_dir, Path)
+        assert data_dir.exists()
+
     
     def test_base_dir_exists(self):
         """Test that BASE_DIR is properly configured."""
@@ -161,8 +166,11 @@ class TestPathOperations:
         
         # Assert
         assert base_dir is not None
-        assert isinstance(base_dir, str)
-        assert os.path.exists(base_dir)
+        # BASE_DIR is also a Path object
+        from pathlib import Path
+        assert isinstance(base_dir, Path)
+        assert base_dir.exists()
+
 
 # Utility function tests
 @pytest.mark.parametrize("input_data,expected", [

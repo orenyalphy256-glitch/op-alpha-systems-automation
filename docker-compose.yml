@@ -2,8 +2,6 @@
 # Multi-Service Orchestration with Advanced Patterns
 # Agent ALO - Batch 5, Day 64
 
-version: '3.8'
-
 # SERVICES DEFINITION
 services:
   # PRIMARY API + SCHEDULER SERVICE

@@ -1,93 +1,49 @@
 @echo off
 
 REM ============================================================================
-
 REM Run All Tests with Coverage
-
 REM ============================================================================
 
-
-
 echo.
-
 echo ════════════════════════════════════════════════════════════════════════
-
 echo   AUTOM8 - Running Test Suite
-
 echo ════════════════════════════════════════════════════════════════════════
-
 echo.
-
-
 
 REM Activate virtual environment
-
-call venv\\Scripts\\activate
-
-
+call venv\Scripts\activate
 
 REM Run pytest with coverage
-
 echo 🧪 Running tests with coverage...
-
 echo.
-
-
 
 pytest -v --cov=autom8 --cov-report=term-missing --cov-report=html --cov-report=xml
 
-
-
-set TEST\_EXIT\_CODE=%ERRORLEVEL%
-
-
+set TEST_EXIT_CODE=%ERRORLEVEL%
 
 echo.
-
 echo ════════════════════════════════════════════════════════════════════════
-
 echo   Test Results
-
 echo ════════════════════════════════════════════════════════════════════════
-
 echo.
 
-
-
-if %TEST\_EXIT\_CODE% equ 0 (
-
-&nbsp;   echo ✅ All tests passed!
-
-&nbsp;   echo.
-
-&nbsp;   echo 📊 Coverage report generated:
-
-&nbsp;   echo    - Terminal: See above
-
-&nbsp;   echo    - HTML: htmlcov\\index.html
-
-&nbsp;   echo    - XML: coverage.xml
-
+if %TEST_EXIT_CODE% equ 0 (
+    echo ✅ All tests passed!
+    echo.
+    echo 📊 Coverage report generated:
+    echo    - Terminal: See above
+    echo    - HTML: htmlcov\index.html
+    echo    - XML: coverage.xml
 ) else (
-
-&nbsp;   echo ❌ Some tests failed!
-
-&nbsp;   echo.
-
-&nbsp;   echo Check output above for details.
-
+    echo ❌ Some tests failed!
+    echo.
+    echo Check output above for details.
 )
 
-
-
 echo.
-
 echo ════════════════════════════════════════════════════════════════════════
-
 echo.
+echo Press any key to close this window...
+pause >nul
 
-
-
-pause
-
-exit /b %TEST\_EXIT\_CODE%
+exit /b %TEST_EXIT_CODE%

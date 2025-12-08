@@ -1,41 +1,39 @@
-# DEVELOPMENT OVERRIDES
-# Automatically loaded in development (docker compose up)
-
-version: '3.8'
+# AUTOM8 - DEVELOPMENT OVERRIDES
+# Override settings for local development
+# Agent ALO - Batch 5
 
 services:
   api:
     # Mount source code for live reload
     volumes:
       - .:/app
-    
+
     # Development environment
     environment:
       - DEBUG=true
       - LOG_LEVEL=DEBUG
       - FLASK_ENV=development
       - RELOAD=true
-    
+
     # No resource limits in development
     deploy:
       resources:
         limits:
           cpus: '2.0'
           memory: 1G
-    
+
     # Build with no cache for development
     build:
       cache_from: []
-  
+
   dashboard:
     volumes:
       - .:/app
-    
+
     environment:
       - DEBUG=true
       - LOG_LEVEL=DEBUG
-
-# Development-specific services
+  # Development-specific services
   # Uncomment if you want a development database viewer
   # db-viewer:
   #   image: sqlitebrowser/sqlitebrowser

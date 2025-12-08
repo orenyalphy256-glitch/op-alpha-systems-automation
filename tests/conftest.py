@@ -72,7 +72,11 @@ def temp_file():
     """
     fd, path = tempfile.mkstemp()
     os.close(fd)
-    os.unlink(path)
+
+    yield path
+
+    if os.path.exists(path):
+        os.unlink(path)
 
 # Application Fixtures
 @pytest.fixture(scope="session")
