@@ -1,0 +1,154 @@
+01-Projects/
+├── .coverage
+├── .coveragerc
+├── .dockerignore
+├── .env
+├── .git/
+├── .gitignore
+├── .pytest_cache/
+├── DOCKER_COMPOSE_GUIDE.md
+├── Dockerfile
+├── LICENSE
+├── README.md
+├── TESTING_GUIDE.md
+├── __init__.py
+├── __pycache__/
+├── autom8/
+│   ├── __init__.py
+│   ├── __pycache__/
+│   ├── alerts.py
+│   ├── analyze_logs.py
+│   ├── api.py
+│   ├── core.py
+│   ├── dashboard.py
+│   ├── db_shell.py
+│   ├── demo_tasks.py
+│   ├── init_database.py
+│   ├── inspect_db.py
+│   ├── metrics.py
+│   ├── models.py
+│   ├── monitor_scheduler.py
+│   ├── scheduler.py
+│   ├── seed_data.py
+│   ├── tasks.py
+│   ├── test_api_manual.py
+│   ├── test_monitoring.py
+│   ├── test_paths.py
+│   └── test_scheduler.py
+├── autom8.egg-info/
+├── coverage.xml
+├── data/
+│   ├── backup_20251115_163240.json
+│   ├── backup_20251115_174031.json
+│   ├── backup_20251115_174915.json
+│   ├── backup_20251115_175716.json
+│   ├── backup_20251115_180324.json
+│   ├── backup_20251115_183730.json
+│   ├── backup_20251115_183936.json
+│   ├── backup_20251120_232045.json
+│   ├── backup_20251120_232941.json
+│   ├── backup_20251121_000557.json
+│   ├── backup_20251121_000805.json
+│   ├── backup_20251121_001344.json
+│   ├── backup_20251121_002636.json
+│   ├── backup_20251121_002639.json
+│   ├── backup_20251121_004640.json
+│   ├── backup_20251121_004955.json
+│   ├── backup_20251202_161521.json
+│   ├── backup_20251207_224216.json
+│   ├── backup_20251207_224558.json
+│   ├── backup_20251207_231249.json
+│   ├── backup_20251207_231719.json
+│   ├── backup_20251207_231816.json
+│   ├── backup_20251207_231817.json
+│   ├── backup_20251207_231951.json
+│   ├── backup_20251207_234153.json
+│   ├── backup_20251207_234505.json
+│   ├── backup_20251207_234539.json
+│   ├── backup_20251207_234949.json
+│   ├── backup_20251207_234959.json
+│   ├── backup_20251207_235044.json
+│   ├── backup_20251207_235111.json
+│   ├── backup_20251207_235342.json
+│   ├── backup_20251207_235501.json
+│   ├── backup_20251207_235536.json
+│   ├── backup_20251207_235639.json
+│   ├── backup_20251208_000100.json
+│   ├── backup_20251208_110503.json
+│   ├── report_20251115_183730.json
+│   ├── report_20251115_183936.json
+│   ├── report_20251207_224216.json
+│   ├── report_20251207_224558.json
+│   ├── report_20251207_231249.json
+│   ├── report_20251207_231719.json
+│   ├── report_20251207_231816.json
+│   ├── report_20251207_231951.json
+│   ├── report_20251207_234153.json
+│   ├── report_20251207_234505.json
+│   ├── report_20251207_234539.json
+│   ├── report_20251207_234949.json
+│   ├── report_20251207_234959.json
+│   ├── report_20251207_235044.json
+│   ├── report_20251207_235111.json
+│   ├── report_20251207_235342.json
+│   ├── report_20251207_235501.json
+│   ├── report_20251207_235536.json
+│   ├── report_20251207_235639.json
+│   ├── report_20251208_000100.json
+│   ├── report_20251208_110503.json
+│   └── system.db
+├── debugging-cheatsheet.md
+├── docker-build.bat
+├── docker-compose.override.yml
+├── docker-compose.prod.yml
+├── docker-compose.yml
+├── docker-logs.bat
+├── docker-rebuild.bat
+├── docker-scale.bat
+├── docker-start.bat
+├── docker-status.bat
+├── docker-stop.bat
+├── docker-test.bat
+├── htmlcov/
+├── logs/
+├── pytest.ini
+├── requirements.txt
+├── run-tests-integration.bat
+├── run-tests-quick.bat
+├── run-tests-unit.bat
+├── run-tests-watch.bat
+├── run-tests.bat
+├── run_api.py
+├── run_combined.py
+├── run_scheduler.py
+├── setup.py
+├── test-compose-setup.bat
+├── tests/
+│   ├── __init__.py
+│   ├── __pycache__/
+│   ├── conftest.py
+│   ├── fixtures/
+│   │   └── __init__.py
+│   ├── integration/
+│   │   ├── __init__.py
+│   │   ├── __pycache__/
+│   │   ├── test_api.py
+│   │   ├── test_database.py
+│   │   └── test_scheduler.py
+│   └── unit/
+│       ├── __init__.py
+│       ├── __pycache__/
+│       ├── test_core.py
+│       ├── test_models.py
+│       └── test_tasks.py
+└── venv/
+
+Summary:
+========
+Total Directories: 10
+Total Files: 95+
+
+Key Expanded Sections:
+- autom8/: 20 Python modules (core application code)
+- tests/: Organized test suite with fixtures, integration, and unit tests
+- data/: 59 files including backups, reports, and system database
