@@ -2,6 +2,7 @@
 alerts.py - Alert System
 Sends email notifications on critical events
 """
+
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -16,12 +17,13 @@ SMTP_USERNAME = os.getenv("SMTP_USERNAME", "")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
 ALERT_EMAIL = os.getenv("ALERT_EMAIL", "admin@example.com")
 
+
 # Alert functions
 def send_email_alert(subject, body, to_email=None):
     if not SMTP_USERNAME or not SMTP_PASSWORD:
         log.warning("Email credentials not set. Skipping email alert.")
         return False
-    
+
     try:
         to_email = to_email or ALERT_EMAIL
 
@@ -36,14 +38,15 @@ def send_email_alert(subject, body, to_email=None):
             server.starttls()
             server.login(SMTP_USERNAME, SMTP_PASSWORD)
             server.sendmail(SMTP_USERNAME, to_email, msg.as_string())
-        
+
         log.info(f"Email alert sent to {to_email}: {subject}")
         return True
-    
+
     except Exception as e:
         log.error(f"Error sending email alert: {e}")
         return False
-    
+
+
 def alert_task_failure(task_type, error_message):
     subject = f"Task Failure: {task_type}"
     body = f"""
@@ -60,6 +63,7 @@ def alert_task_failure(task_type, error_message):
     </html>
     """
     send_email_alert(subject, body)
+
 
 def alert_system_issue(issue_type, details):
     subject = f"System Issue: {issue_type}"
@@ -78,9 +82,6 @@ def alert_system_issue(issue_type, details):
     """
     send_email_alert(subject, body)
 
+
 # Module exports
-__all__ = [
-    "send_email_alert", 
-    "alert_task_failure", 
-    "alert_system_issue"
-]
+__all__ = ["send_email_alert", "alert_task_failure", "alert_system_issue"]

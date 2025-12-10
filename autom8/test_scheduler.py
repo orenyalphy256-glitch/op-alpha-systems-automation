@@ -2,6 +2,7 @@
 test_scheduler.py - Test scheduler functionality
 Run: python -m autom8.test_scheduler
 """
+
 import time
 from datetime import datetime, timedelta
 from autom8.scheduler import (
@@ -11,10 +12,11 @@ from autom8.scheduler import (
     schedule_backup_job,
     schedule_cleanup_job,
     get_scheduled_jobs,
-    run_job_now
+    run_job_now,
 )
 from autom8.models import get_session, TaskLog
 from autom8.core import log
+
 
 def test_scheduler():
     print("=" * 60)
@@ -29,7 +31,7 @@ def test_scheduler():
     except Exception as e:
         print(f"Failed: {e}")
         return
-    
+
     # Test 2: Schedule jobs
     print("\nTest 2: Scheduling jobs...")
     try:
@@ -39,7 +41,7 @@ def test_scheduler():
     except Exception as e:
         print(f"Failed: {e}")
         return
-    
+
     # Test 3: List jobs
     print("\nTest 3: Listing scheduled jobs...")
     jobs = get_scheduled_jobs()
@@ -50,7 +52,7 @@ def test_scheduler():
         print(f"    - Trigger: {job['trigger']}")
         print(f"    - Next run: {job['next_run_time']}")
         print()
-    
+
     # Test 4: Start scheduler
     print("\nTest 4: Starting scheduler...")
     try:
@@ -59,16 +61,16 @@ def test_scheduler():
     except Exception as e:
         print(f"Failed: {e}")
         return
-    
+
     # Test 5: Manual trigger
     print("\nTest 5: Manually triggering backup job...")
     try:
-        run_job_now('backup_job')
+        run_job_now("backup_job")
         print("Backup job triggered successfully")
-        time.sleep(2) # Wait for task execution
+        time.sleep(2)  # Wait for task execution
     except Exception as e:
         print(f"Failed: {e}")
-        
+
     # Test 6: Check database logs
     print("\nTest 6: Checking database logs...")
     session = get_session()
@@ -92,9 +94,11 @@ def test_scheduler():
         print("Scheduler stopped successfully")
     except Exception as e:
         print(f"Failed: {e}")
-    
+
     print("\n" + "=" * 60)
     print("SCHEDULER TESTING COMPLETE")
     print("=" * 60)
+
+
 if __name__ == "__main__":
     test_scheduler()

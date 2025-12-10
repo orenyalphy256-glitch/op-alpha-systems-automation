@@ -2,6 +2,7 @@
 models.py - SQLAlchemy Database Models
 Defines: Contact model, database initialization, session management
 """
+
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime, create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
@@ -15,12 +16,7 @@ DB_PATH = DATA_DIR / "system.db"
 DB_URL = f"sqlite:///{DB_PATH}"
 
 # Create engine (connection pool)
-engine = create_engine(
-    DB_URL,
-    echo=False,
-    future=True,
-    connect_args={"check_same_thread": False}
-)
+engine = create_engine(DB_URL, echo=False, future=True, connect_args={"check_same_thread": False})
 
 # Session factory
 SessionLocal = sessionmaker(
@@ -33,10 +29,11 @@ SessionLocal = sessionmaker(
 # Base class for all models
 Base = declarative_base()
 
+
 # Model definitions
 class Contact(Base):
     __tablename__ = "contacts"
-    
+
     # Primary key
     id = Column(Integer, primary_key=True, autoincrement=True)
 
@@ -49,17 +46,12 @@ class Contact(Base):
 
     # Timestamps (auto-managed)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(
-        DateTime,
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
-        nullable=False
-    )
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     def __repr__(self):
         """String representation for debugging."""
         return f"<Contact(id={self.id}, name='{self.name}', phone='{self.phone}')>"
-    
+
     def to_dict(self):
         return {
             "id": self.id,
@@ -69,6 +61,7 @@ class Contact(Base):
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
+
 
 class TaskLog(Base):
     __tablename__ = "task_logs"
@@ -84,7 +77,7 @@ class TaskLog(Base):
 
     def __repr__(self):
         return f"<TaskLog(id={self.id}, type='{self.task_type}', status='{self.status}')>"
-    
+
     def to_dict(self):
         return {
             "id": self.id,
@@ -96,15 +89,18 @@ class TaskLog(Base):
             "result_data": self.result_data,
             "error_message": self.error_message,
         }
-    
+
+
 # Database Initialization
 def init_db():
     log.info(f"Initializing database at {DB_PATH}")
     Base.metadata.create_all(bind=engine)
     log.info("Database tables created successfully")
 
+
 def get_session():
     return SessionLocal()
+
 
 # CRUD Helper Functions
 def create_contact(session, name, phone, email=None):
@@ -115,20 +111,23 @@ def create_contact(session, name, phone, email=None):
     log.info(f"Created contact: {contact}")
     return contact
 
+
 def get_contact_by_id(session, contact_id):
     return session.query(Contact).filter(Contact.id == contact_id).first()
+
 
 def get_contact_by_phone(session, phone):
     return session.query(Contact).filter(Contact.phone == phone).first()
 
+
 def list_contacts(session, limit=100, offset=0):
     return session.query(Contact).limit(limit).offset(offset).all()
 
+
 def search_contacts(session, query):
     pattern = f"%{query}%"
-    return session.query(Contact).filter(
-        Contact.name.ilike(pattern)
-    ).all()
+    return session.query(Contact).filter(Contact.name.ilike(pattern)).all()
+
 
 def update_contact(session, contact_id, **kwargs):
     contact = get_contact_by_id(session, contact_id)
@@ -141,6 +140,7 @@ def update_contact(session, contact_id, **kwargs):
         log.info(f"Updated contact: {contact}")
     return contact
 
+
 def delete_contact(session, contact_id):
     contact = get_contact_by_id(session, contact_id)
     if contact:
@@ -149,6 +149,7 @@ def delete_contact(session, contact_id):
         log.info(f"Deleted contact ID {contact_id}")
         return True
     return False
+
 
 # Modular Exports
 __all__ = [

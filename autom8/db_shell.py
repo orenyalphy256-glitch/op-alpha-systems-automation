@@ -2,10 +2,15 @@
 db_shell.py - Interactive database exploration
 Run: python -m autom8.db_shell
 """
+
 from autom8.models import (
-    get_session, list_contacts, search_contacts,
-    create_contact, delete_contact
+    get_session,
+    list_contacts,
+    search_contacts,
+    create_contact,
+    delete_contact,
 )
+
 
 def main():
     session = get_session()
@@ -61,11 +66,12 @@ def main():
                     print(f"Contact ID {contact_id} not found")
             except ValueError:
                 print("Invalid ID")
-        
+
         else:
             print("Unknown command")
 
     session.close()
+
 
 if __name__ == "__main__":
     main()

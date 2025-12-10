@@ -4,21 +4,24 @@ Display scheduler status and recent job executions
 
 Run: python -m autom8.monitor_scheduler
 """
+
 import time
 import os
 from datetime import datetime, timedelta
 from autom8.scheduler import get_scheduled_jobs
 from autom8.models import get_session, TaskLog
 
+
 def clear_screen():
     """Clear the terminal screen."""
-    os.system('cls' if os.name == 'nt' else 'clear')
+    os.system("cls" if os.name == "nt" else "clear")
+
 
 def format_timedelta(td):
     """Format timedelta for display."""
     if td is None:
         return "N/A"
-    
+
     total_seconds = int(td.total_seconds())
     if total_seconds < 60:
         return f"{total_seconds}s"
@@ -30,7 +33,8 @@ def format_timedelta(td):
         hours = total_seconds // 3600
         minutes = (total_seconds % 3600) // 60
         return f"{hours}h {minutes}m"
-    
+
+
 def monitor_dashboard():
     """Display real-time scheduler status and recent job executions."""
     try:
@@ -41,7 +45,7 @@ def monitor_dashboard():
             print("=" * 70)
             print(f"Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
             print()
-            
+
             # Scheduled Jobs
             print("SCHEDULED JOBS")
             print("-" * 70)
@@ -51,7 +55,7 @@ def monitor_dashboard():
                 print("No scheduled jobs found.")
             else:
                 for job in jobs:
-                    next_run = job.get('next_run_time')
+                    next_run = job.get("next_run_time")
                     if next_run:
                         next_run_dt = datetime.fromisoformat(next_run)
                         time_until = next_run_dt - datetime.now()
@@ -69,19 +73,15 @@ def monitor_dashboard():
 
             session = get_session()
             try:
-                logs = session.query(TaskLog).order_by(
-                    TaskLog.started_at.desc()
-                ).limit(10).all()
+                logs = session.query(TaskLog).order_by(TaskLog.started_at.desc()).limit(10).all()
 
                 if not logs:
                     print("No task logs yet")
                 else:
                     for log in logs:
-                        status_emoji = {
-                            'completed': '✅',
-                            'failed': '❌',
-                            'running': '⏳'
-                        }.get(log.status, '❓')
+                        status_emoji = {"completed": "✅", "failed": "❌", "running": "⏳"}.get(
+                            log.status, "❓"
+                        )
 
                         duration = None
                         if log.completed_at and log.started_at:
@@ -99,15 +99,11 @@ def monitor_dashboard():
                     # Statistics
                     print("\nSTATISTICS")
                     print("-" * 70)
-                    
+
                     total = session.query(TaskLog).count()
-                    completed = session.query(TaskLog).filter(
-                        TaskLog.status == "completed"
-                    ).count()
-                    failed = session.query(TaskLog).filter(
-                        TaskLog.status == "failed"
-                    ).count()
-                    
+                    completed = session.query(TaskLog).filter(TaskLog.status == "completed").count()
+                    failed = session.query(TaskLog).filter(TaskLog.status == "failed").count()
+
                     success_rate = (completed / total * 100) if total > 0 else 0
 
                     print(f"  - Total Executions: {total}")
@@ -125,6 +121,7 @@ def monitor_dashboard():
 
     except KeyboardInterrupt:
         print("\n\nMonitoring stopped.")
+
 
 if __name__ == "__main__":
     monitor_dashboard()

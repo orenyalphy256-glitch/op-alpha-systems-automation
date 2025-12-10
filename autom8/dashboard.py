@@ -2,6 +2,7 @@
 dashboard.py - Real-time Monitoring Dashboard
 Displays system health, metrics, recent logs
 """
+
 import time
 import os
 from datetime import datetime
@@ -9,9 +10,11 @@ from autom8.models import get_session, TaskLog
 from autom8.metrics import get_all_metrics
 from autom8.scheduler import get_scheduled_jobs
 
+
 def clear_screen():
     """Clear the terminal screen."""
-    os.system('cls' if os.name == 'nt' else 'clear')
+    os.system("cls" if os.name == "nt" else "clear")
+
 
 def get_status_emoji(value, warning_threshold, critical_threshold):
     if value > critical_threshold:
@@ -20,6 +23,7 @@ def get_status_emoji(value, warning_threshold, critical_threshold):
         return "[*]"
     else:
         return "[OK]"
+
 
 def display_dashboard():
     """Display real-time monitoring dashboard."""
@@ -41,19 +45,23 @@ def display_dashboard():
                 print("System Resources")
                 print("-" * 80)
 
-                cpu_percent = metrics['system']['cpu']['percent']
-                mem_percent = metrics['system']['memory']['percent']
-                disk_percent = metrics['system']['disk']['percent']
+                cpu_percent = metrics["system"]["cpu"]["percent"]
+                mem_percent = metrics["system"]["memory"]["percent"]
+                disk_percent = metrics["system"]["disk"]["percent"]
 
                 print(f"  {get_status_emoji(cpu_percent, 70, 90)} CPU:    {cpu_percent:.1f}% used")
-                print(f"  {get_status_emoji(mem_percent, 70, 90)} Memory: {mem_percent:.1f}% used ({metrics['system']['memory']['used_mb']} MB / {metrics['system']['memory']['total_mb']} MB)")
-                print(f"  {get_status_emoji(disk_percent, 70, 90)} Disk:   {disk_percent:.1f}% used ({metrics['system']['disk']['used_gb']} GB / {metrics['system']['disk']['total_gb']} GB)")
+                print(
+                    f"  {get_status_emoji(mem_percent, 70, 90)} Memory: {mem_percent:.1f}% used ({metrics['system']['memory']['used_mb']} MB / {metrics['system']['memory']['total_mb']} MB)"
+                )
+                print(
+                    f"  {get_status_emoji(disk_percent, 70, 90)} Disk:   {disk_percent:.1f}% used ({metrics['system']['disk']['used_gb']} GB / {metrics['system']['disk']['total_gb']} GB)"
+                )
 
                 # Task Metrics
                 print("\nTask Execution Statistics")
                 print("-" * 80)
 
-                task_stats = metrics['tasks']
+                task_stats = metrics["tasks"]
                 print(f"  Total Executions: {task_stats['total_executions']}")
                 print(f"  Completed: {task_stats['completed']}")
                 print(f"  Failed: {task_stats['failed']}")
@@ -67,7 +75,7 @@ def display_dashboard():
                 jobs = get_scheduled_jobs()
                 if jobs:
                     for job in jobs[:5]:  # Show first 5
-                        next_run = job.get('next_run_time', 'N/A')
+                        next_run = job.get("next_run_time", "N/A")
                         print(f"  - {job['name']}")
                         print(f"    Next run: {next_run}")
                 else:
@@ -79,16 +87,14 @@ def display_dashboard():
 
                 session = get_session()
                 try:
-                    recent_logs = session.query(TaskLog).order_by(
-                        TaskLog.started_at.desc()
-                    ).limit(5).all()
+                    recent_logs = (
+                        session.query(TaskLog).order_by(TaskLog.started_at.desc()).limit(5).all()
+                    )
 
                     for log in recent_logs:
-                        status_icon = {
-                            'completed': '[OK]',
-                            'failed': '[!]',
-                            'running': '[*]'
-                        }.get(log.status, '[?]')
+                        status_icon = {"completed": "[OK]", "failed": "[!]", "running": "[*]"}.get(
+                            log.status, "[?]"
+                        )
 
                         duration = ""
                         if log.completed_at and log.started_at:
@@ -107,7 +113,7 @@ def display_dashboard():
                 # Database Stats
                 print("\nDatabase Statistics")
                 print("-" * 80)
-                db_stats = metrics['database']
+                db_stats = metrics["database"]
                 print(f"  Contacts: {db_stats['contacts']}")
                 print(f"  Task Logs: {db_stats['task_logs']}")
 
@@ -122,6 +128,7 @@ def display_dashboard():
 
     except KeyboardInterrupt:
         print("\n\nDashboard stopped")
+
 
 if __name__ == "__main__":
     display_dashboard()

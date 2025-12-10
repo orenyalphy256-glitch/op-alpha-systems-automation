@@ -2,10 +2,12 @@
 test_monitoring.py - Automated System Monitoring Tests
 Tests: CPU, disk usage, task statistics
 """
+
 import logging
 from autom8.metrics import get_all_metrics
 from autom8.alerts import send_email_alert
 from autom8.core import log, setup_logging, ContextLogger
+
 
 def test_logging_levels():
     """Test different log levels."""
@@ -19,27 +21,21 @@ def test_logging_levels():
 
     print(" Check 99-Logs/ for log files")
 
+
 def test_structured_logging():
     """Test structured logging with context."""
     print("\n[TEST 2] Testing structured logging...")
 
     context_log = ContextLogger("test")
 
-    context_log.info(
-        "User login event",
-        user="alphonce",
-        ip="192.168.1.100",
-        duration_ms=234
-    )
+    context_log.info("User login event", user="alphonce", ip="192.168.1.100", duration_ms=234)
 
     context_log.error(
-        "Database connection failed",
-        database="contacts",
-        error_code=1045,
-        retry_count=3
+        "Database connection failed", database="contacts", error_code=1045, retry_count=3
     )
 
     print(" Check autom8_json.log for structured entries")
+
 
 def test_metrics():
     """Test metrics collection."""
@@ -58,25 +54,27 @@ def test_metrics():
 
     print(" Metrics collection working")
 
+
 def test_alerting():
     """Test email alerts."""
     print("\nTEST 4: Testing email alerts...")
 
     import os
+
     if not os.getenv("SMTP_USERNAME"):
         print(" Email not configured - skipping alert test")
         print(" Set SMTP_USERNAME and SMTP_PASSWORD environment variables to test alerts")
         return
-    
+
     result = send_email_alert(
-        "Test Alert",
-        "<p>This is a test email alert from Autom8 monitoring system</p>"
+        "Test Alert", "<p>This is a test email alert from Autom8 monitoring system</p>"
     )
 
     if result:
         print(" Email alert sent successfully")
     else:
         print(" Alert email failed")
+
 
 def main():
     """Run all monitoring tests."""
@@ -97,6 +95,7 @@ def main():
     print("  2. 99-Logs/autom8_text.log (Human-readable logs)")
     print("  3. 99-logs/autom8_errors.log (Erros only)")
     print("  4. Console output above")
+
 
 if __name__ == "__main__":
     main()

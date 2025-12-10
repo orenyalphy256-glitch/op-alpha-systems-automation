@@ -1,6 +1,7 @@
 """
 Quick test module for autom8.paths
 """
+
 from autom8.core import BASE_DIR, PROJECT_ROOT, DATA_DIR, LOGS_DIR
 
 print("Path Verification:")

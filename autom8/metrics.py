@@ -2,41 +2,41 @@
 metrics.py - System Metrics Collection
 Collects: CPU, disk usage, task statistics
 """
+
 import psutil
 import time
 from datetime import datetime
 from autom8.models import get_session, TaskLog, Contact
 from autom8.core import log
 
+
 # System metrics
 def get_system_metrics():
     try:
         cpu_percent = psutil.cpu_percent(interval=1)
         memory = psutil.virtual_memory()
-        disk = psutil.disk_usage('/')
+        disk = psutil.disk_usage("/")
 
         return {
             "timestamp": datetime.utcnow().isoformat() + "Z",
-            "cpu": {
-                "percent": cpu_percent,
-                "count": psutil.cpu_count()
-            },
+            "cpu": {"percent": cpu_percent, "count": psutil.cpu_count()},
             "memory": {
                 "total_mb": memory.total // (1024 * 1024),
                 "available_mb": memory.available // (1024 * 1024),
                 "used_mb": memory.used // (1024 * 1024),
-                "percent": memory.percent   
+                "percent": memory.percent,
             },
             "disk": {
-                "total_gb": disk.total // (1024 ** 3),
-                "used_gb": disk.used // (1024 ** 3),
-                "free_gb": disk.free // (1024 ** 3),
-                "percent": disk.percent
-            }
+                "total_gb": disk.total // (1024**3),
+                "used_gb": disk.used // (1024**3),
+                "free_gb": disk.free // (1024**3),
+                "percent": disk.percent,
+            },
         }
     except Exception as e:
         log.error(f"Error collecting system metrics: {e}")
         return None
+
 
 # Application metrics
 def get_task_metrics():
@@ -50,9 +50,7 @@ def get_task_metrics():
         success_rate = (completed / total * 100) if total > 0 else 0
 
         # Get last 10 executions
-        recent = session.query(TaskLog).order_by(
-            TaskLog.started_at.desc()
-        ).limit(10).all()
+        recent = session.query(TaskLog).order_by(TaskLog.started_at.desc()).limit(10).all()
 
         return {
             "timestamp": datetime.utcnow().isoformat() + "Z",
@@ -61,13 +59,14 @@ def get_task_metrics():
             "failed": failed,
             "running": running,
             "success_rate": round(success_rate, 2),
-            "recent_count": len(recent)
+            "recent_count": len(recent),
         }
     except Exception as e:
         log.error(f"Error collecting task metrics: {e}")
         return None
     finally:
         session.close()
+
 
 # Database metrics
 def get_database_metrics():
@@ -80,7 +79,7 @@ def get_database_metrics():
         return {
             "timestamp": datetime.utcnow().isoformat() + "Z",
             "contacts": contact_count,
-            "task_logs": tasklog_count
+            "task_logs": tasklog_count,
         }
     except Exception as e:
         log.error(f"Error collecting database metrics: {e}")
@@ -88,18 +87,15 @@ def get_database_metrics():
     finally:
         session.close()
 
+
 # All metrics
 def get_all_metrics():
-        return {
-            "system": get_system_metrics(),
-            "tasks": get_task_metrics(),
-            "database": get_database_metrics()
-        }
-    
+    return {
+        "system": get_system_metrics(),
+        "tasks": get_task_metrics(),
+        "database": get_database_metrics(),
+    }
+
+
 # Module exports
-__all__ = [
-    'get_system_metrics',
-    'get_task_metrics',
-    'get_database_metrics',
-    'get_all_metrics'
-]
+__all__ = ["get_system_metrics", "get_task_metrics", "get_database_metrics", "get_all_metrics"]

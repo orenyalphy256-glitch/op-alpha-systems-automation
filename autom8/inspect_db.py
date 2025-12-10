@@ -1,8 +1,10 @@
 """
 inspect_db.py - Display database statistics and info
 """
+
 from autom8.models import get_session, Contact, TaskLog, engine
 from autom8.core import log
+
 
 def main():
     session = get_session()
@@ -35,12 +37,8 @@ def main():
     print(f"    - Total records: {tasklog_count}")
 
     if tasklog_count > 0:
-        completed = session.query(TaskLog).filter(
-            TaskLog.status == "failed"
-        ).count()
-        failed = session.query(TaskLog).filter(
-            TaskLog.status == "failed"
-        ).count()
+        completed = session.query(TaskLog).filter(TaskLog.status == "failed").count()
+        failed = session.query(TaskLog).filter(TaskLog.status == "failed").count()
         print(f"    - Completed: {completed}")
         print(f"    - Failed: {failed}")
 
@@ -53,6 +51,7 @@ def main():
     print("\n" + "=" * 60)
 
     session.close()
+
 
 if __name__ == "__main__":
     main()

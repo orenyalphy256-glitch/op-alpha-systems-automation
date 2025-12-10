@@ -2,6 +2,7 @@
 scheduler.py - Job Scheduling with APScheduler
 Integrates: Task system + Database logging
 """
+
 from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
@@ -14,7 +15,8 @@ from autom8.models import get_session, TaskLog, init_db
 from autom8.alerts import alert_task_failure
 
 # Scheduler configuration
-scheduler = None # Global scheduler instance
+scheduler = None  # Global scheduler instance
+
 
 # Job execution with database logging
 def execute_task_with_logging(task_type, task_name=None):
@@ -25,7 +27,7 @@ def execute_task_with_logging(task_type, task_name=None):
         task_type=task_type,
         task_name=task_name or task_type,
         status="running",
-        started_at=datetime.utcnow()
+        started_at=datetime.utcnow(),
     )
 
     try:
@@ -48,7 +50,7 @@ def execute_task_with_logging(task_type, task_name=None):
         log.info(f"Completed scheduled task: {task_type} (log ID: {task_log.id})")
 
         return result
-    
+
     except Exception as e:
         task_log.status = "failed"
         task_log.completed_at = datetime.utcnow()
@@ -62,16 +64,19 @@ def execute_task_with_logging(task_type, task_name=None):
         alert_task_failure(task_type, str(e))
 
         return {"status": "failed", "error": str(e)}
-    
+
     finally:
         session.close()
+
 
 # Scheduler event listeners
 def job_executed_listener(event):
     log.info(f"Job {event.job_id} executed successfully")
 
+
 def job_error_listener(event):
     log.error(f"Job {event.job_id} failed: {event.exception}")
+
 
 # Scheduler initialization
 def init_scheduler():
@@ -80,7 +85,7 @@ def init_scheduler():
     if scheduler is not None:
         log.warning("Scheduler already initialized")
         return scheduler
-    
+
     # Ensure database is initialized
     init_db()
 
@@ -88,10 +93,10 @@ def init_scheduler():
     scheduler = BackgroundScheduler(
         timezone="UTC",
         job_defaults={
-            'coalesce': False, # Run all missed jobs not just latest
-            'max_instances': 3, # Allow up to 3 concurrent instances of the same job
-            'misfire_grace_time': 60 # Allow 60 seconds grace for missed jobs
-        }
+            "coalesce": False,  # Run all missed jobs not just latest
+            "max_instances": 3,  # Allow up to 3 concurrent instances of the same job
+            "misfire_grace_time": 60,  # Allow 60 seconds grace for missed jobs
+        },
     )
 
     # Add event listeners
@@ -102,52 +107,56 @@ def init_scheduler():
 
     return scheduler
 
+
 # Job scheduling functions
 def schedule_backup_job():
     if scheduler is None:
         raise RuntimeError("Scheduler not initialized. Call init_scheduler() first.")
-    
+
     scheduler.add_job(
         func=execute_task_with_logging,
         trigger=IntervalTrigger(hours=24),
-        args=['backup'],
-        id='backup_job',
-        name='Daily Backup Task',
+        args=["backup"],
+        id="backup_job",
+        name="Daily Backup Task",
         replace_existing=True,
-        next_run_time=datetime.utcnow() # Run immediately on first start
+        next_run_time=datetime.utcnow(),  # Run immediately on first start
     )
 
     log.info("Backup job scheduled successfully")
 
+
 def schedule_cleanup_job():
     if scheduler is None:
         raise RuntimeError("Scheduler not initialized. Call init_scheduler() first.")
-    
+
     scheduler.add_job(
         func=execute_task_with_logging,
         trigger=IntervalTrigger(hours=1),
-        args=['cleanup'],
-        id='cleanup_job',
-        name='Hourly Cleanup Task',
-        replace_existing=True
+        args=["cleanup"],
+        id="cleanup_job",
+        name="Hourly Cleanup Task",
+        replace_existing=True,
     )
 
     log.info("Cleanup job scheduled successfully")
 
+
 def schedule_report_job():
     if scheduler is None:
         raise RuntimeError("Scheduler not initialized. Call init_scheduler() first.")
-    
+
     scheduler.add_job(
         func=execute_task_with_logging,
         trigger=CronTrigger(hour=9, minute=0),
-        args=['report'],
-        id='report_job',
-        name='Daily Report Task',
-        replace_existing=True
+        args=["report"],
+        id="report_job",
+        name="Daily Report Task",
+        replace_existing=True,
     )
 
     log.info("Report job scheduled successfully")
+
 
 def schedule_all_jobs():
     schedule_backup_job()
@@ -156,91 +165,103 @@ def schedule_all_jobs():
 
     log.info("All default jobs scheduled successfully")
 
+
 # Scheduler management
 def start_scheduler():
     if scheduler is None:
         raise RuntimeError("Scheduler not initialized. Call init_scheduler() first.")
-    
+
     if not scheduler.running:
         scheduler.start()
         log.info("Scheduler started successfully")
     else:
         log.warning("Scheduler already running")
 
+
 def stop_scheduler(wait=True):
     if scheduler is None:
         log.warning("Scheduler not initialized")
         return
-    
+
     if scheduler.running:
         scheduler.shutdown(wait=wait)
         log.info("Scheduler stopped successfully")
     else:
         log.warning("Scheduler not running")
 
+
 def get_scheduled_jobs():
     if scheduler is None:
         return []
-    
+
     jobs = []
     for job in scheduler.get_jobs():
-        jobs.append({
-            'id': job.id,
-            'name': job.name,
-            'next_run_time': (job.next_run_time.isoformat() if getattr(job, 'next_run_time', None) else 'N/A'),
-            'trigger': str(job.trigger)
-        })
+        jobs.append(
+            {
+                "id": job.id,
+                "name": job.name,
+                "next_run_time": (
+                    job.next_run_time.isoformat() if getattr(job, "next_run_time", None) else "N/A"
+                ),
+                "trigger": str(job.trigger),
+            }
+        )
 
     return jobs
+
 
 def pause_job(job_id):
     if scheduler is None:
         raise RuntimeError("Scheduler not initialized")
-    
+
     scheduler.pause_job(job_id)
     log.info(f"Job {job_id} paused successfully")
+
 
 def resume_job(job_id):
     if scheduler is None:
         raise RuntimeError("Scheduler not initialized")
-    
+
     scheduler.resume_job(job_id)
     log.info(f"Job {job_id} resumed successfully")
+
 
 def remove_job(job_id):
     if scheduler is None:
         raise RuntimeError("Scheduler not initialized")
-    
+
     scheduler.remove_job(job_id)
     log.info(f"Job {job_id} removed successfully")
+
 
 def run_job_now(job_id):
     if scheduler is None:
         raise RuntimeError("Scheduler not initialized")
-    
+
     job = scheduler.get_job(job_id)
     if job is None:
         raise ValueError(f"Job {job_id} not found")
-    
+
     # Execute job function immediately
     job.func(*job.args, **job.kwargs)
     log.info(f"Manually executed job {job_id} successfully")
 
+
 # Module exports
 __all__ = [
-    'scheduler',
-    'init_scheduler',
-    'start_scheduler',
-    'stop_scheduler',
-    'get_scheduler',
-    'schedule_backup_job',
-    'schedule_cleanup_job',
-    'schedule_report_job',
-    'schedule_all_jobs',
-    'get_scheduled_jobs',
-    'pause_job',
-    'resume_job',
-    'remove_job',
-    'run_job_now',
-    'execute_task_with_logging',
+    "scheduler",
+    "init_scheduler",
+    "start_scheduler",
+    "stop_scheduler",
+    "get_scheduler",
+    "schedule_backup_job",
+    "schedule_cleanup_job",
+    "schedule_report_job",
+    "schedule_all_jobs",
+    "get_scheduled_jobs",
+    "pause_job",
+    "resume_job",
+    "remove_job",
+    "run_job_now",
+    "execute_task_with_logging",
 ]
