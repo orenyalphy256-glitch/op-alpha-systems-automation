@@ -46,6 +46,23 @@ data/
 99-Logs/
 logs/
 
+# Testing & Coverage
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.pytest_cache/
+.tox/
+.hypothesis/
+
+# Linting Reports
+flake-report/
+.flake8-report/
+pylint-report/
+.mypy_cache/
+.ruff_cache/
+
 # Environment variables
 .env
 .env.local
