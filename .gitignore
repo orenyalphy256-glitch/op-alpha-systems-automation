@@ -45,12 +45,18 @@ data/
 *.log
 99-Logs/
 logs/
+project-tree.txt
+celerybeat-schedule
+instance/
+node_modules/
+
 
 # Testing & Coverage
 htmlcov/
 .coverage
 .coverage.*
 coverage.xml
+coverage_report.txt
 *.cover
 .pytest_cache/
 .tox/
@@ -62,6 +68,9 @@ flake-report/
 pylint-report/
 .mypy_cache/
 .ruff_cache/
+bandit*.json
+bandit*.html
+security_report.*
 
 # Environment variables
 .env

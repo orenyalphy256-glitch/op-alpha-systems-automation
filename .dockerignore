@@ -46,3 +46,26 @@ docs/
 .env
 *.txt
 !requirements.txt
+
+# Security & Linting Reports
+bandit*.json
+bandit*.html
+security_report.*
+flake-report/
+.ruff_cache/
+.mypy_cache/
+.flake8
+.bandit
+.coveragerc
+
+# Windows Scripts
+*.bat
+
+# Docker orchestration files
+docker-compose*.yml
+Dockerfile
+.dockerignore
+
+# Coverage reports
+coverage.xml
+coverage_report.txt
