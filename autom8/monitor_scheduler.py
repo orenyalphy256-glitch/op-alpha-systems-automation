@@ -14,7 +14,7 @@ from autom8.models import get_session, TaskLog
 
 def clear_screen():
     """Clear the terminal screen."""
-    os.system("cls" if os.name == "nt" else "clear")
+    os.system("cls" if os.name == "nt" else "clear")  # nosec B605
 
 
 def format_timedelta(td):

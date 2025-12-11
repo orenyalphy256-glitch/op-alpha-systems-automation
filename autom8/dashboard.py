@@ -13,7 +13,7 @@ from autom8.scheduler import get_scheduled_jobs
 
 def clear_screen():
     """Clear the terminal screen."""
-    os.system("cls" if os.name == "nt" else "clear")
+    os.system("cls" if os.name == "nt" else "clear")  # nosec B605
 
 
 def get_status_emoji(value, warning_threshold, critical_threshold):
