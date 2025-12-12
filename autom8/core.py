@@ -180,7 +180,10 @@ def setup_logging(
     )
     error_handler.setLevel(logging.ERROR)  # Only ERROR AND CRITICAL
     error_formatter = logging.Formatter(
-        fmt="%(asctime)s [%(levelname)s] %(name)s: %(message)s\nLocation: %(pathname)s:%(lineno)d\n%(message)s\n",
+        fmt=(
+            "%(asctime)s [%(levelname)s] %(name)s: %(message)s\n"
+            "Location: %(pathname)s:%(lineno)d\n%(message)s\n"
+        ),
         datefmt="%Y-%m-%d %H:%M:%S",
     )
     error_handler.setFormatter(error_formatter)
