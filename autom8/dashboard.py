@@ -89,9 +89,7 @@ def _print_recent_logs():
 
     session = get_session()
     try:
-        recent_logs = (
-            session.query(TaskLog).order_by(TaskLog.started_at.desc()).limit(5).all()
-        )
+        recent_logs = session.query(TaskLog).order_by(TaskLog.started_at.desc()).limit(5).all()
 
         for log in recent_logs:
             status_icon = {"completed": "[OK]", "failed": "[!]", "running": "[*]"}.get(
