@@ -116,6 +116,9 @@ def test_monitor_dashboard(mock_sleep, mock_session, mock_jobs):
     mock_db = MagicMock()
     mock_session.return_value = mock_db
     mock_db.query.return_value.order_by.return_value.limit.return_value.all.return_value = []
+    # FIX: Mock count() to return 0 for statistics
+    mock_db.query.return_value.count.return_value = 0
+    mock_db.query.return_value.filter.return_value.count.return_value = 0
     
     # Break loop
     mock_sleep.side_effect = KeyboardInterrupt
