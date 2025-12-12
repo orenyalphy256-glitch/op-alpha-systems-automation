@@ -13,15 +13,15 @@ def main():
     print("=" * 60)
 
     # Database location
-    print(f"\nDatabase Location:")
+    print("\nDatabase Location:")
     print(f"    {engine.url}")
 
     # Table statistics
-    print(f"\nTable Statistics:")
+    print("\nTable Statistics:")
 
     # Contacts
     contact_count = session.query(Contact).count()
-    print(f"\n  Contacts Table:")
+    print("\n  Contacts Table:")
     print(f"    - Total records: {contact_count}")
 
     if contact_count > 0:
@@ -32,7 +32,7 @@ def main():
 
     # Task Logs
     tasklog_count = session.query(TaskLog).count()
-    print(f"\n  TaskLog Table:")
+    print("\n  TaskLog Table:")
     print(f"    - Total records: {tasklog_count}")
 
     if tasklog_count > 0:
@@ -42,7 +42,7 @@ def main():
         print(f"    - Failed: {failed}")
 
     # Sample records
-    print(f"\nSample Contacts (first 3):")
+    print("\nSample Contacts (first 3):")
     contacts = session.query(Contact).limit(3).all()
     for c in contacts:
         print(f"    [{c.id}] {c.name} - {c.phone}")
