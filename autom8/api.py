@@ -3,28 +3,24 @@ api.py - Flask REST API for Contact Management
 Implements: RESTful endpoints using SQLAlchemy ORM
 """
 
-from flask import Flask, request, jsonify, abort
+from flask import Flask, abort, jsonify, request
 from sqlalchemy.exc import IntegrityError
-from autom8.core import log, LOGS_DIR
+
+from autom8.core import LOGS_DIR, log
+from autom8.metrics import get_all_metrics, get_system_metrics
 from autom8.models import (
-    get_session,
+    TaskLog,
     create_contact,
+    delete_contact,
     get_contact_by_id,
     get_contact_by_phone,
+    get_session,
+    init_db,
     list_contacts,
     search_contacts,
     update_contact,
-    delete_contact,
-    init_db,
-    TaskLog,
 )
-from autom8.scheduler import (
-    get_scheduled_jobs,
-    pause_job,
-    resume_job,
-    run_job_now,
-)
-from autom8.metrics import get_all_metrics, get_system_metrics
+from autom8.scheduler import get_scheduled_jobs, pause_job, resume_job, run_job_now
 
 # Flask Application Setup
 app = Flask(__name__)

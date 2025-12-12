@@ -13,18 +13,18 @@ services:
         - PYTHON_VERSION=3.11
     image: autom8:latest
     container_name: autom8_api
-    
+
     # Port mapping
     ports:
       - "${API_PORT:-5000}:5000"
-    
+
     # Volume mounts for persistent data
     volumes:
       - autom8_data:/app/data
       - autom8_logs:/app/logs
       # Uncomment for development (live code reload)
       # - .:/app
-    
+
     # Environment variables
     environment:
       - PYTHONUNBUFFERED=1
@@ -33,11 +33,11 @@ services:
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - TZ=${TZ:-Etc/UTC}
       - TERM=xterm-256color
-    
+
     # Load additional env vars from file
     env_file:
       - .env
-      
+
     # Health check configuration
     healthcheck:
       test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5000/api/v1/health', timeout=5).raise_for_status()"]
@@ -45,10 +45,10 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-    
+
     # Restart policy
     restart: unless-stopped
-    
+
     # Resource limits
     deploy:
       resources:
@@ -58,51 +58,51 @@ services:
         reservations:
           cpus: '0.5'
           memory: 256M
-    
+
     # Network configuration
     networks:
       - autom8_network
-    
+
     # Logging configuration
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
-    
+
     # Labels for organization
     labels:
       com.autom8.service: "api"
       com.autom8.version: "1.0"
       com.autom8.description: "Main API and Scheduler Service"
-  
+
   # MONITORING DASHBOARD SERVICE
 
   dashboard:
     image: autom8:latest
     container_name: autom8_dashboard
-    
+
     # Override default command
     command: python -m autom8.dashboard
-    
+
     # Share volumes with API
     volumes:
       - autom8_data:/app/data:ro  # Read-only access
       - autom8_logs:/app/logs:ro
-    
+
     # Environment variables
     environment:
       - PYTHONUNBUFFERED=1
       - TZ=${TZ:-Etc/UTC}
-    
+
     # Depends on API being healthy
     depends_on:
       api:
         condition: service_healthy
-    
+
     # Restart policy
     restart: unless-stopped
-    
+
     # Resource limits (lighter than API)
     deploy:
       resources:
@@ -112,18 +112,18 @@ services:
         reservations:
           cpus: '0.25'
           memory: 128M
-    
+
     # Network configuration
     networks:
       - autom8_network
-    
+
     # Logging
     logging:
       driver: "json-file"
       options:
         max-size: "5m"
         max-file: "2"
-    
+
     # Labels
     labels:
       com.autom8.service: "dashboard"
@@ -134,25 +134,25 @@ services:
   db-init:
     image: autom8:latest
     container_name: autom8_db_init
-    
+
     # Run initialization script and exit
     command: python -m autom8.init_database
-    
+
     # Share data volume
     volumes:
       - autom8_data:/app/data
-    
+
     # Environment
     environment:
       - PYTHONUNBUFFERED=1
-    
+
     # Only run once (don't restart)
     restart: "no"
-    
+
     # Network
     networks:
       - autom8_network
-    
+
     # Labels
     labels:
       com.autom8.service: "db-init"
@@ -165,7 +165,7 @@ volumes:
     driver: local
     labels:
       com.autom8.description: "Application data storage"
-  
+
   # Application logs
   autom8_logs:
     driver: local

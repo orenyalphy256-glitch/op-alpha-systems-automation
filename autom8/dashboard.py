@@ -3,11 +3,12 @@ dashboard.py - Real-time Monitoring Dashboard
 Displays system health, metrics, recent logs
 """
 
-import time
 import os
+import time
 from datetime import datetime
-from autom8.models import get_session, TaskLog
+
 from autom8.metrics import get_all_metrics
+from autom8.models import TaskLog, get_session
 from autom8.scheduler import get_scheduled_jobs
 
 

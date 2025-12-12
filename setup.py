@@ -3,7 +3,7 @@ Setup configuration for autom8 package.
 Agent ALO - Batch 5
 """
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(
     name="autom8",

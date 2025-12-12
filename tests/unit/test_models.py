@@ -1,9 +1,13 @@
 """
 Unit tests for database models
 """
-import pytest
+
 from datetime import datetime
+
+import pytest
+
 from autom8.models import Contact
+
 
 # Contact Model Tests
 class TestContactModel:
@@ -42,7 +46,7 @@ class TestContactModel:
         # Act & Assert
         with pytest.raises(Exception):
             test_db.commit()
-    
+
     def test_contact_requires_phone(self, test_db):
         """Test that a contact requires a phone number."""
         # Arrange
@@ -52,7 +56,7 @@ class TestContactModel:
         # Act & Assert
         with pytest.raises(Exception):
             test_db.commit()
-    
+
     def test_contact_phone_unique(self, test_db):
         """Test that a contact's phone number is unique."""
         # Arrange
@@ -67,7 +71,7 @@ class TestContactModel:
         # Act & Assert
         with pytest.raises(Exception):
             test_db.commit()
-    
+
     def test_contact_update(self, test_db):
         """Test updating a contact."""
         # Arrange
@@ -92,7 +96,6 @@ class TestContactModel:
         contact = Contact(name="To Delete", phone="0700000000")
         test_db.add(contact)
         test_db.commit()
-        contact_id = contact.id
 
         # Act
         test_db.delete(contact)
@@ -101,12 +104,12 @@ class TestContactModel:
         # Assert
         deleted = test_db.query(Contact).filter_by(id=contact.id).first()
         assert deleted is None
-    
+
     def test_contact_query_all(self, test_db_with_data):
         """Test querying all contacts."""
         # Act
         contacts = test_db_with_data.query(Contact).all()
-        
+
         # Assert
         assert len(contacts) == 3
         assert all(isinstance(c, Contact) for c in contacts)
@@ -115,7 +118,7 @@ class TestContactModel:
         """Test querying contact by name."""
         # Act
         contact = test_db_with_data.query(Contact).filter_by(name="Alice Johnson").first()
-        
+
         # Assert
         assert contact is not None
         assert contact.name == "Alice Johnson"
@@ -125,12 +128,12 @@ class TestContactModel:
         """Test querying contact by phone."""
         # Act
         contact = test_db_with_data.query(Contact).filter_by(phone="0711111111").first()
-        
+
         # Assert
         assert contact is not None
         assert contact.name == "Bob Smith"
         assert contact.phone == "0711111111"
-    
+
     def test_contact_created_at_auto_set(self, test_db):
         """Test that created_at is automatically set on contact creation."""
         # Arrange
@@ -144,6 +147,7 @@ class TestContactModel:
         assert contact.created_at is not None
         assert isinstance(contact.created_at, datetime)
         assert contact.created_at <= datetime.now()
+
 
 # Edge cases and validation
 class TestContactValidation:
@@ -180,41 +184,40 @@ class TestContactValidation:
         special_name = "Test User™ © ® €"
         contact = Contact(name=special_name, phone="0700000000")
         test_db.add(contact)
-        
+
         # Act
         test_db.commit()
-        
+
         # Assert
         assert contact.name == special_name
 
     def test_contact_phone_formats(self, test_db):
         """Test various phone number formats."""
         # Test different formats
-        formats = [
-            "0700000000",
-            "+254700000000",
-            "254700000000",
-            "0700-000-000",
-            "(070) 000-0000"
-        ]
+        formats = ["0700000000", "+254700000000", "254700000000", "0700-000-000", "(070) 000-0000"]
 
         for idx, phone in enumerate(formats):
             contact = Contact(name=f"User {idx}", phone=phone)
             test_db.add(contact)
-        
+
         test_db.commit()
-        
+
         # Assert all were saved
         contacts = test_db.query(Contact).all()
         assert len(contacts) == len(formats)
 
+
 # Parametrized tests (Testing multiple scenarios)
 
-@pytest.mark.parametrize("name,phone,should_succeed", [
-    ("Valid User", "0700000000", True),
-    ("Another User", "0711111111", True),
-    ("User Three", "+254722222222", True),
-])
+
+@pytest.mark.parametrize(
+    "name,phone,should_succeed",
+    [
+        ("Valid User", "0700000000", True),
+        ("Another User", "0711111111", True),
+        ("User Three", "+254722222222", True),
+    ],
+)
 def test_contact_creation_parametrized(test_db, name, phone, should_succeed):
     """
     Parametrized test for contact creation.
@@ -223,7 +226,7 @@ def test_contact_creation_parametrized(test_db, name, phone, should_succeed):
     # Arrange
     contact = Contact(name=name, phone=phone)
     test_db.add(contact)
-    
+
     # Act
     if should_succeed:
         test_db.commit()

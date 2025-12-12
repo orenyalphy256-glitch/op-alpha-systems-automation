@@ -2,7 +2,7 @@
 inspect_db.py - Display database statistics and info
 """
 
-from autom8.models import get_session, Contact, TaskLog, engine
+from autom8.models import Contact, TaskLog, engine, get_session
 
 
 def main():

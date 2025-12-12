@@ -3,7 +3,7 @@ init_database.py - Database initialization script
 Run once to create tables
 """
 
-from autom8.models import init_db, engine
+from autom8.models import engine, init_db
 
 
 def main():

@@ -8,6 +8,7 @@ python -m autom8.analyze_logs --hours 48 # Run for last 48 hours
 import json
 from collections import Counter
 from datetime import datetime, timedelta
+
 from autom8.core import LOGS_DIR
 
 

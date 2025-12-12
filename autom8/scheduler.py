@@ -4,15 +4,16 @@ Integrates: Task system + Database logging
 """
 
 from datetime import datetime
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.interval import IntervalTrigger
-from apscheduler.triggers.cron import CronTrigger
-from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 
-from autom8.core import log
-from autom8.tasks import run_task
-from autom8.models import get_session, TaskLog, init_db
+from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
+from apscheduler.triggers.interval import IntervalTrigger
+
 from autom8.alerts import alert_task_failure
+from autom8.core import log
+from autom8.models import TaskLog, get_session, init_db
+from autom8.tasks import run_task
 
 # Scheduler configuration
 scheduler = None  # Global scheduler instance

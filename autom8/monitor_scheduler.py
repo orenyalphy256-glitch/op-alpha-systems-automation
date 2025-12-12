@@ -5,11 +5,12 @@ Display scheduler status and recent job executions
 Run: python -m autom8.monitor_scheduler
 """
 
-import time
 import os
+import time
 from datetime import datetime
+
+from autom8.models import TaskLog, get_session
 from autom8.scheduler import get_scheduled_jobs
-from autom8.models import get_session, TaskLog
 
 
 def clear_screen():

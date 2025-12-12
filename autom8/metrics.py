@@ -3,10 +3,12 @@ metrics.py - System Metrics Collection
 Collects: CPU, disk usage, task statistics
 """
 
-import psutil
 from datetime import datetime
-from autom8.models import get_session, TaskLog, Contact
+
+import psutil
+
 from autom8.core import log
+from autom8.models import Contact, TaskLog, get_session
 
 
 # System metrics

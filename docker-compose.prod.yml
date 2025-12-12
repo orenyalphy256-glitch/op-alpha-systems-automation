@@ -11,10 +11,10 @@ services:
       - LOG_LEVEL=WARNING
       - FLASK_ENV=production
       - RELOAD=false
-    
+
     # Always restart in production
     restart: always
-    
+
     # Stricter resource limits
     deploy:
       resources:
@@ -24,23 +24,23 @@ services:
         reservations:
           cpus: '0.5'
           memory: 256MB
-      
+
       # Restart policy for failures
       restart_policy:
         condition: on-failure
         delay: 5s
         max_attempts: 3
         window: 120s
-    
+
     # Production health check (more frequent)
     healthcheck:
       interval: 15s
       timeout: 5s
       retries: 5
-  
+
   dashboard:
     restart: always
-    
+
     deploy:
       resources:
         limits:
@@ -56,7 +56,7 @@ volumes:
     labels:
       com.autom8.backup: "true"
       com.autom8.backup_frequency: "daily"
-  
+
   autom8_logs:
     labels:
       com.autom8.backup: "false"

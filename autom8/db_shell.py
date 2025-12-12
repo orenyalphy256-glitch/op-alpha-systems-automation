@@ -4,11 +4,11 @@ Run: python -m autom8.db_shell
 """
 
 from autom8.models import (
+    create_contact,
+    delete_contact,
     get_session,
     list_contacts,
     search_contacts,
-    create_contact,
-    delete_contact,
 )
 
 

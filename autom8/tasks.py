@@ -5,7 +5,8 @@ Implements: Factory Pattern, Abstract Base Class (ABC)
 
 from abc import ABC, abstractmethod
 from datetime import datetime
-from autom8.core import log, save_json, DATA_DIR
+
+from autom8.core import DATA_DIR, log, save_json
 
 
 # Abstract Base Class - Task Interface

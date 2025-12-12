@@ -4,7 +4,8 @@ Defines: Contact model, database initialization, session management
 """
 
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, DateTime, create_engine
+
+from sqlalchemy import Column, DateTime, Integer, String, create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 from autom8.core import DATA_DIR, log

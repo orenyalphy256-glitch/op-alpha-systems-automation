@@ -300,7 +300,7 @@ services:
       - "80:80"
     depends_on:
       - api
-  
+
   api:
     # No ports exposed (internal only)
     expose:

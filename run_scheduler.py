@@ -5,25 +5,29 @@ Runs scheduler tasks in background
 Usage: python run_scheduler.py # Run forever
     python run_scheduler.py --once # Run once
 """
+
+import signal
 import sys
 import time
-import signal
+
+from autom8.core import log
 from autom8.scheduler import (
+    get_scheduled_jobs,
     init_scheduler,
+    schedule_all_jobs,
     start_scheduler,
     stop_scheduler,
-    schedule_all_jobs,
-    get_scheduled_jobs,
 )
-from autom8.core import log
 
 # Global flag for graceful shutdown
 shutdown_requested = False
+
 
 def signal_handler(sig, frame):
     global shutdown_requested
     log.info("Shutdown signal received (Ctrl+C). Stopping scheduler...")
     shutdown_requested = True
+
 
 def main():
     global shutdown_requested
@@ -32,7 +36,7 @@ def main():
     signal.signal(signal.SIGINT, signal_handler)
 
     # Check for --once flag (test mode)
-    test_mode = '--once' in sys.argv
+    test_mode = "--once" in sys.argv
 
     print("=" * 60)
     print("AUTOM8 SCHEDULER SERVICE")
@@ -54,7 +58,7 @@ def main():
         print(f"    -Next run: {job['next_run_time']}")
         print(f"    -Trigger: {job['trigger']}")
         print()
-    
+
     # Start scheduler
     log.info("Starting scheduler...")
     start_scheduler()
@@ -80,6 +84,7 @@ def main():
     stop_scheduler(wait=True)
     print("Scheduler stopped successfully.")
     log.info("Scheduler service exited")
+
 
 if __name__ == "__main__":
     main()

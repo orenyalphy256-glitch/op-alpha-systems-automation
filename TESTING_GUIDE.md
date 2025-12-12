@@ -137,10 +137,10 @@ pytest --cov=autom8 --cov-fail-under=80
 def test_example():
     # ARRANGE: Set up test data
     input_data = {"key": "value"}
-    
+
     # ACT: Perform the action
     result = function_to_test(input_data)
-    
+
     # ASSERT: Verify the result
     assert result == expected_output
 ```
@@ -154,7 +154,7 @@ def test_with_fixture(test_db, sample_contact):
     contact = Contact(**sample_contact)
     test_db.add(contact)
     test_db.commit()
-    
+
     assert contact.id is not None
 ```
 
@@ -194,9 +194,9 @@ def test_with_mock():
     """Test using mock objects."""
     mock_service = Mock()
     mock_service.call.return_value = "mocked result"
-    
+
     result = function_using_service(mock_service)
-    
+
     mock_service.call.assert_called_once()
     assert result == "mocked result"
 
@@ -204,9 +204,9 @@ def test_with_mock():
 def test_with_patch(mock_function):
     """Test using patch decorator."""
     mock_function.return_value = "patched"
-    
+
     result = function_that_calls_external()
-    
+
     assert result == "patched"
 ```
 

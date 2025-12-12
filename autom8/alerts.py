@@ -3,11 +3,12 @@ alerts.py - Alert System
 Sends email notifications on critical events
 """
 
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from datetime import datetime
 import os
+import smtplib
+from datetime import datetime
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
 from autom8.core import log
 
 # Email configuration

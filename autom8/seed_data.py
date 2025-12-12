@@ -2,7 +2,7 @@
 seed_data.py - Populate database with test data
 """
 
-from autom8.models import get_session, create_contact
+from autom8.models import create_contact, get_session
 
 
 def main():

@@ -2,9 +2,13 @@
 run_combined.py - Run Flask API + Scheduler in one process
 Usage: python run_combined.py
 """
+
 import os
 import signal
 import sys
+
+# Import API (depends on everything)
+from autom8.api import app
 
 # Import core FIRST (no dependencies)
 from autom8.core import log
@@ -14,24 +18,23 @@ from autom8.models import init_db
 
 # Import scheduler (depends on models + core)
 from autom8.scheduler import (
+    get_scheduled_jobs,
     init_scheduler,
+    schedule_all_jobs,
     start_scheduler,
     stop_scheduler,
-    schedule_all_jobs,
-    get_scheduled_jobs
 )
-
-# Import API (depends on everything)
-from autom8.api import app
 
 # Global flag for graceful shutdown
 shutdown_requested = False
+
 
 def signal_handler(sig, frame):
     global shutdown_requested
     log.info("Shutdown signal received (Ctrl+C). Stopping scheduler...")
     shutdown_requested = True
     sys.exit(0)
+
 
 def main():
     """Run combined API & Scheduler in one process."""
@@ -66,9 +69,9 @@ def main():
     print("Scheduler running")
 
     # Configuration
-    host = os.getenv('API_HOST', '0.0.0.0')
-    port = int(os.getenv('API_PORT', 5000))
-    debug = os.getenv('API_DEBUG', 'False').lower() == 'true'
+    host = os.getenv("API_HOST", "0.0.0.0")
+    port = int(os.getenv("API_PORT", 5000))
+    debug = os.getenv("API_DEBUG", "False").lower() == "true"
 
     # Start Flask API
     print(f"\n Starting Flask API on {host}:{port}")
@@ -81,12 +84,7 @@ def main():
 
     try:
         # Run Flask (blocks until stopped)
-        app.run(
-            host=host,
-            port=port,
-            debug=debug,
-            use_reloader=False
-        )
+        app.run(host=host, port=port, debug=debug, use_reloader=False)
     except KeyboardInterrupt:
         pass
     finally:
@@ -95,6 +93,7 @@ def main():
         stop_scheduler(wait=True)
         print("Services stopped")
         log.info("Combined service exited")
+
 
 if __name__ == "__main__":
     main()

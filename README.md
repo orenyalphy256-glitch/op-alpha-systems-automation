@@ -15,9 +15,9 @@
 
 ---
 
-**Developer:** Alphonce Liguori Oreny  
-**Project Type:** Systems Management & Automation  
-**Tech Stack:** Python 3.14, Flask, SQLAlchemy, APScheduler, Docker  
+**Developer:** Alphonce Liguori Oreny
+**Project Type:** Systems Management & Automation
+**Tech Stack:** Python 3.14, Flask, SQLAlchemy, APScheduler, Docker
 **Status:** Active Development
 
 ## 📋 Project Overview
@@ -366,5 +366,5 @@ MIT License - See LICENSE file for details
 
 ## 📧 Contact
 
-**Email:** orenyalphy256@gmail.com  
+**Email:** orenyalphy256@gmail.com
 **Portfolio:** https://github.com/orenyalphy256-glitch/
