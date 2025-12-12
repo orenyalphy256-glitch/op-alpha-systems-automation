@@ -2,14 +2,15 @@
 
 <div align="center">
 
-![Python Version](https://img.shields.io/badge/python-3.9%2B-blue?style=for-the-badge&logo=python&logoColor=white)
+![Python Version](https://img.shields.io/badge/python-3.11%2B-blue?style=for-the-badge&logo=python&logoColor=white)
 ![Flask](https://img.shields.io/badge/flask-3.0%2B-black?style=for-the-badge&logo=flask&logoColor=white)
 ![Docker](https://img.shields.io/badge/docker-ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)
 ![Test Coverage](https://img.shields.io/badge/coverage-80%25%2B-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)
-![Build Status](https://img.shields.io/badge/build-passing-success?style=for-the-badge)
-![Code Style](https://img.shields.io/badge/code%20style-professional-blueviolet?style=for-the-badge)
-![Deployment](https://img.shields.io/badge/deployment-ready-orange?style=for-the-badge&logo=rocket&logoColor=white)
+![Build Status](https://img.shields.io/badge/build-passing-success?style=for-the-badge&logo=githubactions&logoColor=white)
+![Code Style](https://img.shields.io/badge/code%20style-black-000000?style=for-the-badge)
+![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?style=for-the-badge&logo=pre-commit&logoColor=white)
+![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
 
 </div>
 
@@ -359,6 +360,29 @@ save_json("output.json", data)
 - Test fixtures and mocking strategies
 - Continuous testing workflow
 - Created TESTING_GUIDE.md documentation
+
+### Phase 9: CI/CD Pipeline
+
+- GitHub Actions workflow for automated CI/CD
+- Pre-commit hooks for code quality enforcement
+- Multi-stage pipeline: Lint → Test → Build → Deploy
+- Automated security scanning (Bandit, pip-audit)
+- Code formatting with Black and isort
+- Linting with Flake8 (PEP8 compliance)
+- Codecov integration for coverage reporting
+- Docker image build with GitHub Actions cache
+- Created CI_CD_GUIDE.md documentation
+
+**Pipeline Stages:**
+
+| Stage | Purpose | Status |
+|-------|---------|--------|
+| Setup | Environment preparation | ✅ |
+| Lint | Code quality (Flake8) | ✅ |
+| Test | pytest with coverage | ✅ |
+| Build | Docker image creation | ✅ |
+| Security | Bandit + pip-audit | ✅ |
+| Deploy | Staging deployment | ✅ |
 
 ## 📄 License
 
