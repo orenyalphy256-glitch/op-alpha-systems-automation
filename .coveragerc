@@ -14,6 +14,8 @@ omit =
     */site-packages/*
     setup.py
     */migrations/*
+    *test_*.py
+    *conftest.py
 
 # Branch coverage
 branch = True

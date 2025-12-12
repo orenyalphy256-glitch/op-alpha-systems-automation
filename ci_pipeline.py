@@ -119,15 +119,34 @@ def stage_setup():
     required_tools = ['pip', 'pytest', 'flake8', 'bandit', 'black', 'docker']
     for tool in required_tools:
         try:
-            result = subprocess.run([tool, '--version'], capture_output=True, text=True, timeout=5)
-            if result.returncode == 0:
-                print_success(f"{tool} is installed: {result.stdout.strip()}")
+            if tool == 'docker':
+                cmd = ['docker', '--version']
             else:
-                print_error(f"{tool} is not installed or not found in PATH.")
+                cmd = [sys.executable, '-m', tool, '--version']
+                
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+            if result.returncode == 0:
+                print_success(f"{tool} is installed: {result.stdout.strip().splitlines()[0]}")
+            else:
+                print_error(f"{tool} is not installed or not found.")
         except FileNotFoundError:
-            print_error(f"{tool} is not installed or not found in PATH.")
+            print_error(f"{tool} is not installed or not found.")
         except Exception as e:
             print_warning(f"Could not check {tool} version: {str(e)}")
+
+    # Install package in editable mode for coverage
+    print_info("Installing package in editable mode for coverage...")
+    try:
+        subprocess.run(
+            [sys.executable, "-m", "pip", "install", "-e", "."],
+            check=True,
+            capture_output=True,
+            text=True
+        )
+        print_success("Package installed in editable mode.")
+    except subprocess.CalledProcessError as e:
+        print_error(f"Failed to install package in editable mode: {e.stderr}")
+        return False
 
     print_success("Setup stage completed.")
     return True
@@ -138,7 +157,7 @@ def stage_lint():
 
     # Flake8 linting
     success = run_command(
-        ['flake8', 'autom8/', '--count', '--statistics'],
+        [sys.executable, '-m', 'flake8', 'autom8/', '--count', '--statistics'],
         "Flake8 Linting",
         fail_on_error=False
     )
@@ -155,7 +174,7 @@ def stage_format_check():
 
     # Black formatting check
     success = run_command(
-        ['black', '--check', 'autom8/'],
+        [sys.executable, '-m', 'black', '--check', 'autom8/'],
         "Black Formatting Check",
         fail_on_error=False
     )
@@ -173,7 +192,7 @@ def stage_security():
 
     # Bandit security analysis
     success = run_command(
-        ['bandit', '-r', 'autom8/', '-ll'],
+        [sys.executable, '-m', 'bandit', '-r', 'autom8/', '-ll'],
         "Bandit Security Analysis",
         fail_on_error=False
     )
@@ -190,7 +209,7 @@ def stage_tests():
     # Run pytest with coverage
     success = run_command(
         [
-            'pytest',
+            sys.executable, '-m', 'pytest',
             'tests/',
             '-v',
             '--cov=autom8',
