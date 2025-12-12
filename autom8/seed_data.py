@@ -26,7 +26,7 @@ def main():
             except Exception as e:
                 print(f" Skipped {name}: {e}")
 
-        print(f"\nDatabase seeded successfully!")
+        print("\nDatabase seeded successfully!")
 
     finally:
         session.close()
