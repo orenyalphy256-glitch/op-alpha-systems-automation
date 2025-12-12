@@ -6,10 +6,9 @@ python -m autom8.analyze_logs --hours 48 # Run for last 48 hours
 """
 
 import json
-from pathlib import Path
 from collections import Counter
 from datetime import datetime, timedelta
-from autom8.core import log, LOGS_DIR
+from autom8.core import LOGS_DIR
 
 
 def parse_json_logs(log_file="autom8_json.log", hours=24):

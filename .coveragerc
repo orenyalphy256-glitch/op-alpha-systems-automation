@@ -1,67 +1,25 @@
-# ============================================================================
-# Coverage Configuration
-# ============================================================================
-
 [run]
-# Source code to measure
 source = autom8
-
-# Files to omit from coverage
 omit =
     */tests/*
     */venv/*
     */__pycache__/*
-    */site-packages/*
-    setup.py
-    */migrations/*
-    *test_*.py
-    *conftest.py
-
-# Branch coverage
 branch = True
 
 [report]
-# Precision of percentages
 precision = 2
-
-# Show missing lines
 show_missing = True
-
-# Skip covered files
 skip_covered = False
-
-# Exclude lines from coverage
 exclude_lines =
-    # Standard pragma
     pragma: no cover
-    
-    # Debug code
     def __repr__
     def __str__
-    
-    # Abstract methods
     raise AssertionError
     raise NotImplementedError
-    
-    # Non-runnable code
     if __name__ == "__main__":
-    if TYPE_CHECKING:
-    if False:
-    if 0:
-    
-    # Pass statements
-    pass
-    
-    # Ellipsis
-    ...
 
 [html]
-# HTML report directory
 directory = htmlcov
 
-# Title for HTML report
-title = Autom8 Test Coverage Report
-
 [xml]
-# XML report output
 output = coverage.xml

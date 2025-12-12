@@ -4,7 +4,6 @@ Run with: python -m autom8.demo_tasks
 """
 
 from autom8.tasks import TaskFactory, run_task
-from autom8.core import log
 
 
 def main():

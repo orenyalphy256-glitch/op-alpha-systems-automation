@@ -216,8 +216,11 @@ def stage_tests():
             '--cov-report=term-missing',
             '--cov-report=xml',
             '--cov-report=html',
-            '--cov-fail-under=80',  # Fail if coverage < 80%
-            '--tb=short'
+            '--cov-fail-under=80',
+            '--tb=short',
+            '-W', 'ignore::ResourceWarning',  # Ignore resource warnings
+            '-W', 'ignore::DeprecationWarning',
+            '--disable-warnings'
         ],
         "Test suite with coverage",
         fail_on_error=True  # This is a HARD STOP

@@ -3,10 +3,9 @@ core.py - Shared Utilities & Configuration
 Purpose: Centralize common functions used across the application
 """
 
-import os
 import json
 import logging
-from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from datetime import datetime
 

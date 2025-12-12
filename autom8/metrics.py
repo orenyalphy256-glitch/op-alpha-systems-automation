@@ -4,7 +4,6 @@ Collects: CPU, disk usage, task statistics
 """
 
 import psutil
-import time
 from datetime import datetime
 from autom8.models import get_session, TaskLog, Contact
 from autom8.core import log

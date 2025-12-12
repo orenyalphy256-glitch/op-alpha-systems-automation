@@ -4,7 +4,6 @@ Run once to create tables
 """
 
 from autom8.models import init_db, engine
-from autom8.core import log
 
 
 def main():

@@ -8,7 +8,6 @@ from sqlalchemy.exc import IntegrityError
 from autom8.core import log, LOGS_DIR
 from autom8.models import (
     get_session,
-    Contact,
     create_contact,
     get_contact_by_id,
     get_contact_by_phone,
@@ -20,16 +19,12 @@ from autom8.models import (
     TaskLog,
 )
 from autom8.scheduler import (
-    init_scheduler,
-    start_scheduler,
-    stop_scheduler,
     get_scheduled_jobs,
     pause_job,
     resume_job,
     run_job_now,
 )
-from autom8.metrics import get_all_metrics, get_system_metrics, get_task_metrics
-from datetime import datetime
+from autom8.metrics import get_all_metrics, get_system_metrics
 
 # Flask Application Setup
 app = Flask(__name__)

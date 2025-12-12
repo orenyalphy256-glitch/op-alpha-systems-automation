@@ -1,16 +1,19 @@
 """
 Shared pytest fixtures for all tests.
-Available to all test files automatically.
 """
+
 import pytest
 import os
 import tempfile
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 from autom8.models import Base, Contact
 from autom8 import core
 
-# Database Fixtures
+# ============================================================================
+# DATABASE FIXTURES
+# ============================================================================
+
 @pytest.fixture(scope="function")
 def test_db():
     """
@@ -20,21 +23,29 @@ def test_db():
     Cleanup: Automatic after test completes
     """
     # Create in-memory database
-    engine = create_engine("sqlite:///:memory:", echo=False)
-
+    engine = create_engine(
+        "sqlite:///:memory:", 
+        echo=False,
+        connect_args={"check_same_thread": False}  # Important for SQLite
+    )
+    
     # Create all tables
     Base.metadata.create_all(engine)
-
-    # Create session
-    Session = sessionmaker(bind=engine)
+    
+    # Create session factory
+    Session = scoped_session(sessionmaker(bind=engine))
     session = Session()
-
-    # Yield session
+    
     yield session
+    
+    # CRITICAL: Proper cleanup
+    try:
+        session.close()
+        Session.remove()
+        engine.dispose()
+    except Exception as e:
+        print(f"Warning: Error during database cleanup: {e}")
 
-    # Close session
-    session.close()
-    engine.dispose()
 
 @pytest.fixture(scope="function")
 def test_db_with_data(test_db):
@@ -45,46 +56,54 @@ def test_db_with_data(test_db):
     contacts = [
         Contact(name="Alice Johnson", phone="0700000001"),
         Contact(name="Bob Smith", phone="0711111111"),
-        Contact(name="Carol White", phone="0722222222")
+        Contact(name="Carol White", phone="0722222222"),
     ]
-
+    
     for contact in contacts:
         test_db.add(contact)
-
-    # Commit changes
+    
     test_db.commit()
-
+    
     return test_db
 
-# File system fixtures
+
+# ============================================================================
+# FILE SYSTEM FIXTURES
+# ============================================================================
+
 @pytest.fixture(scope="function")
 def temp_dir():
     """
-    Provide a temporary directory that is cleaned up after the test
+    Provide a temporary directory that's cleaned up after the test.
     """
     with tempfile.TemporaryDirectory() as tmpdir:
         yield tmpdir
 
+
 @pytest.fixture(scope="function")
 def temp_file():
     """
-    Provide a temporary file that is cleaned up after the test
+    Provide a temporary file that's cleaned up after the test.
     """
     fd, path = tempfile.mkstemp()
-    os.close(fd)
-
     yield path
-
-    if os.path.exists(path):
+    try:
+        os.close(fd)
         os.unlink(path)
+    except Exception:
+        pass  # File might already be closed/deleted
 
-# Application Fixtures
+
+# ============================================================================
+# APPLICATION FIXTURES
+# ============================================================================
+
 @pytest.fixture(scope="session")
 def app_config():
     """
-    Provide test configuration dictionary for the application.
-
-    Scope: session (single instance for all tests)
+    Provide test configuration.
+    
+    Scope: session (created once for all tests)
     """
     return {
         "TESTING": True,
@@ -93,44 +112,34 @@ def app_config():
         "LOG_LEVEL": "DEBUG"
     }
 
-# Data fixtures
+
+# ============================================================================
+# DATA FIXTURES
+# ============================================================================
+
 @pytest.fixture
 def sample_contact():
+    """Provide a sample contact dictionary."""
     return {
         "name": "Test User",
-        "phone": "0700000000",
+        "phone": "0700000000"
     }
+
 
 @pytest.fixture
 def sample_contacts_list():
+    """Provide a list of sample contacts."""
     return [
         {"name": "User 1", "phone": "0700000001"},
         {"name": "User 2", "phone": "0700000002"},
         {"name": "User 3", "phone": "0700000003"},
     ]
 
-# Mock fixtures
-@pytest.fixture
-def mock_datetime(monkeypatch):
-    """
-    Mock the datetime module to return a fixed date.
-    """
-    from datetime import datetime
 
-    class MockDatetime:
-        @staticmethod
-        def now():
-            return datetime(2025, 1, 1, 12, 0, 0)
-        
-        @staticmethod
-        def utcnow():
-            return datetime(2025, 1, 1, 12, 0, 0)
+# ============================================================================
+# CLEANUP HOOKS
+# ============================================================================
 
-    monkeypatch.setattr("datetime.datetime", MockDatetime)
-    
-    return MockDatetime
-
-# Cleanup Hooks
 @pytest.fixture(autouse=True)
 def reset_logging():
     """
@@ -141,6 +150,6 @@ def reset_logging():
     import logging
     
     yield
-
+    
     # Cleanup
     logging.getLogger().handlers = []

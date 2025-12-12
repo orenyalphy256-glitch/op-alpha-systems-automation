@@ -9,8 +9,8 @@ from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 
-from autom8.core import log, DATA_DIR
-from autom8.tasks import TaskFactory, run_task
+from autom8.core import log
+from autom8.tasks import run_task
 from autom8.models import get_session, TaskLog, init_db
 from autom8.alerts import alert_task_failure
 

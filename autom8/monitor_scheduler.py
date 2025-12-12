@@ -7,7 +7,7 @@ Run: python -m autom8.monitor_scheduler
 
 import time
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 from autom8.scheduler import get_scheduled_jobs
 from autom8.models import get_session, TaskLog
 
