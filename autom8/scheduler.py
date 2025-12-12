@@ -253,7 +253,6 @@ __all__ = [
     "init_scheduler",
     "start_scheduler",
     "stop_scheduler",
-    "get_scheduler",
     "schedule_backup_job",
     "schedule_cleanup_job",
     "schedule_report_job",
