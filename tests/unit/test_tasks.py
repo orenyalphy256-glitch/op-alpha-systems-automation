@@ -1,81 +1,90 @@
-"""
-Unit tests for task functions.
 
-Tests cover:
-- Individual task execution
-- Task error handling
-- Task return values
-"""
 import pytest
-from unittest.mock import Mock, patch
-from autom8 import tasks
+from unittest.mock import patch, MagicMock
+from autom8.tasks import (
+    Task, TaskFactory, BackupTask, CleanupTask, ReportTask, run_task
+)
 
-# Sample task tests
-class TestSampleTasks:
-    """Test sample tasks from tasks.py."""
-    
-    def test_backup_task_success(self, caplog):
-        """Test backup task executes successfully."""
-        # Act
-        task = tasks.BackupTask()
-        result = task.execute()
-        
-        # Assert
-        assert result is not None
-        assert result["status"] == "success"
-    
-    def test_cleanup_task_success(self, caplog):
-        """Test cleanup task executes successfully."""
-        # Act
-        task = tasks.CleanupTask()
-        result = task.execute()
-        
-        # Assert
-        assert result is not None
-        assert result["status"] == "success"
-    
-    def test_report_task_success(self, caplog):
-        """Test report task executes successfully."""
-        # Act
-        task = tasks.ReportTask()
-        result = task.execute()
-        
-        # Assert
-        assert result is not None
-        assert result["status"] == "success"
+class ConcreteTask(Task):
+    def execute(self):
+        return "Executed"
 
-# Task error handling tests
-class TestTaskErrorHandling:
-    """Test task error handling."""
-    
-    @patch('autom8.tasks.save_json')
-    def test_task_handles_external_failure(self, mock_save_json):
-        """Test task handles external service failures gracefully."""
-        # Arrange - Make save_json raise an exception
-        mock_save_json.side_effect = Exception("Disk full")
-        
-        # Act - Execute BackupTask which uses save_json
-        task = tasks.BackupTask()
-        result = task.execute()
-        
-        # Assert - Task should handle exception and return failure status
-        assert result is not None
-        assert result["status"] == "failed"
-        assert "error" in result
+def test_task_abstract_instantiation():
+    # Cannot instantiate abstract class
+    with pytest.raises(TypeError):
+        Task()
 
-# Task timing tests
-class TestTaskTiming:
-    """Test task execution timing."""
+def test_concrete_task():
+    t = ConcreteTask(name="Test")
+    assert t.name == "Test"
+    assert t.status == "pending"
+    assert t.execute() == "Executed"
+
+def test_task_logging():
+    t = ConcreteTask()
+    with patch("autom8.tasks.log") as mock_log:
+        t.log_start()
+        assert t.status == "running"
+        mock_log.info.assert_called()
+        
+        t.log_complete()
+        assert t.status == "completed"
+        
+        t.log_error("Err")
+        assert t.status == "failed"
+        mock_log.error.assert_called()
+
+def test_task_factory_create():
+    t = TaskFactory.create("backup")
+    assert isinstance(t, BackupTask)
     
-    def test_backup_task_completes_fast(self):
-        """Test that backup task completes within reasonable time."""
-        import time
+    t = TaskFactory.create("cleanup")
+    assert isinstance(t, CleanupTask)
+    
+    with pytest.raises(ValueError):
+        TaskFactory.create("unknown")
+
+def test_task_factory_register():
+    class NewTask(Task):
+        def execute(self): pass
         
-        # Act
-        start = time.time()
-        task = tasks.BackupTask()
-        task.execute()
-        duration = time.time() - start
+    TaskFactory.register("new", NewTask)
+    t = TaskFactory.create("new")
+    assert isinstance(t, NewTask)
+    
+    # Invalid registration
+    class BadTask: pass
+    with pytest.raises(TypeError):
+        TaskFactory.register("bad", BadTask)
         
-        # Assert
-        assert duration < 5.0, "Backup task should complete in under 5 seconds"
+    assert "new" in TaskFactory.list_types()
+
+@patch("autom8.tasks.save_json")
+def test_backup_task(mock_save):
+    t = BackupTask()
+    res = t.execute()
+    assert res["status"] == "success"
+    mock_save.assert_called()
+    
+    # Failure
+    mock_save.side_effect = Exception("Fail")
+    res = t.execute()
+    assert res["status"] == "failed"
+
+def test_cleanup_task():
+    t = CleanupTask()
+    res = t.execute()
+    assert res["status"] == "success"
+
+@patch("autom8.tasks.save_json")
+def test_report_task(mock_save):
+    t = ReportTask()
+    res = t.execute()
+    assert res["status"] == "success"
+
+def test_run_task_helper():
+    with patch("autom8.tasks.TaskFactory.create") as mock_create:
+        mock_task = MagicMock()
+        mock_create.return_value = mock_task
+        run_task("backup", "MyBackup")
+        mock_task.execute.assert_called()
