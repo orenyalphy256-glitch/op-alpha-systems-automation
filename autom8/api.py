@@ -95,6 +95,32 @@ def internal_error(error):
 
 
 # Helper Functions
+def _validate_name(name):
+    if not isinstance(name, str) or not name.strip():
+        return False, "Name must be a non-empty string"
+    if len(name) > 100:
+        return False, "Name must be 100 characters or less"
+    return True, None
+
+
+def _validate_phone(phone):
+    if not isinstance(phone, str) or not phone.strip():
+        return False, "Phone must be a non-empty string"
+    if len(phone) > 20:
+        return False, "Phone must be 20 characters or less"
+    return True, None
+
+
+def _validate_email(email):
+    if not isinstance(email, str):
+        return False, "Email must be a string"
+    if len(email) > 100:
+        return False, "Email must be 100 characters or less"
+    if "@" not in email:
+        return False, "Email must contain @ symbol"
+    return True, None
+
+
 def validate_contact_data(data, required_fields=None):
     """Validate contact data from request."""
     if not data:
@@ -107,26 +133,21 @@ def validate_contact_data(data, required_fields=None):
 
     """Validate contact name from request."""
     if "name" in data:
-        if not isinstance(data["name"], str) or not data["name"].strip():
-            return False, "Name must be a non-empty string"
-        if len(data["name"]) > 100:
-            return False, "Name must be 100 characters or less"
+        valid, msg = _validate_name(data["name"])
+        if not valid:
+            return valid, msg
 
     """Validate contact phone number."""
     if "phone" in data:
-        if not isinstance(data["phone"], str) or not data["phone"].strip():
-            return False, "Phone must be a non-empty string"
-        if len(data["phone"]) > 20:
-            return False, "Phone must be 20 characters or less"
+        valid, msg = _validate_phone(data["phone"])
+        if not valid:
+            return valid, msg
 
     """Validate email (if provided)."""
     if "email" in data and data["email"]:
-        if not isinstance(data["email"], str):
-            return False, "Email must be a string"
-        if len(data["email"]) > 100:
-            return False, "Email must be 100 characters or less"
-        if "@" not in data["email"]:
-            return False, "Email must contain @ symbol"
+        valid, msg = _validate_email(data["email"])
+        if not valid:
+            return valid, msg
 
     return True, None
 
@@ -492,7 +513,9 @@ def index():
                         "get_system_metrics_endpoint": "GET /api/v1/metrics/system",
                         "get_error_logs": "GET /api/v1/logs/errors",
                     },
-                    "documentation": "https://github.com/orenyalphy256-glitch/op-alpha-systems-automation",
+                    "documentation": (
+                        "https://github.com/orenyalphy256-glitch/op-alpha-systems-automation"
+                    ),
                 },
             }
         ),
