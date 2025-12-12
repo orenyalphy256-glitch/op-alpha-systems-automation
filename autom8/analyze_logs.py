@@ -18,7 +18,7 @@ def parse_json_logs(log_file="autom8_json.log", hours=24):
         print(f"JSON log file not found: {log_path}")
         return []
 
-    cutoff_time = datetime.utcnow() - timedelta(hours=hours)
+    cutoff_time = datetime.now() - timedelta(hours=hours)
     entries = []
 
     with open(log_path, "r", encoding="utf-8") as f:

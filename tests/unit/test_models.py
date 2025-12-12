@@ -143,7 +143,7 @@ class TestContactModel:
         # Assert
         assert contact.created_at is not None
         assert isinstance(contact.created_at, datetime)
-        assert contact.created_at <= datetime.utcnow()
+        assert contact.created_at <= datetime.now()
 
 # Edge cases and validation
 class TestContactValidation:

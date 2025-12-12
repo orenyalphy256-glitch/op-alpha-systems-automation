@@ -27,7 +27,7 @@ def execute_task_with_logging(task_type, task_name=None):
         task_type=task_type,
         task_name=task_name or task_type,
         status="running",
-        started_at=datetime.utcnow(),
+        started_at=datetime.now(),
     )
 
     try:
@@ -42,7 +42,7 @@ def execute_task_with_logging(task_type, task_name=None):
 
         # Update log entry
         task_log.status = "completed"
-        task_log.completed_at = datetime.utcnow()
+        task_log.completed_at = datetime.now()
         task_log.result_data = str(result)[:500]  # Truncate if too huge
 
         session.commit()
@@ -53,7 +53,7 @@ def execute_task_with_logging(task_type, task_name=None):
 
     except Exception as e:
         task_log.status = "failed"
-        task_log.completed_at = datetime.utcnow()
+        task_log.completed_at = datetime.now()
         task_log.error_message = str(e)[:500]
 
         session.commit()
@@ -120,7 +120,7 @@ def schedule_backup_job():
         id="backup_job",
         name="Daily Backup Task",
         replace_existing=True,
-        next_run_time=datetime.utcnow(),  # Run immediately on first start
+        next_run_time=datetime.now(),  # Run immediately on first start
     )
 
     log.info("Backup job scheduled successfully")

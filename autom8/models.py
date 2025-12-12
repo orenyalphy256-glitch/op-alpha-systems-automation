@@ -45,8 +45,8 @@ class Contact(Base):
     email = Column(String(100), nullable=True)
 
     # Timestamps (auto-managed)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
 
     def __repr__(self):
         """String representation for debugging."""
@@ -70,7 +70,7 @@ class TaskLog(Base):
     task_type = Column(String(50), nullable=False, index=True)
     task_name = Column(String(100), nullable=True)
     status = Column(String(20), nullable=False)
-    started_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    started_at = Column(DateTime, default=datetime.now, nullable=False)
     completed_at = Column(DateTime, nullable=True)
     result_data = Column(String(500), nullable=True)
     error_message = Column(String(500), nullable=True)

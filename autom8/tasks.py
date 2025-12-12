@@ -22,7 +22,7 @@ class Task(ABC):
             name (str): Human-readable task name
         """
         self.name = name or self.__class__.__name__
-        self.created_at = datetime.utcnow()
+        self.created_at = datetime.now()
         self.status = "pending"
 
     @abstractmethod
@@ -53,7 +53,7 @@ class BackupTask(Task):
         self.log_start()
         try:
             # Simulate backup operation
-            timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             backup_file = DATA_DIR / f"backup_{timestamp}.json"
 
             # Create backup data
@@ -106,7 +106,7 @@ class ReportTask(Task):
         self.log_start()
         try:
             # Simulate report creation
-            timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             report_file = DATA_DIR / f"report_{timestamp}.json"
 
             # Generate report data

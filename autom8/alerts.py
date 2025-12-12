@@ -54,7 +54,7 @@ def alert_task_failure(task_type, error_message):
     <body>
         <h2>Task Execution Failed</h2>
         <p><strong>Task:</strong> {task_type}</p>
-        <p><strong>Time:</strong> {datetime.utc.now().isoformat()}Z</p>
+        <p><strong>Time:</strong> {datetime.now().isoformat()}Z</p>
         <p><strong>Error:</strong></p>
         <pre>{error_message}</pre>
         <hr>
@@ -72,7 +72,7 @@ def alert_system_issue(issue_type, details):
     <body>
         <h2>System Issue Detected</h2>
         <p><strong>Issue Type:</strong> {issue_type}</p>
-        <p><strong>Time:</strong> {datetime.utcnow().isoformat()}Z</p>
+        <p><strong>Time:</strong> {datetime.now().isoformat()}Z</p>
         <p><strong>Details:</strong></p>
         <pre>{details}</pre>
         <hr>

@@ -17,7 +17,7 @@ def get_system_metrics():
         disk = psutil.disk_usage("/")
 
         return {
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.now().isoformat() + "Z",
             "cpu": {"percent": cpu_percent, "count": psutil.cpu_count()},
             "memory": {
                 "total_mb": memory.total // (1024 * 1024),
@@ -52,7 +52,7 @@ def get_task_metrics():
         recent = session.query(TaskLog).order_by(TaskLog.started_at.desc()).limit(10).all()
 
         return {
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.now().isoformat() + "Z",
             "total_executions": total,
             "completed": completed,
             "failed": failed,
@@ -76,7 +76,7 @@ def get_database_metrics():
         tasklog_count = session.query(TaskLog).count()
 
         return {
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.now().isoformat() + "Z",
             "contacts": contact_count,
             "task_logs": tasklog_count,
         }
