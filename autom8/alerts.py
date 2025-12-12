@@ -1,6 +1,7 @@
 """
 alerts.py - Alert System
 Sends email notifications on critical events
+in the Autom8 system.
 """
 
 import os
