@@ -118,7 +118,7 @@ isort autom8/ --profile black    # Sort imports
 ✓ Generate coverage report
 ```
 
-**Quality Gate:** 
+**Quality Gate:**
 - ✅ All tests must pass
 - ✅ Code coverage ≥ 80%
 - ❌ **Pipeline STOPS if tests fail**
