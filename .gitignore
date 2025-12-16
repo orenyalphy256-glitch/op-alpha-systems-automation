@@ -49,6 +49,7 @@ project-tree.txt
 celerybeat-schedule
 instance/
 node_modules/
+data/*.db
 
 
 # Testing & Coverage
@@ -76,7 +77,32 @@ security_report.*
 .env
 .env.local
 .env.*.local
+.env.*
+*.env
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Secrets and Credentials
+secrets/
+credentials/
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+
+# Docker
+.dockerignore
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Backups 
+*.bak
+backup/
+*.backup
