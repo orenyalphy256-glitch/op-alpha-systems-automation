@@ -3,32 +3,68 @@ api.py - Flask REST API for Contact Management
 Implements: RESTful endpoints using SQLAlchemy ORM
 """
 
+import os
+
 from flask import Flask, abort, jsonify, request
+from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from sqlalchemy.exc import IntegrityError
 
-from autom8.core import LOGS_DIR, log
+from autom8.core import LOGS_DIR, Config, log
 from autom8.metrics import get_all_metrics, get_system_metrics
 from autom8.models import (
+    Contact,
+    SessionLocal,
     TaskLog,
-    create_contact,
-    delete_contact,
     get_contact_by_id,
     get_contact_by_phone,
     get_session,
     init_db,
-    list_contacts,
-    search_contacts,
     update_contact,
 )
 from autom8.scheduler import get_scheduled_jobs, pause_job, resume_job, run_job_now
+from autom8.security import (
+    SecurityConfig,
+    add_security_headers,
+    generate_token,
+    log_security_event,
+    sanitize_input,
+    token_required,
+    validate_phone,
+)
 
 # Flask Application Setup
 app = Flask(__name__)
-app.config["JSON_SORT_KEYS"] = False  # Preserve key order in JSON responses
+
+# Configuration from the environment
+app.config["SECRET_KEY"] = Config.SECRET_KEY
+app.config["DEBUG"] = Config.DEBUG
+
+# CORS Configuration
+if SecurityConfig.RATE_LIMIT_ENABLED:
+    cors_origins = os.getenv("CORS_ORIGINS", "*").split(",")
+    CORS(app, origins=cors_origins)
 
 # Initialize database on startup
 init_db()
 log.info("Flask API initialized - database ready")
+
+# Rate Limiting
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=[SecurityConfig.RATE_LIMIT_DEFAULT],
+    storage_uri=os.getenv("RATE_LIMIT_STORAGE", "memory://"),
+    enabled=SecurityConfig.RATE_LIMIT_ENABLED,
+)
+
+
+# Security Headers
+@app.after_request
+def after_request(response):
+    """Add security headers to all responses."""
+    return add_security_headers(response)
 
 
 # Error Handlers
@@ -45,6 +81,18 @@ def bad_request(error):
         ),
         400,
     )
+
+
+@app.errorhandler(401)
+def unauthorized_handler(e):
+    """Handle unauthorized access."""
+    return jsonify({"error": "Unauthorized", "message": "Authentication required"}), 401
+
+
+@app.errorhandler(403)
+def forbidden_handler(e):
+    """Handle forbidden access."""
+    return jsonify({"error": "Forbidden", "message": "Access denied"}), 403
 
 
 @app.errorhandler(404)
@@ -78,6 +126,26 @@ def conflict(error):
             }
         ),
         409,
+    )
+
+
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    """Handle rate limit exceeded."""
+    log_security_event(
+        "rate_limit_exceeded",
+        {"endpoint": request.endpoint, "limit": str(e.description)},
+        "WARNING",
+    )
+
+    return (
+        jsonify(
+            {
+                "error": "Rate limit exceeded",
+                "message": "Too many requests. Please try again later.",
+            }
+        ),
+        429,
     )
 
 
@@ -150,106 +218,177 @@ def validate_contact_data(data, required_fields=None):
 
 # API Routes - Contacts
 @app.route("/api/v1/health", methods=["GET"])
-def health_check():
-    """
-    Health check endpoint.
+@limiter.exempt  # No rate limit on health check
+def health():
+    """Health check endpoint."""
+    return jsonify(
+        {
+            "status": "healthy",
+            "service": Config.APP_NAME,
+            "version": Config.APP_VERSION,
+            "environment": Config.ENVIRONMENT,
+        }
+    )
 
-    Returns:
-        JSON: API status
+
+@app.route("/api/v1/info", methods=["GET"])
+def info():
+    """API information endpoint."""
+    return jsonify(
+        {
+            "name": Config.APP_NAME,
+            "version": Config.APP_VERSION,
+            "environment": Config.ENVIRONMENT,
+            "security": {
+                "rate_limiting": SecurityConfig.RATE_LIMIT_ENABLED,
+                "cors_enabled": True,
+                "https_only": False,  # Update if using HTTPS
+            },
+            "documentation": "https://github.com/orenyalphy256-glitch/op-alpha-systems-automation",
+        }
+    )
+
+
+@app.route("/api/v1/auth/login", methods=["POST"])
+@limiter.limit("5 per minute")  # Strict rate limit on login
+def login():
     """
-    return jsonify({"status": "healthy", "service": "autom8-api", "version": "1.0"}), 200
+    Demo login endpoint.
+    """
+    data = request.get_json()
+
+    username = sanitize_input(data.get("username", ""))
+    password = data.get("password", "")
+
+    if not username or not password:
+        log_security_event(
+            "login_failed", {"username": username, "reason": "missing_credentials"}, "WARNING"
+        )
+        return jsonify({"error": "Username and password required"}), 400
+
+    # DEMO: In production, verify against database
+    if username == "demo" and password == "password123":
+        token = generate_token(username, {"role": "user"})
+
+        log_security_event("login_success", {"username": username}, "INFO")
+
+        return jsonify({"token": token, "username": username, "message": "Login successful"})
+
+    log_security_event(
+        "login_failed", {"username": username, "reason": "invalid_credentials"}, "WARNING"
+    )
+
+    return jsonify({"error": "Invalid credentials"}), 401
+
+
+@app.route("/api/v1/auth/protected", methods=["GET"])
+@token_required  # Requires valid JWT token
+def protected(current_user):
+    """
+    Demo protected endpoint.
+    """
+    return jsonify(
+        {
+            "message": "Access granted to protected resource",
+            "user": current_user.get("user_id"),
+            "role": current_user.get("role"),
+        }
+    )
 
 
 @app.route("/api/v1/contacts", methods=["GET"])
+@limiter.limit("100 per minute")
 def get_contacts():
-    session = get_session()
-
+    """Get all contacts."""
+    session = SessionLocal()
     try:
-        # Get query parameters
-        limit = request.args.get("limit", 100, type=int)
-        offset = request.args.get("offset", 0, type=int)
-        search_query = request.args.get("search", None, type=str)
-
-        # Validate pagination params
-        if limit < 1 or limit > 1000:
-            abort(400, description="Limit must be between 1 and 1000")
-        if offset < 0:
-            abort(400, description="Offset must be non-negative")
-
-        # Execute query
-        if search_query:
-            contacts = search_contacts(session, search_query)
-        else:
-            contacts = list_contacts(session, limit=limit, offset=offset)
-
-        # Serialize to dict
-        result = [contact.to_dict() for contact in contacts]
-
-        log.info(f"Listed {len(result)} contacts")
-
-        return (
-            jsonify({"count": len(result), "limit": limit, "offset": offset, "contacts": result}),
-            200,
+        contacts = session.query(Contact).all()
+        return jsonify(
+            [
+                {
+                    "id": c.id,
+                    "name": c.name,
+                    "phone": c.phone,
+                    "created_at": c.created_at.isoformat() if c.created_at else None,
+                }
+                for c in contacts
+            ]
         )
-
-    except Exception as e:
-        log.error(f"Error listing contacts: {e}")
-        abort(500)
-
     finally:
         session.close()
 
 
 @app.route("/api/v1/contacts/<int:contact_id>", methods=["GET"])
 def get_contact(contact_id):
-    session = get_session()
-
+    """Get specific contact."""
+    session = SessionLocal()
     try:
-        contact = get_contact_by_id(session, contact_id)
-
+        contact = session.query(Contact).filter_by(id=contact_id).first()
         if not contact:
-            abort(404, description=f"Contact with ID {contact_id} not found")
+            return jsonify({"error": "Contact not found"}), 404
 
-        log.info(f"Retrieved contact ID {contact_id}")
-
-        return jsonify(contact.to_dict()), 200
-
+        return jsonify(
+            {
+                "id": contact.id,
+                "name": contact.name,
+                "phone": contact.phone,
+                "created_at": contact.created_at.isoformat(),
+            }
+        )
     finally:
         session.close()
 
 
 @app.route("/api/v1/contacts", methods=["POST"])
-def create_contact_endpoint():
-    session = get_session()
+@limiter.limit("20 per minute")  # Stricter limit on POST
+def create_contact():
+    """Create new contact with validation."""
+    data = request.get_json()
 
-    try:
-        # Get JSON data
-        data = request.get_json()
+    # Sanitize inputs
+    name = sanitize_input(data.get("name", ""))
+    phone = sanitize_input(data.get("phone", ""))
 
-        # Validate the data
-        is_valid, error_msg = validate_contact_data(data, required_fields=["name", "phone"])
-        if not is_valid:
-            abort(400, description=error_msg)
+    # Validate
+    if not name or not phone:
+        return jsonify({"error": "Name and phone required"}), 400
 
-        # Check if phone already exists
-        existing = get_contact_by_phone(session, data["phone"])
-        if existing:
-            abort(409, description=f"Contact with phone {data['phone']} already exists")
-
-        # Create contact
-        contact = create_contact(
-            session, name=data["name"], phone=data["phone"], email=data.get("email")
+    if not validate_phone(phone):
+        log_security_event(
+            "invalid_input",
+            {"field": "phone", "value": phone, "endpoint": "/api/v1/contacts"},
+            "WARNING",
         )
+        return jsonify({"error": "Invalid phone number format"}), 400
 
-        log.info(f"Created contact ID {contact.id}: {contact.name}")
+    # Create contact
+    session = SessionLocal()
+    try:
+        contact = Contact(name=name, phone=phone)
+        session.add(contact)
+        session.commit()
 
-        return jsonify(contact.to_dict()), 201
+        log.info(f"Contact created: {name}")
 
-    except IntegrityError as e:
+        return (
+            jsonify(
+                {
+                    "id": contact.id,
+                    "name": contact.name,
+                    "phone": contact.phone,
+                    "created_at": contact.created_at.isoformat(),
+                }
+            ),
+            201,
+        )
+    except IntegrityError:
+        session.rollback()
+        log.warning(f"Attempt to create duplicate contact: {name} ({phone})")
+        return jsonify({"error": "Contact with this phone number already exists"}), 409
+    except Exception as e:
         session.rollback()
         log.error(f"Error creating contact: {e}")
-        abort(500)
-
+        return jsonify({"error": "Failed to create contact"}), 500
     finally:
         session.close()
 
@@ -290,35 +429,41 @@ def update_contact_endpoint(contact_id):
 
 
 @app.route("/api/v1/contacts/<int:contact_id>", methods=["DELETE"])
-def delete_contact_endpoint(contact_id):
-    session = get_session()
-
+@limiter.limit("10 per minute")
+def delete_contact(contact_id):
+    """Delete contact."""
+    session = SessionLocal()
     try:
-        existing = get_contact_by_id(session, contact_id)
-        if not existing:
-            abort(404, description=f"Contact with ID {contact_id} not found")
+        contact = session.query(Contact).filter_by(id=contact_id).first()
+        if not contact:
+            return jsonify({"error": "Contact not found"}), 404
 
-        deleted = delete_contact(session, contact_id)
+        session.delete(contact)
+        session.commit()
 
-        if deleted:
-            log.info(f"Deleted contact ID {contact_id}")
-            return "", 204
-        else:
-            abort(500)
+        log.info(f"Contact deleted: ID {contact_id}")
 
+        return jsonify({"message": "Contact deleted"}), 200
+    except Exception as e:
+        session.rollback()
+        log.error(f"Error deleting contact: {e}")
+        return jsonify({"error": "Failed to delete contact"}), 500
     finally:
         session.close()
 
 
 # Scheduler management endpoints
 @app.route("/api/v1/scheduler/status", methods=["GET"])
-def scheduler_status():
-    from autom8.scheduler import scheduler
+def scheduler_status(scheduler_instance=None):
+    if scheduler_instance:
+        sched = scheduler_instance
+    else:
+        from autom8.scheduler import scheduler as sched
 
-    if scheduler is None:
+    if sched is None:
         return jsonify({"running": False, "jobs": []}), 200
 
-    return jsonify({"running": scheduler.running, "jobs": get_scheduled_jobs()}), 200
+    return jsonify({"running": sched.running, "jobs": get_scheduled_jobs()}), 200
 
 
 @app.route("/api/v1/scheduler/jobs/<job_id>/run", methods=["POST"])
@@ -519,5 +664,11 @@ def index():
     )
 
 
-# Module Exports
-__all__ = ["app"]
+# MAIN
+if __name__ == "__main__":
+    log.info(f"Starting {Config.APP_NAME} API v{Config.APP_VERSION}")
+    log.info(f"Environment: {Config.ENVIRONMENT}")
+    log.info(f"Debug mode: {Config.DEBUG}")
+    log.info(f"Rate limiting: {SecurityConfig.RATE_LIMIT_ENABLED}")
+
+    app.run(host=Config.API_HOST, port=Config.API_PORT, debug=Config.DEBUG)

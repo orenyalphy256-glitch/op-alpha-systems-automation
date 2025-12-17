@@ -63,7 +63,7 @@ def main():
     log.info("Starting scheduler...")
     start_scheduler()
     print("Scheduler started. Press Ctrl+C to stop...")
-    print("Monitoring: Check 99-Logs/system.log for job execution logs")
+    print("Monitoring: Check logs/system.log for job execution logs")
     print(" Press Ctrl+C to stop\n")
 
     if test_mode:
