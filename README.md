@@ -2,15 +2,13 @@
 
 <div align="center">
 
-![Python Version](https://img.shields.io/badge/python-3.11%2B-blue?style=for-the-badge&logo=python&logoColor=white)
-![Flask](https://img.shields.io/badge/flask-3.0%2B-black?style=for-the-badge&logo=flask&logoColor=white)
+![Python Version](https://img.shields.io/badge/python-3.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/flask-3.0%2B-000000?style=for-the-badge&logo=flask&logoColor=white)
 ![Docker](https://img.shields.io/badge/docker-ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)
+![Security](https://img.shields.io/badge/security-hardened-success?style=for-the-badge&logo=dependabot&logoColor=white)
 ![Test Coverage](https://img.shields.io/badge/coverage-80%25%2B-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)
-![Build Status](https://img.shields.io/badge/build-passing-success?style=for-the-badge&logo=githubactions&logoColor=white)
+![CI/CD](https://img.shields.io/badge/CI%2FCD-passing-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
 ![Code Style](https://img.shields.io/badge/code%20style-black-000000?style=for-the-badge)
-![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?style=for-the-badge&logo=pre-commit&logoColor=white)
-![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
 
 </div>
 
@@ -18,7 +16,7 @@
 
 **Developer:** Alphonce Liguori Oreny
 **Project Type:** Systems Management & Automation
-**Tech Stack:** Python 3.14, Flask, SQLAlchemy, APScheduler, Docker
+**Tech Stack:** Python 3.11+, Flask, SQLAlchemy, APScheduler, Docker
 **Status:** Active Development
 
 ## 📋 Project Overview
@@ -39,8 +37,22 @@ autom8/
 ├── core.py        # Shared utilities, config, logging
 ├── models.py      # SQLAlchemy ORM models
 ├── api.py         # Flask REST API endpoints
-└── scheduler.py   # APScheduler background jobs
+├── scheduler.py   # APScheduler background jobs
+└── security.py    # Security, JWT, & Encryption layer
 ```
+
+## 🛡️ Security Implementation
+
+Autom8 implements a multi-layered security strategy to ensure system integrity and data protection:
+
+- **Authentication:** JWT-based token authentication for all sensitive API endpoints.
+- **Data Protection:** Field-level encryption using AES-256 (Fernet) for sensitive data at rest.
+- **Identity:** Secure password hashing using PBKDF2 with SHA-256 salt.
+- **API Hardening:** 
+  - Automated security header injection (HSTS, CSP, X-Frame-Options).
+  - Robust input sanitization and parameter validation.
+  - IP-based rate limiting to prevent brute-force attacks.
+- **Audit Logging:** Comprehensive security event logging for monitoring and incident response.
 
 ## 🚀 Quick Start
 
@@ -383,6 +395,15 @@ save_json("output.json", data)
 | Build | Docker image creation | ✅ |
 | Security | Bandit + pip-audit | ✅ |
 | Deploy | Staging deployment | ✅ |
+
+### Phase 10: Security & Hardening
+
+- Implemented JWT token authentication & authorization
+- Added Fernet field-level encryption for sensitive data
+- Integrated PBKDF2 password hashing
+- Added automated security headers and input sanitization
+- Implemented rate limiting and security audit logging
+- Verified with comprehensive security test suite
 
 ## 📄 License
 
