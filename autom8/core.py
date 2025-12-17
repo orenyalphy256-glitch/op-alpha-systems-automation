@@ -5,11 +5,18 @@ Purpose: Centralize common functions used across the application
 
 import json
 import logging
+import os
+import sys
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
-# Directory Configuration
+# LOAD ENVIRONMENT VARIABLES
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+env_path = Path(__file__).parent / ".env"
+load_dotenv(dotenv_path=env_path)
 
 # Get absolute path to autom8 package directory
 BASE_DIR = Path(__file__).parent.absolute()
@@ -22,12 +29,28 @@ DATA_DIR = PROJECT_ROOT / "data"
 DATA_DIR.mkdir(exist_ok=True)
 
 # Logs directory
-LOGS_DIR = PROJECT_ROOT.parent / "99-Logs"
+LOGS_DIR = PROJECT_ROOT / "logs"
 LOGS_DIR.mkdir(exist_ok=True)
 
+
+# Configuration from the environment
+class Config:
+    """Application configuration from environment variables."""
+
+    APP_NAME = os.getenv("APP_NAME", "Autom8")
+    APP_VERSION = os.getenv("APP_VERSION", "1.0.0")
+    ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
+    DEBUG = os.getenv("DEBUG", "False") == "True"
+    SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
+    API_HOST = os.getenv("API_HOST", "127.0.0.1")
+    API_PORT = int(os.getenv("API_PORT", "5000"))
+    DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DATA_DIR}/system.db")
+    LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+    LOG_FILE = LOGS_DIR / os.getenv("LOG_FILE", "app.log")
+    TIMEZONE = os.getenv("TIMEZONE", "UTC")
+
+
 # JSON File Operations
-
-
 def load_json(filepath):
     filepath = Path(filepath)
     if not filepath.exists():
@@ -114,7 +137,7 @@ class ContextLogger:
 # Logging Configuration
 def setup_logging(
     app_name="autom8",
-    log_level=logging.INFO,
+    log_level=getattr(logging, Config.LOG_LEVEL),
     console_output=True,
     json_logs=True,
     text_logs=True,
@@ -132,7 +155,7 @@ def setup_logging(
 
     # Console handler
     if console_output:
-        console_handler = logging.StreamHandler()
+        console_handler = logging.StreamHandler(sys.stdout)
         console_handler.setLevel(log_level)
         console_formatter = logging.Formatter(
             fmt="%(asctime)s [%(levelname)s] %(name)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
@@ -196,7 +219,9 @@ def setup_logging(
 
 
 # Initialize logging on module import
-log = setup_logging()
+log = logging.getLogger(__name__)
+log.info(f"Loaded environment: {Config.ENVIRONMENT}")
+log.info(f"Debug mode: {Config.DEBUG}")
 
 # Module-Level Exports
 __all__ = [

@@ -99,6 +99,13 @@ class TestJSONOperations:
 class TestLogging:
     """Test logging functionality."""
 
+    @pytest.fixture(autouse=True)
+    def setup_logging_for_test(self):
+        """Ensure propagation is enabled for capture."""
+        core.log.propagate = True
+        yield
+        core.log.propagate = False
+
     def test_logger_exists(self):
         """Test that logger is properly initialized."""
         # Act
@@ -112,6 +119,7 @@ class TestLogging:
         """Test logging info message."""
         # Arrange
         message = "Test info message"
+        caplog.set_level(logging.INFO)
 
         # Act
         core.log.info(message)
@@ -124,6 +132,7 @@ class TestLogging:
         """Test logging error message."""
         # Arrange
         message = "Test error message"
+        caplog.set_level(logging.ERROR)
 
         # Act
         core.log.error(message)
@@ -136,6 +145,7 @@ class TestLogging:
         """Test logging warning message."""
         # Arrange
         message = "Test warning message"
+        caplog.set_level(logging.WARNING)
 
         # Act
         core.log.warning(message)

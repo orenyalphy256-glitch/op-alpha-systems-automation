@@ -1,71 +1,18 @@
-# .dockerignore - Files to exclude from the Docker build
-
-# Virtual environment
-venv/
-env/
-ENV/
-
-# Python cache
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-
-# IDE
-.vscode/
-.idea/
-*.swp
-
-# Git
-.git/
-.gitignore
-
-# Logs
-99-Logs/
-*.log
-
-# Data files (we'll use volumes)
-data/
-*.db
-*.sqlite
-
-# Test files
-.pytest_cache/
-htmlcov/
-.coverage
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Documentation
-*.md
-docs/
-
-# Other
+__pycache__
+venv
+.git
 .env
-*.txt
-!requirements.txt
-
-# Security & Linting Reports
-bandit*.json
-bandit*.html
-security_report.*
-flake-report/
-.ruff_cache/
-.mypy_cache/
-.flake8
-.bandit
-.coveragerc
-
-# Windows Scripts
-*.bat
-
-# Docker orchestration files
-docker-compose*.yml
-Dockerfile
-.dockerignore
-
-# Coverage reports
-coverage.xml
-coverage_report.txt
+.env.*
+logs
+coverage
+*.pyc
+*.pyo
+.pytest_cache
+.coverage
+htmlcov
+dist
+build
+src
+autom8.egg-info
+.idea
+.vscode

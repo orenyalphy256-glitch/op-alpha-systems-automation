@@ -29,7 +29,7 @@ def main():
                     print(f"  {key}: {value}")
 
     print("\n" + "=" * 60)
-    print("All tasks completed. Check 99-Logs/system.log for details.")
+    print("All tasks completed. Check logs/system.log for details.")
     print("=" * 60)
 
 

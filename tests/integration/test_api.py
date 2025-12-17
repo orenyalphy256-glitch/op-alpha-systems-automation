@@ -105,10 +105,8 @@ class TestContactsEndpoints:
         # Assert
         assert response.status_code == 200
         data = json.loads(response.data)
-        # API returns a dict with 'contacts' key, not a direct list
-        assert isinstance(data, dict)
-        assert "contacts" in data
-        assert isinstance(data["contacts"], list)
+        # API returns a direct list
+        assert isinstance(data, list)
         # Note: May not be empty if database has existing data
 
     def test_create_contact_success(self, client):

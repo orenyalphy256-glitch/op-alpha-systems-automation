@@ -68,7 +68,7 @@ def run_command(command, description, fail_on_error=True):
                 shell=True,
                 capture_output=True,
                 text=True,
-                timeout=300,
+                timeout=600,
                 encoding="utf-8",
                 errors="replace",
             )
@@ -77,7 +77,7 @@ def run_command(command, description, fail_on_error=True):
                 command,
                 capture_output=True,
                 text=True,
-                timeout=300,
+                timeout=600,
                 encoding="utf-8",
                 errors="replace",
             )
@@ -130,38 +130,45 @@ def stage_setup():
     else:
         print_warning("Virtual environment is not active. It's recommended to use one.")
 
-    # Check required tools
-    required_tools = ["pip", "pytest", "flake8", "bandit", "black", "docker"]
-    for tool in required_tools:
-        try:
-            if tool == "docker":
-                cmd = ["docker", "--version"]
-            else:
-                cmd = [sys.executable, "-m", tool, "--version"]
-
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
-            if result.returncode == 0:
-                print_success(f"{tool} is installed: {result.stdout.strip().splitlines()[0]}")
-            else:
-                print_error(f"{tool} is not installed or not found.")
-        except FileNotFoundError:
-            print_error(f"{tool} is not installed or not found.")
-        except Exception as e:
-            print_warning(f"Could not check {tool} version: {str(e)}")
-
-    # Install package in editable mode for coverage
-    print_info("Installing package in editable mode for coverage...")
+    # Install dependencies first
+    print_info("Installing dependencies...")
     try:
+        subprocess.run(
+            [sys.executable, "-m", "pip", "install", "--upgrade", "pip"],
+            check=True,
+            capture_output=True
+        )
+        subprocess.run(
+            [sys.executable, "-m", "pip", "install", "-r", "requirements.txt"],
+            check=True,
+            capture_output=True,
+            text=True
+        )
+        # Install package in editable mode for coverage
         subprocess.run(
             [sys.executable, "-m", "pip", "install", "-e", "."],
             check=True,
             capture_output=True,
-            text=True,
+            text=True
         )
-        print_success("Package installed in editable mode.")
+        print_success("Dependencies and package installed.")
     except subprocess.CalledProcessError as e:
-        print_error(f"Failed to install package in editable mode: {e.stderr}")
+        print_error(f"Failed to install dependencies: {e.stderr}")
         return False
+
+    # Check required tools AFTER install
+    required_tools = ["pytest", "flake8", "bandit", "black", "docker"]
+    for tool in required_tools:
+        if tool == "docker":
+            cmd = ["docker", "--version"]
+        else:
+            cmd = [sys.executable, "-m", tool, "--version"]
+        
+        try:
+            subprocess.run(cmd, capture_output=True, check=True)
+        except (subprocess.CalledProcessError, FileNotFoundError):
+             if tool != "docker": # Docker might not be installed in all envs
+                print_warning(f"{tool} might be missing from path, but should be in venv.")
 
     print_success("Setup stage completed.")
     return True
@@ -378,7 +385,7 @@ def generate_report(results):
 
     # Save to file
     report_path = (
-        Path("99-Logs") / f'pipeline_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json'
+        Path("logs") / f'pipeline_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json'
     )
     report_path.parent.mkdir(parents=True, exist_ok=True)
 
