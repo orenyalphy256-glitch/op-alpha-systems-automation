@@ -1,6 +1,5 @@
 """
 Setup configuration for autom8 package.
-Agent ALO - Batch 5
 """
 
 from setuptools import find_packages, setup
@@ -9,8 +8,8 @@ setup(
     name="autom8",
     version="1.0.0",
     description="Autom8 Systems Automation Platform",
-    author="Agent ALO",
-    author_email="orenyalphy256.com",
+    author="Autom8 Engineering",
+    author_email="orenyalphy256@gmail.com",
     packages=find_packages(exclude=["tests", "tests.*"]),
     python_requires=">=3.11",
     install_requires=[
@@ -19,6 +18,7 @@ setup(
         "apscheduler>=3.10.4",
         "requests>=2.31.0",
         "psutil>=5.9.6",
+        "cachetools>=5.5.0",
     ],
     extras_require={
         "dev": [
@@ -42,6 +42,5 @@ setup(
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "Programming Language :: Python :: 3.11",
-        "Programming Language :: Python :: 3.14",
     ],
 )

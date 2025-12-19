@@ -5,16 +5,21 @@ Collects: CPU, disk usage, task statistics
 
 from datetime import datetime
 
-import psutil
-
 from autom8.core import log
 from autom8.models import Contact, TaskLog, get_session
+from autom8.performance import cached, timed_cache
+
+# Initialize psutil
+import psutil
+
+psutil.cpu_percent(interval=None)
 
 
 # System metrics
+@cached(cache_obj=timed_cache)
 def get_system_metrics():
     try:
-        cpu_percent = psutil.cpu_percent(interval=1)
+        cpu_percent = psutil.cpu_percent(interval=None)
         memory = psutil.virtual_memory()
         disk = psutil.disk_usage("/")
 
@@ -40,6 +45,7 @@ def get_system_metrics():
 
 
 # Application metrics
+@cached(cache_obj=timed_cache)
 def get_task_metrics():
     session = get_session()
     try:
@@ -70,6 +76,7 @@ def get_task_metrics():
 
 
 # Database metrics
+@cached(cache_obj=timed_cache)
 def get_database_metrics():
     """Collect database statistics."""
     session = get_session()

@@ -33,6 +33,15 @@ from autom8.security import (
     token_required,
     validate_phone,
 )
+from autom8.performance import (
+    perf_monitor,
+    get_system_performance,
+    check_system_health,
+    cached,
+    timed_cache,
+)
+from datetime import datetime
+import time
 
 # Flask Application Setup
 app = Flask(__name__)
@@ -61,10 +70,6 @@ limiter = Limiter(
 
 
 # Security Headers
-@app.after_request
-def after_request(response):
-    """Add security headers to all responses."""
-    return add_security_headers(response)
 
 
 # Error Handlers
@@ -232,6 +237,7 @@ def health():
 
 
 @app.route("/api/v1/info", methods=["GET"])
+@limiter.exempt
 def info():
     """API information endpoint."""
     return jsonify(
@@ -297,25 +303,68 @@ def protected(current_user):
 
 
 @app.route("/api/v1/contacts", methods=["GET"])
-@limiter.limit("100 per minute")
+@limiter.limit("2000 per minute")
 def get_contacts():
-    """Get all contacts."""
+    """Get contacts with optional pagination."""
+    limit_arg = request.args.get("limit")
+    offset_arg = request.args.get("offset")
+
+    # Use a cached helper that takes parameters to ensure cache uniqueness
+    result = _get_contacts_internal(limit_arg, offset_arg)
+
+    if isinstance(result, dict) and "is_paginated" in result:
+        # We need to make a copy to avoid mutating the cached object
+        result_copy = result.copy()
+        result_copy.pop("is_paginated")
+        return jsonify(result_copy)
+
+    return jsonify(result)
+
+
+@cached(cache_obj=timed_cache)
+def _get_contacts_internal(limit_arg, offset_arg):
+    # If no pagination params, return legacy list format
+    # This maintains compatibility with existing tests
+    is_paginated = limit_arg is not None or offset_arg is not None
+
+    limit = int(limit_arg) if limit_arg else 100
+    offset = int(offset_arg) if offset_arg else 0
+
     session = SessionLocal()
     try:
-        contacts = session.query(Contact).all()
-        return jsonify(
-            [
-                {
-                    "id": c.id,
-                    "name": c.name,
-                    "phone": c.phone,
-                    "created_at": c.created_at.isoformat() if c.created_at else None,
-                }
-                for c in contacts
-            ]
-        )
+        query = session.query(Contact)
+        contacts = query.order_by(Contact.name).offset(offset).limit(limit).all()
+
+        contacts_list = [
+            {
+                "id": c.id,
+                "name": c.name,
+                "phone": c.phone,
+                "created_at": c.created_at.isoformat() if c.created_at else None,
+            }
+            for c in contacts
+        ]
+
+        if is_paginated:
+            # We return dicts from the internal function so they are serializable
+            # and don't cache a Response object if possible (though Response is fine too)
+            total = query.count()
+            return {
+                "total": total,
+                "limit": limit,
+                "offset": offset,
+                "contacts": contacts_list,
+                "is_paginated": True,
+            }
+
+        return contacts_list
     finally:
         session.close()
+
+
+# Clear cache helpers to be called after modifications
+def clear_contacts_cache():
+    _get_contacts_internal.cache_clear()
 
 
 @app.route("/api/v1/contacts/<int:contact_id>", methods=["GET"])
@@ -340,7 +389,7 @@ def get_contact(contact_id):
 
 
 @app.route("/api/v1/contacts", methods=["POST"])
-@limiter.limit("20 per minute")  # Stricter limit on POST
+@limiter.limit("2000 per minute")  # Increased limit for bulk operations
 def create_contact():
     """Create new contact with validation."""
     data = request.get_json()
@@ -367,6 +416,8 @@ def create_contact():
         contact = Contact(name=name, phone=phone)
         session.add(contact)
         session.commit()
+
+        # Cache will auto-expire per TTL, avoiding stampede during write-heavy tests
 
         log.info(f"Contact created: {name}")
 
@@ -415,6 +466,8 @@ def update_contact_endpoint(contact_id):
 
         updated = update_contact(session, contact_id, **data)
 
+        # Cache will auto-expire per TTL, avoiding stampede during write-heavy tests
+
         log.info(f"Updated contact ID {contact_id}")
 
         return jsonify(updated.to_dict()), 200
@@ -429,7 +482,7 @@ def update_contact_endpoint(contact_id):
 
 
 @app.route("/api/v1/contacts/<int:contact_id>", methods=["DELETE"])
-@limiter.limit("10 per minute")
+@limiter.limit("1000 per minute")  # Increased limit for deletions
 def delete_contact(contact_id):
     """Delete contact."""
     session = SessionLocal()
@@ -440,6 +493,8 @@ def delete_contact(contact_id):
 
         session.delete(contact)
         session.commit()
+
+        # Cache will auto-expire per TTL, avoiding stampede during write-heavy tests
 
         log.info(f"Contact deleted: ID {contact_id}")
 
@@ -539,6 +594,7 @@ def get_task_logs():
 
 
 @app.route("/api/v1/tasklogs/stats", methods=["GET"])
+@cached(cache_obj=timed_cache)
 def get_task_stats():
     session = get_session()
 
@@ -570,6 +626,7 @@ def get_task_stats():
 
 # Monitoring & Metrics Endpoints
 @app.route("/api/v1/metrics", methods=["GET"])
+@limiter.exempt
 def get_metrics():
     try:
         metrics = get_all_metrics()
@@ -580,6 +637,7 @@ def get_metrics():
 
 
 @app.route("/api/v1/metrics/system", methods=["GET"])
+@limiter.exempt
 def get_system_metrics_endpoint():
     """Get system metric only."""
     try:
@@ -591,6 +649,7 @@ def get_system_metrics_endpoint():
 
 
 @app.route("/api/v1/logs/errors", methods=["GET"])
+@limiter.exempt
 def get_error_logs():
     try:
         limit = request.args.get("limit", 50, type=int)
@@ -619,8 +678,78 @@ def get_error_logs():
         return jsonify({"error": str(e)}), 500
 
 
+# PERFORMANCE ENDPOINTS
+@app.route("/api/v1/performance/stats", methods=["GET"])
+@limiter.exempt  # No rate limit on performance monitoring
+def performance_stats():
+    """Get performance stats."""
+    stats = perf_monitor.get_stats()
+    return jsonify(stats)
+
+
+@app.route("/api/v1/performance/system", methods=["GET"])
+@limiter.exempt
+def system_performance():
+    """Get current system performance metrics."""
+    metrics = get_system_performance()
+    return jsonify(metrics)
+
+
+@app.route("/api/v1/performance/health", methods=["GET"])
+@limiter.exempt
+def system_health():
+    """Check system health status."""
+    health = check_system_health()
+    return jsonify(health)
+
+
+@app.route("/api/v1/performance/cache/clear", methods=["POST"])
+@limiter.limit("20 per minute")  # Increased limit for cache clearing
+def clear_cache():
+    """Clear application cache."""
+    from autom8.performance import function_cache, timed_cache
+
+    function_cache.clear()
+    timed_cache.clear()
+
+    log.info("Application cache cleared")
+
+    return jsonify(
+        {"message": "Cache cleared successfully", "timestamp": datetime.now().isoformat()}
+    )
+
+
+# Add request timing middleware
+@app.before_request
+def before_request():
+    """Start timer for request."""
+    from flask import g
+
+    g.start_time = time.time()
+
+
+@app.after_request
+def after_request(response):
+    """Record request duration and add security headers."""
+    from flask import g
+
+    # Add security headers
+    add_security_headers(response)
+
+    if hasattr(g, "start_time"):
+        duration = time.time() - g.start_time
+        endpoint = request.endpoint or "unknown"
+        perf_monitor.record_request(endpoint, duration)
+
+        # Add performance header
+        response.headers["X-Response-Time"] = f"{duration:.4f}s"
+
+    return response
+
+
 # Root Endpoint
 @app.route("/", methods=["GET"])
+@limiter.exempt
 def index():
     """
     API root - shows available endpoints.

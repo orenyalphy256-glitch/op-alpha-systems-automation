@@ -1,7 +1,6 @@
 """
 CI/CD Pipeline Simulation Script
 Automates: Lint -> Test -> Build -> Deploy workflow
-Agent ALO
 """
 
 import json
@@ -136,20 +135,20 @@ def stage_setup():
         subprocess.run(
             [sys.executable, "-m", "pip", "install", "--upgrade", "pip"],
             check=True,
-            capture_output=True
+            capture_output=True,
         )
         subprocess.run(
             [sys.executable, "-m", "pip", "install", "-r", "requirements.txt"],
             check=True,
             capture_output=True,
-            text=True
+            text=True,
         )
         # Install package in editable mode for coverage
         subprocess.run(
             [sys.executable, "-m", "pip", "install", "-e", "."],
             check=True,
             capture_output=True,
-            text=True
+            text=True,
         )
         print_success("Dependencies and package installed.")
     except subprocess.CalledProcessError as e:
@@ -163,11 +162,11 @@ def stage_setup():
             cmd = ["docker", "--version"]
         else:
             cmd = [sys.executable, "-m", tool, "--version"]
-        
+
         try:
             subprocess.run(cmd, capture_output=True, check=True)
         except (subprocess.CalledProcessError, FileNotFoundError):
-             if tool != "docker": # Docker might not be installed in all envs
+            if tool != "docker":  # Docker might not be installed in all envs
                 print_warning(f"{tool} might be missing from path, but should be in venv.")
 
     print_success("Setup stage completed.")
@@ -384,9 +383,7 @@ def generate_report(results):
         print(f" {stage:<25} {status}")
 
     # Save to file
-    report_path = (
-        Path("logs") / f'pipeline_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json'
-    )
+    report_path = Path("logs") / f'pipeline_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json'
     report_path.parent.mkdir(parents=True, exist_ok=True)
 
     report_data = {

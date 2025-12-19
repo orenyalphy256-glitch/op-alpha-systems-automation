@@ -12,7 +12,8 @@ Complete guide to testing the Autom8 application.
 4. [Writing Tests](#writing-tests)
 5. [Coverage](#coverage)
 6. [Best Practices](#best-practices)
-7. [Troubleshooting](#troubleshooting)
+7. [Load testing](#load-testing)
+8. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -325,6 +326,26 @@ pytest -m "not slow"
 # Run API and database tests
 pytest -m "api or database"
 ```
+
+---
+
+## 🐝 Load Testing
+
+Autom8 uses **Locust** for distributed load testing. The included `locustfile.py` is configured with smart discovery logic.
+
+### Running a Load Test
+
+```bash
+# Standard test (Headless)
+locust -f locustfile.py --headless -u 10 -r 2 -t 5m --host=http://localhost:5000
+
+# Web Interface (Best for live monitoring)
+locust -f locustfile.py --host=http://localhost:5000
+# Open http://localhost:8089 in your browser
+```
+
+### Smart ID Tracking
+The load testing script automatically queries `/api/v1/contacts` on startup to discover existing IDs. This prevents `404 Not Found` errors during DELETE and GET tasks.
 
 ---
 

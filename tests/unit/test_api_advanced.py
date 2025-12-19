@@ -10,13 +10,6 @@ import pytest
 from autom8.api import app, validate_contact_data
 
 
-@pytest.fixture
-def client():
-    app.config["TESTING"] = True
-    with app.test_client() as client:
-        yield client
-
-
 # ============================================================================
 # Validation Tests
 # ============================================================================
@@ -91,20 +84,20 @@ def test_405_handler(client):
 def test_scheduler_status(mock_get_jobs, client):
     # Mock get_scheduled_jobs
     mock_get_jobs.return_value = [{"id": "j1"}]
-    
+
     # Since patching the import inside the function is hard
     # We refactored the endpoint to accept an optional scheduler instance
     # But wait, 'client.get' calls the route handler via Flask, we can't pass args easily there
     # unless we use dependency injection via app config or similar.
-    
+
     # Alternative: Test the function directly bypassing Flask routing for this specific unit test
     # since we are testing logic.
     from autom8.api import scheduler_status
-    
+
     mock_sched = MagicMock()
     mock_sched.running = True
     mock_sched.__bool__.return_value = True
-    
+
     # Call directly
     with app.app_context():
         # returns tuple (response, status) or just response
