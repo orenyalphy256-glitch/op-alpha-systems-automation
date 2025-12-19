@@ -65,7 +65,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
 
       - name: Run tests with coverage
         run: |
@@ -162,6 +162,6 @@ jobs:
 
       - name: Run security audit
         run: |
-          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
           pip-audit
         continue-on-error: true
