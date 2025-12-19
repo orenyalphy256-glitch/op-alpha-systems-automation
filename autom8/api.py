@@ -303,7 +303,7 @@ def protected(current_user):
 
 
 @app.route("/api/v1/contacts", methods=["GET"])
-@limiter.limit("2000 per minute")
+@limiter.limit(SecurityConfig.RATE_LIMIT_CONTACTS_GET)
 def get_contacts():
     """Get contacts with optional pagination."""
     limit_arg = request.args.get("limit")
@@ -368,6 +368,7 @@ def clear_contacts_cache():
 
 
 @app.route("/api/v1/contacts/<int:contact_id>", methods=["GET"])
+@limiter.limit(SecurityConfig.RATE_LIMIT_CONTACTS_GET)
 def get_contact(contact_id):
     """Get specific contact."""
     session = SessionLocal()
@@ -389,7 +390,7 @@ def get_contact(contact_id):
 
 
 @app.route("/api/v1/contacts", methods=["POST"])
-@limiter.limit("2000 per minute")  # Increased limit for bulk operations
+@limiter.limit(SecurityConfig.RATE_LIMIT_CONTACTS_POST)
 def create_contact():
     """Create new contact with validation."""
     data = request.get_json()
@@ -482,7 +483,7 @@ def update_contact_endpoint(contact_id):
 
 
 @app.route("/api/v1/contacts/<int:contact_id>", methods=["DELETE"])
-@limiter.limit("1000 per minute")  # Increased limit for deletions
+@limiter.limit(SecurityConfig.RATE_LIMIT_CONTACTS_DELETE)
 def delete_contact(contact_id):
     """Delete contact."""
     session = SessionLocal()
