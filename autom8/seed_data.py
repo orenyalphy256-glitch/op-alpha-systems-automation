@@ -11,7 +11,7 @@ def main():
     try:
         # Sample contacts
         contacts_data = [
-            ("Alphonce Liguori", "0712345678", "orenyalphy256@gmail.com"),
+            ("Admin User", "0712345678", "orenyalphy256@gmail.com"),
             ("John Kamau", "0723456789", "john.kamau@email.com"),
             ("Mary Wanjiku", "0734567890", None),
             ("Peter Ochieng", "0745678901", "peter.o@email.com"),

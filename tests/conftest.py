@@ -117,6 +117,26 @@ def app_config():
     }
 
 
+@pytest.fixture(scope="module")
+def test_app():
+    """Create Flask test application."""
+    # Disable rate limiting for tests
+    os.environ["RATE_LIMIT_ENABLED"] = "False"
+
+    # Import the actual Flask app from api.py
+    from autom8.api import app
+
+    app.config["TESTING"] = True
+
+    return app
+
+
+@pytest.fixture(scope="module")
+def client(test_app):
+    """Create test client."""
+    return test_app.test_client()
+
+
 # ============================================================================
 # DATA FIXTURES
 # ============================================================================
@@ -141,6 +161,20 @@ def sample_contacts_list():
 # ============================================================================
 # CLEANUP HOOKS
 # ============================================================================
+
+
+@pytest.fixture(autouse=True)
+def reset_caches():
+    """
+    Clear all caches before each test to ensure isolation.
+    """
+    from autom8.performance import function_cache, timed_cache
+
+    # Clear shared caches
+    function_cache.clear()
+    timed_cache.clear()
+
+    yield
 
 
 @pytest.fixture(autouse=True)

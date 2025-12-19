@@ -38,7 +38,7 @@ class SecurityConfig:
 
     # Rate limiting
     RATE_LIMIT_ENABLED = os.getenv("RATE_LIMIT_ENABLED", "True") == "True"
-    RATE_LIMIT_DEFAULT = os.getenv("RATE_LIMIT_DEFAULT", "100 per hour")
+    RATE_LIMIT_DEFAULT = os.getenv("RATE_LIMIT_DEFAULT", "100 per minute")
 
     # Encryption
     ENCRYPTION_KEY = os.getenv(
