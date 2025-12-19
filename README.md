@@ -88,7 +88,7 @@ For detailed testing patterns, refer to the [Testing Guide](TESTING_GUIDE.md).
 ## 🛡️ Security Posture
 
 - **Hardened Headers**: Automated HSTS, CSP, and X-Frame-Options for defense-in-depth.
-- **Adaptive Rate Limiting**: Intelligent request throttling (100 req/min default) with monitoring exemptions.
+- **Adaptive Rate Limiting**: Intelligent request throttling (200 req/min default) with monitored high-capacity overrides (5000 req/min) for data operations.
 - **Deep Sanitization**: Recursive input scrubbing using regularized patterns to prevent injection.
 - **Secure Audit Trails**: Encrypted event logging for all critical system operations.
 
