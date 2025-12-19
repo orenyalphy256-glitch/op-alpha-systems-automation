@@ -9,7 +9,7 @@ This document outlines the security policy for the Autom8 platform. We take secu
 **Do not open a public issue on GitHub.**
 
 If you discover a security vulnerability, please report it immediately via email:
-> **Email:** [security@example.com](mailto:security@example.com)
+> **Email:** (mailto:orenyalphy256@gmail.com)
 
 Please include:
 * Description of the vulnerability
@@ -40,7 +40,7 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
 *   **Least Privilege:** Grant the minimum necessary permissions.
 
 ### 3. API Security
-*   **Rate Limiting:** Enabled by default to prevent abuse (e.g., 100 req/min).
+*   **Rate Limiting:** Enabled by default to prevent abuse (e.g., 5000 req/min).
 *   **Input Validation:** Sanitize and validate all incoming data using `autom8.security` utilities.
 *   **Headers:** Standard security headers (HSTS, X-Frame-Options) are automatically injected.
 
