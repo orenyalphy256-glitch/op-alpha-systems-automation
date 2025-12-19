@@ -179,5 +179,5 @@ jobs:
         uses: actions/dependency-review-action@v4
         continue-on-error: true
       - name: Dependency Submission API
-        uses: advanced-security/component-detection-dependency-submission-action@v0.0.1
+        uses: advanced-security/component-detection-dependency-submission-action@v0.1.0
         continue-on-error: true
