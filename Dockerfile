@@ -4,7 +4,7 @@
 # ============================================================================
 
 # BUILD STAGE
-FROM python:3.11-slim AS builder
+FROM python:3.14-slim AS builder
 
 # Set build arguments
 ARG PYTHON_VERSION=3.11
@@ -28,7 +28,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # RUNTIME STAGE
 # ============================================================================
 
-FROM python:3.11-slim
+FROM python:3.14-slim
 
 # Set labels
 LABEL maintainer="Autom8 Engineering"
