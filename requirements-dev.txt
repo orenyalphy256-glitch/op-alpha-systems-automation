@@ -28,7 +28,6 @@ setuptools==80.9.0
 
 # Profiling / performance (Day 68)
 memory-profiler==0.61.0
-cachetools==6.2.4
 redis==7.1.0
 locust==2.42.6
 py-spy==0.4.1
