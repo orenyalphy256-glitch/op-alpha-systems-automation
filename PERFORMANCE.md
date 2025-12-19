@@ -26,7 +26,8 @@ Autom8 is engineered for performance from the ground up, utilizing asynchronous 
 |--------|-------------------------------|----------|
 | API Latency (p95) | < 150ms | 45ms |
 | DB Query Execution | < 30ms | 8ms |
-| API Rate Limit | 100 req/min | Fixed |
+| API Rate Limit (Default) | 200 req/min | Configurable |
+| API Rate Limit (Bulk) | 5000 req/min | High-load |
 | Peak CPU Utilization | < 60% | 15% |
 
 ---
