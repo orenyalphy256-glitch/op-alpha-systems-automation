@@ -9,7 +9,7 @@ This document outlines the security policy for the Autom8 platform. We take secu
 **Do not open a public issue on GitHub.**
 
 If you discover a security vulnerability, please report it immediately via email:
-> **Email:** [security@example.com](mailto:security@example.com)
+> **Email:** (mailto:orenyalphy256@gmail.com)
 
 Please include:
 * Description of the vulnerability
