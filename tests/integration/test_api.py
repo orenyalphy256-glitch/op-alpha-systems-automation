@@ -29,23 +29,6 @@ def get_unique_phone():
 
 
 # Fixtures
-@pytest.fixture(scope="module")
-def test_app():
-    """Create Flask test application."""
-    # Import the actual Flask app from api.py
-    from autom8.api import app
-
-    app.config["TESTING"] = True
-
-    return app
-
-
-@pytest.fixture(scope="module")
-def client(test_app):
-    """Create test client."""
-    return test_app.test_client()
-
-
 @pytest.fixture(scope="function")
 def api_db():
     """Provide clean database for API tests."""

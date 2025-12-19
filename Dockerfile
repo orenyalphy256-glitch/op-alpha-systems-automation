@@ -31,7 +31,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 FROM python:3.11-slim
 
 # Set labels
-LABEL maintainer="Agent ALO"
+LABEL maintainer="Autom8 Engineering"
 LABEL description="Autom8 Systems Automation Platform"
 LABEL version="1.0.0"
 

@@ -1,6 +1,5 @@
 # AUTOM8 - DEVELOPMENT OVERRIDES
 # Override settings for local development
-# Agent ALO - Batch 5
 
 services:
   api:

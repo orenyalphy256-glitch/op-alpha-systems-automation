@@ -1,6 +1,5 @@
 # PRE-COMMIT HOOKS CONFIGURATION FILE
 # Runs checks before git commit
-# AGENT ALO
 
 # See https://pre-commit.com/ for more details
 

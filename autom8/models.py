@@ -5,7 +5,7 @@ Defines: Contact model, database initialization, session management
 
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, Integer, String, create_engine
+from sqlalchemy import Column, DateTime, Integer, String, create_engine, event
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 from autom8.core import DATA_DIR, log
@@ -17,7 +17,29 @@ DB_PATH = DATA_DIR / "system.db"
 DB_URL = f"sqlite:///{DB_PATH}"
 
 # Create engine (connection pool)
-engine = create_engine(DB_URL, echo=False, future=True, connect_args={"check_same_thread": False})
+# Optimized for high concurrency with SQLite
+engine = create_engine(
+    DB_URL,
+    echo=False,
+    future=True,
+    pool_size=20,
+    max_overflow=30,
+    pool_timeout=60,
+    connect_args={
+        "check_same_thread": False,
+        "timeout": 30,  # Increase SQLite wait time for locks
+    },
+)
+
+
+@event.listens_for(engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    """Enable WAL mode for SQLite to allow concurrent reads and writes."""
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA journal_mode=WAL")
+    cursor.execute("PRAGMA synchronous=NORMAL")
+    cursor.close()
+
 
 # Session factory
 SessionLocal = sessionmaker(
