@@ -1,33 +1,33 @@
 -r requirements.txt
 
 # Testing
-pytest==9.0.1
-pytest-cov==7.0.0
-coverage==7.12.0
+pytest
+pytest-cov
+coverage
 
 # Linting & formatting
-black==25.11.0
-flake8==7.3.0
-flake8-html==0.4.3
-autoflake==2.3.1
-bandit==1.9.2
-mccabe==0.7.0
-pycodestyle==2.14.0
-pyflakes==3.4.0
+black
+flake8
+flake8-html
+autoflake
+bandit
+mccabe
+pycodestyle
+pyflakes
 
 # Dev tooling
-pre_commit==4.5.0
-virtualenv==20.35.4
-nodeenv==1.9.1
-identify==2.6.15
-cfgv==3.5.0
-pathspec==0.12.1
-platformdirs==4.5.0
-pluggy==1.6.0
-setuptools==80.9.0
+pre-commit
+virtualenv
+nodeenv
+identify
+cfgv
+pathspec
+platformdirs
+pluggy
+setuptools
 
 # Profiling / performance (Day 68)
-memory-profiler==0.61.0
-redis==7.1.0
-locust==2.42.6
-py-spy==0.4.1
+memory-profiler
+redis
+locust
+py-spy
