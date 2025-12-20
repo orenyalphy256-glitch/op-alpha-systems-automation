@@ -38,7 +38,10 @@ class SecurityConfig:
 
     # Rate limiting
     RATE_LIMIT_ENABLED = os.getenv("RATE_LIMIT_ENABLED", "True") == "True"
-    RATE_LIMIT_DEFAULT = os.getenv("RATE_LIMIT_DEFAULT", "100 per minute")
+    RATE_LIMIT_DEFAULT = os.getenv("RATE_LIMIT_DEFAULT", "200 per minute")
+    RATE_LIMIT_CONTACTS_GET = os.getenv("RATE_LIMIT_CONTACTS_GET", "5000 per minute")
+    RATE_LIMIT_CONTACTS_POST = os.getenv("RATE_LIMIT_CONTACTS_POST", "5000 per minute")
+    RATE_LIMIT_CONTACTS_DELETE = os.getenv("RATE_LIMIT_CONTACTS_DELETE", "2000 per minute")
 
     # Encryption
     ENCRYPTION_KEY = os.getenv(

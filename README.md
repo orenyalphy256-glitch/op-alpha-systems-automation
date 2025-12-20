@@ -457,6 +457,7 @@ docker logs -f autom8
 
 ### Docker Compose
 
+### Health Checks
 ```bash
 # Development
 docker-compose up -d
