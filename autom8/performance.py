@@ -2,17 +2,18 @@
 Performance monitoring and optimization utilities for the autom8 package.
 """
 
-import time
-import functools
-from typing import Callable, Optional
-from datetime import datetime
-import psutil
 import cProfile
-import pstats
+import functools
 import io
+import pstats
+import time
 from contextlib import contextmanager
+from datetime import datetime
+from typing import Callable, Optional
 
-from cachetools import TTLCache, LRUCache
+import psutil
+from cachetools import LRUCache, TTLCache
+
 from autom8.core import log
 
 

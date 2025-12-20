@@ -4,6 +4,8 @@ Implements: RESTful endpoints using SQLAlchemy ORM
 """
 
 import os
+import time
+from datetime import datetime
 
 from flask import Flask, abort, jsonify, request
 from flask_cors import CORS
@@ -23,6 +25,13 @@ from autom8.models import (
     init_db,
     update_contact,
 )
+from autom8.performance import (
+    cached,
+    check_system_health,
+    get_system_performance,
+    perf_monitor,
+    timed_cache,
+)
 from autom8.scheduler import get_scheduled_jobs, pause_job, resume_job, run_job_now
 from autom8.security import (
     SecurityConfig,
@@ -33,15 +42,6 @@ from autom8.security import (
     token_required,
     validate_phone,
 )
-from autom8.performance import (
-    perf_monitor,
-    get_system_performance,
-    check_system_health,
-    cached,
-    timed_cache,
-)
-from datetime import datetime
-import time
 
 # Flask Application Setup
 app = Flask(__name__)

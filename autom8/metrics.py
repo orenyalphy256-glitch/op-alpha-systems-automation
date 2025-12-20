@@ -5,12 +5,12 @@ Collects: CPU, disk usage, task statistics
 
 from datetime import datetime
 
+# Initialize psutil
+import psutil
+
 from autom8.core import log
 from autom8.models import Contact, TaskLog, get_session
 from autom8.performance import cached, timed_cache
-
-# Initialize psutil
-import psutil
 
 psutil.cpu_percent(interval=None)
 
