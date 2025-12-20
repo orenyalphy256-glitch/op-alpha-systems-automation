@@ -392,7 +392,7 @@ def cmd_dev_setup(args):
     ]
     
     for step_name, cmd in steps:
-        print_info(step_name...)
+        print_info(f"{step_name}...")
         success, _, stderr = run_command(cmd)
         if success:
             print_success(f"{step_name} completed")
