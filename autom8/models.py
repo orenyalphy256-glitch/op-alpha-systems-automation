@@ -13,19 +13,18 @@ from datetime import datetime
 from sqlalchemy import Column, DateTime, Integer, String, create_engine, event
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-from autom8.core import DATA_DIR, log
+from autom8.core import Config, log
 
 # Database Configuration
 
 # Database file path
-DB_PATH = DATA_DIR / "system.db"
-DB_URL = f"sqlite:///{DB_PATH}"
+DB_URL = Config.DATABASE_URL
 
 # Create engine (connection pool)
 # Optimized for high concurrency with SQLite
 engine = create_engine(
     DB_URL,
-    echo=False,
+    echo=Config.DB_ECHO,
     future=True,
     pool_size=20,
     max_overflow=30,
@@ -121,7 +120,7 @@ class TaskLog(Base):
 
 # Database Initialization
 def init_db():
-    log.info(f"Initializing database at {DB_PATH}")
+    log.info(f"Initializing database at {DB_URL}")
     Base.metadata.create_all(bind=engine)
     log.info("Database tables created successfully")
 
