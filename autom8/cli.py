@@ -1,4 +1,9 @@
+# Copyright (c) 2025 Alphonce Liguori Oreny. All rights reserved.
+# This software is proprietary and confidential.
+# Unauthorized copying of this file, via any medium is strictly prohibited.
+
 """
+
 Autom8 Command Line Interface
 
 Complete CLI for managing the Autom8 automation platform.

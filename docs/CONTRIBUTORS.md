@@ -1,5 +1,8 @@
 # 👥 Contributors
 
+> [!NOTE]
+> Autom8 is a proprietary project owned by Alphonce Liguori Oreny. While we welcome community input and contributions, the core software remains under an "All Rights Reserved" license.
+
 ## Project Maintainer
 
 **Alphonce Liguori Oreny (Agent ALO)**

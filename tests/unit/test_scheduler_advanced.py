@@ -1,4 +1,9 @@
+# Copyright (c) 2025 Alphonce Liguori Oreny. All rights reserved.
+# This software is proprietary and confidential.
+# Unauthorized copying of this file, via any medium is strictly prohibited.
+
 """
+
 Advanced Unit Tests for Scheduler Logic
 Covers init, start/stop, listeners, and job helpers.
 """

@@ -1,4 +1,9 @@
+# Copyright (c) 2025 Alphonce Liguori Oreny. All rights reserved.
+# This software is proprietary and confidential.
+# Unauthorized copying of this file, via any medium is strictly prohibited.
+
 """
+
 analyze_logs.py - Log analysis tool
 Parse and analyze JSON logs
 Usage: python -m autom8.analyze_logs # Run for last 24 hours
