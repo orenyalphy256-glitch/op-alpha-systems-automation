@@ -1,4 +1,9 @@
+# Copyright (c) 2025 Alphonce Liguori Oreny. All rights reserved.
+# This software is proprietary and confidential.
+# Unauthorized copying of this file, via any medium is strictly prohibited.
+
 """
+
 Unit tests for visual/CLI modules: dashboard, monitor_scheduler, and analyze_logs.
 Uses mocking to test infinite loops and print statements without hanging.
 """

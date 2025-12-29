@@ -1,4 +1,9 @@
+# Copyright (c) 2025 Alphonce Liguori Oreny. All rights reserved.
+# This software is proprietary and confidential.
+# Unauthorized copying of this file, via any medium is strictly prohibited.
+
 """
+
 tasks.py - Task Management with Design Patterns
 Implements: Factory Pattern, Abstract Base Class (ABC)
 """

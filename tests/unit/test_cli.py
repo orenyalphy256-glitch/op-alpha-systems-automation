@@ -1,4 +1,9 @@
+# Copyright (c) 2025 Alphonce Liguori Oreny. All rights reserved.
+# This software is proprietary and confidential.
+# Unauthorized copying of this file, via any medium is strictly prohibited.
+
 """
+
 Tests for autom8/cli.py
 
 Comprehensive test suite for the CLI module to ensure 85%+ coverage.

@@ -1,5 +1,9 @@
 # 🤝 Contributing to Autom8
 
+> [!IMPORTANT]
+> **Proprietary Project Notice**
+> Autom8 is a proprietary software project. All rights are reserved by Alphonce Liguori Oreny. By contributing to this project, you agree that your contributions will be licensed under the same proprietary terms.
+
 Thank you for your interest in contributing to Autom8! This document provides guidelines and instructions for contributing.
 
 ## Code of Conduct
@@ -249,6 +253,7 @@ When adding features:
 
 - **Email**: orenyalphy256@gmail.com
 - **Issues**: [GitHub Issues](https://github.com/orenyalphy256-glitch/op-alpha-systems-automation/issues)
+- **License**: See [LICENSE](../LICENSE) for full details.
 
 ---
 

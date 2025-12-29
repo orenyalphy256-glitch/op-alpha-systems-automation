@@ -9,6 +9,8 @@ authors = [
 ]
 readme = "README.md"
 requires-python = ">=3.9"
+license = {text = "Proprietary"}
+
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",

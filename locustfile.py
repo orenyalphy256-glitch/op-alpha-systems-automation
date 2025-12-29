@@ -1,4 +1,9 @@
+# Copyright (c) 2025 Alphonce Liguori Oreny. All rights reserved.
+# This software is proprietary and confidential.
+# Unauthorized copying of this file, via any medium is strictly prohibited.
+
 """
+
 Load testing with locust.
 Usage: locust -f locustfile.py --host=http://localhost:5000
 Then open: https://localhost:8089

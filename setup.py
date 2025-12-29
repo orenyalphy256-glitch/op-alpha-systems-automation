@@ -1,4 +1,9 @@
+# Copyright (c) 2025 Alphonce Liguori Oreny. All rights reserved.
+# This software is proprietary and confidential.
+# Unauthorized copying of this file, via any medium is strictly prohibited.
+
 """
+
 Setup configuration for autom8 package.
 """
 
@@ -10,6 +15,8 @@ setup(
     description="Autom8 Systems Automation Platform",
     author="Autom8 Engineering",
     author_email="orenyalphy256@gmail.com",
+    license="Proprietary",
+
     packages=find_packages(exclude=["tests", "tests.*"]),
     python_requires=">=3.11",
     install_requires=[

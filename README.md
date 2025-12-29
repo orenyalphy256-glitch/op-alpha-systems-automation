@@ -7,7 +7,7 @@
 [![Docker](https://img.shields.io/badge/docker-ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Test Coverage](https://img.shields.io/badge/coverage-85%25-success?style=for-the-badge&logo=pytest&logoColor=white)](./TESTING_GUIDE.md)
 [![Security](https://img.shields.io/badge/security-A%2B-success?style=for-the-badge&logo=security&logoColor=white)](./SECURITY.md)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+[![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red.svg?style=for-the-badge)](LICENSE)
 
 **Production-grade automation platform engineered for enterprise systems**
 
@@ -575,7 +575,7 @@ Systems Engineer specializing in enterprise automation, API development, and clo
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under a Proprietary (All Rights Reserved) License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
