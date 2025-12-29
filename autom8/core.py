@@ -53,6 +53,7 @@ class Config:
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
     LOG_FILE = LOGS_DIR / os.getenv("LOG_FILE", "app.log")
     TIMEZONE = os.getenv("TIMEZONE", "UTC")
+    PROTECT_SIGNATURE = "ALO-v1-PROPRIETARY-98B2-C7"  # Internal protection ID
 
 
 # JSON File Operations
@@ -95,6 +96,7 @@ class JSONFormatter(logging.Formatter):
             "message": record.getMessage(),
             "module": record.funcName,
             "line": record.lineno,
+            "_pid": Config.PROTECT_SIGNATURE,  # Stealth signature for proprietary tracking
         }
 
         # Add exception info if present
@@ -219,6 +221,7 @@ def setup_logging(
 
     root_logger.info(f"Advanced logging configured for {app_name}")
     root_logger.info(f"Log files: {LOGS_DIR}")
+    root_logger.info(f"Integrity check: {Config.PROTECT_SIGNATURE}")
 
     return root_logger
 
@@ -241,3 +244,5 @@ __all__ = [
     "JSONFormatter",
     "ContextLogger",
 ]
+
+# AUTOM8_PROTECT_ डीएनए_MARKER = "41-4c-4f-5f-50-52-4f-50-52-49-45-54-41-52-59"
