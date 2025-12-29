@@ -20,8 +20,16 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
-env_path = Path(__file__).parent / ".env"
-load_dotenv(dotenv_path=env_path)
+# Try package directory first, then project root
+pkg_env = Path(__file__).parent / ".env"
+root_env = Path(__file__).parent.parent / ".env"
+
+if pkg_env.exists():
+    load_dotenv(dotenv_path=pkg_env)
+elif root_env.exists():
+    load_dotenv(dotenv_path=root_env)
+else:
+    load_dotenv()  # Fallback to default search
 
 # Get absolute path to autom8 package directory
 BASE_DIR = Path(__file__).parent.absolute()

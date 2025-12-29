@@ -18,11 +18,12 @@ from email.mime.text import MIMEText
 from autom8.core import log
 
 # Email configuration
-SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.gmail.com")
+SMTP_SERVER = os.getenv("SMTP_SERVER")
 SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
 SMTP_USERNAME = os.getenv("SMTP_USERNAME", "")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
-ALERT_EMAIL = os.getenv("ALERT_EMAIL", "admin@example.com")
+SMTP_USE_TLS = os.getenv("SMTP_USE_TLS", "True") == "True"
+ALERT_EMAIL = os.getenv("ALERT_EMAIL")
 
 
 # Alert functions
