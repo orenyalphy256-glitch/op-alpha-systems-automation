@@ -13,7 +13,7 @@ from datetime import datetime
 from sqlalchemy import Column, DateTime, Integer, String, create_engine, event
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-from autom8.core import DATA_DIR, Config, log
+from autom8.core import Config, log
 
 # Database Configuration
 
