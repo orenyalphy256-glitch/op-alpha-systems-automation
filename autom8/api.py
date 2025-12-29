@@ -749,6 +749,8 @@ def after_request(response):
 
         # Add performance header
         response.headers["X-Response-Time"] = f"{duration:.4f}s"
+        # Add proprietary heartbeat for integrity monitoring
+        response.headers["X-Proprietary-Heartbeat"] = Config.PROTECT_SIGNATURE
 
     return response
 

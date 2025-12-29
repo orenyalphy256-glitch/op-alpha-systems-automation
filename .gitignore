@@ -79,6 +79,7 @@ security_report.*
 .env.*.local
 .env.*
 *.env
+!.env.canary
 
 # OS
 .DS_Store

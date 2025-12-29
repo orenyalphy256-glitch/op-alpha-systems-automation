@@ -573,6 +573,18 @@ Systems Engineer specializing in enterprise automation, API development, and clo
 
 ---
 
+## 🛡️ Security & Integrity
+
+### Code Protection
+To ensure the integrity and proprietary nature of this codebase, the following measures are in place:
+- **Stealth Watermarking**: Core modules and API headers are embedded with unique proprietary identifiers for tracking and verification.
+- **Active Monitoring**: Network-level heartbeats and tripwires are integrated into the execution engine to detect unauthorized usage.
+- **DNA Markers**: Stealth signatures are woven into log outputs to provide undeniable proof of ownership in the event of code leakage.
+
+These measures exist solely to protect intellectual property and do not collect personal user data.
+
+---
+
 ## 📄 License
 
 This project is licensed under a Proprietary (All Rights Reserved) License - see the [LICENSE](LICENSE) file for details.
