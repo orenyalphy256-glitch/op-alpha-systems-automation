@@ -13,7 +13,7 @@ from datetime import datetime
 from sqlalchemy import Column, DateTime, Integer, String, create_engine, event
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-from autom8.core import DATA_DIR, log, Config
+from autom8.core import DATA_DIR, Config, log
 
 # Database Configuration
 
@@ -120,7 +120,7 @@ class TaskLog(Base):
 
 # Database Initialization
 def init_db():
-    log.info(f"Initializing database at {DB_PATH}")
+    log.info(f"Initializing database at {DB_URL}")
     Base.metadata.create_all(bind=engine)
     log.info("Database tables created successfully")
 

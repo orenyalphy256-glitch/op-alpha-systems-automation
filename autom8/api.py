@@ -661,7 +661,7 @@ def get_error_logs():
         limit = request.args.get("limit", 50, type=int)
 
         # Read error log file
-        error_log_path = LOGS_DIR / "autom8_errors.log"
+        error_log_path = LOGS_DIR / f"{Config.APP_NAME}_errors.log"
 
         if not error_log_path.exists():
             return jsonify({"errors": []}), 200

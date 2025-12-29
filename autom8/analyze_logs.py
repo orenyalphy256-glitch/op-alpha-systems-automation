@@ -14,10 +14,11 @@ import json
 from collections import Counter
 from datetime import datetime, timedelta
 
-from autom8.core import LOGS_DIR
+from autom8.core import LOGS_DIR, Config
 
 
-def parse_json_logs(log_file="autom8_json.log", hours=24):
+def parse_json_logs(log_file=None, hours=24):
+    log_file = log_file or f"{Config.APP_NAME}_json.log"
     log_path = LOGS_DIR / log_file
 
     if not log_path.exists():
