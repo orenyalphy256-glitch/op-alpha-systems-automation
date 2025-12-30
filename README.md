@@ -38,6 +38,30 @@ Autom8 is a **comprehensive, enterprise-ready automation platform** designed for
 
 ---
 
+## 🎁 Community vs Pro Edition
+
+<div align="center">
+
+| Feature | Community (Free) | Pro Edition |
+|---------|:---------------:|:-----------:|
+| Contact Management API | ✅ | ✅ |
+| Basic Authentication | ✅ | ✅ |
+| Rate Limiting | ✅ | ✅ |
+| CLI Tool | ✅ | ✅ |
+| Docker Support | ✅ | ✅ |
+| **Advanced Scheduler** | Limited | ✅ Full |
+| **Enterprise Security** | Basic | ✅ Full |
+| **Performance Profiling** | - | ✅ |
+| **Priority Support** | - | ✅ |
+
+</div>
+
+> **🔒 Pro Features**: The Pro Edition includes advanced scheduling, enterprise-grade encryption, and full security modules. These features are protected and require a license key.
+>
+> **📬 Interested in Pro?** Contact [orenyalphy256@gmail.com](mailto:orenyalphy256@gmail.com) for licensing information, partnership opportunities, or investment inquiries.
+
+---
+
 ## ✨ Features
 
 ### 🔐 Enterprise Security

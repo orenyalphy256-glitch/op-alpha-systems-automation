@@ -60,6 +60,7 @@ class Config:
     DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DATA_DIR}/system.db")
     DB_ECHO = os.getenv("DB_ECHO", "False") == "True"
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+    LICENSE_KEY = os.getenv("AUTOM8_LICENSE_KEY", "DEMO-COMMUNITY-MODE")
 
     # Handle potentially nested log paths from .env
     _log_file_env = os.getenv("LOG_FILE", "app.log")
@@ -246,6 +247,72 @@ log = logging.getLogger(__name__)
 log.info(f"Loaded environment: {Config.ENVIRONMENT}")
 log.info(f"Debug mode: {Config.DEBUG}")
 
+# --- CORE IP PROTECTION & PROVIDER REGISTRY ---
+_security_provider = None
+_scheduler_provider = None
+
+
+def is_licensed() -> bool:
+    """Check if the system has a valid license key."""
+    key = Config.LICENSE_KEY
+    if not key or key == "DEMO-COMMUNITY-MODE":
+        return False
+    # In a real app, this would call a license server or check a signature
+    return key.startswith("ALO-PRO")
+
+
+def register_security_provider(provider):
+    global _security_provider
+    _security_provider = provider
+    log.info(f"Security Provider registered: {provider.__class__.__name__}")
+
+
+def register_scheduler_provider(provider):
+    global _scheduler_provider
+    _scheduler_provider = provider
+    log.info(f"Scheduler Provider registered: {provider.__class__.__name__}")
+
+
+def get_security():
+    global _security_provider
+    if _security_provider is None:
+        try:
+            from autom8.interfaces import LimitedSecurityProvider
+
+            _security_provider = LimitedSecurityProvider()
+            log.warning("Safe Core missing: Falling back to LimitedSecurityProvider")
+        except ImportError:
+            log.critical("CRITICAL: Interface layer missing!")
+            raise RuntimeError("System integrity failure.")
+    return _security_provider
+
+
+def get_scheduler():
+    global _scheduler_provider
+    if _scheduler_provider is None:
+        try:
+            from autom8.interfaces import LimitedSchedulerProvider
+
+            _scheduler_provider = LimitedSchedulerProvider()
+            log.warning("Safe Core missing: Falling back to LimitedSchedulerProvider")
+        except ImportError:
+            log.critical("CRITICAL: Interface layer missing!")
+            raise RuntimeError("System integrity failure.")
+    return _scheduler_provider
+
+
+# Attempt to auto-load Private Core if available
+try:
+    # This is where the private repo would be installed as a package
+    # For now, we simulate the presence of a 'core_engine'
+    if is_licensed():
+        # import autom8_core_engine as engine
+        # register_security_provider(engine.Security())
+        # register_scheduler_provider(engine.Scheduler())
+        pass
+except ImportError:
+    pass
+
 # Module-Level Exports
 __all__ = [
     "BASE_DIR",
@@ -258,6 +325,11 @@ __all__ = [
     "setup_logging",
     "JSONFormatter",
     "ContextLogger",
+    "is_licensed",
+    "get_security",
+    "get_scheduler",
+    "register_security_provider",
+    "register_scheduler_provider",
 ]
 
 # AUTOM8_PROTECT_ डीएनए_MARKER = "41-4c-4f-5f-50-52-4f-50-52-49-45-54-41-52-59"

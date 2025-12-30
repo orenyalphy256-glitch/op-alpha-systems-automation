@@ -31,6 +31,26 @@ print(f"ENCRYPTION_KEY={Fernet.generate_key().decode()}")
 print("\n# API KEY (for external services)")
 print(f"API_KEY={secrets.token_urlsafe(32)}")
 
+# Generate Autom8 Pro License Key
+import hashlib
+from datetime import datetime
+
+def generate_license_key():
+    """Generate a unique Autom8 Pro License Key."""
+    # Timestamp component
+    timestamp = datetime.now().strftime("%Y%m%d")
+    # Random component (8 chars)
+    random_part = secrets.token_hex(4).upper()
+    # Signature component (checksum for validation)
+    signature_data = f"ALO-PRO-{timestamp}-{random_part}"
+    checksum = hashlib.sha256(signature_data.encode()).hexdigest()[:6].upper()
+    
+    return f"ALO-PRO-{timestamp}-{random_part}-{checksum}"
+
+license_key = generate_license_key()
+print("\n# Autom8 Pro License Key (enables Pro features)")
+print(f"AUTOM8_LICENSE_KEY={license_key}")
+
 print("\n" + "=" * 70)
 print(" KEYS GENERATED SUCCESSFULLY ")
 print(" Copy and paste them into your .env file ")

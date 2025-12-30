@@ -19,7 +19,7 @@ from cryptography.fernet import Fernet
 from flask import jsonify, request
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from autom8.core import log
+from autom8.core import log, register_security_provider
 
 
 # CONFIGURATION
@@ -178,17 +178,45 @@ class Encryptor:
         encrypted_bytes = self.cipher.encrypt(data.encode())
         return encrypted_bytes.decode()
 
-    def decrypt(self, encrypted_data: str) -> str:
+    def decrypt(self, encrypted_data: str):
         """Decrypt an encrypted string."""
-        if not encrypted_data:
-            return ""
-
-        decrypted_bytes = self.cipher.decrypt(encrypted_data.encode())
-        return decrypted_bytes.decode()
+        if isinstance(encrypted_data, str):
+            encrypted_data = encrypted_data.encode()
+        return self.cipher.decrypt(encrypted_data).decode()
 
 
 # Global encryptor instance
 encryptor = Encryptor()
+
+
+# --- PROVIDER REGISTRATION ---
+class CoreSecurityProvider:
+    """Proprietary implementation of the SecurityProvider interface."""
+
+    def hash_password(self, password: str) -> str:
+        return hash_password(password)
+
+    def verify_password(self, password: str, password_hash: str) -> bool:
+        return verify_password(password, password_hash)
+
+    def generate_token(self, user_id: str, additional_claims=None) -> str:
+        return generate_token(user_id, additional_claims)
+
+    def verify_token(self, token: str) -> Dict[str, Any]:
+        return verify_token(token)
+
+    def encrypt(self, data: str) -> str:
+        return encryptor.encrypt(data)
+
+    def decrypt(self, encrypted_data: str) -> str:
+        return encryptor.decrypt(encrypted_data)
+
+    def sanitize_input(self, user_input: str) -> str:
+        return sanitize_input(user_input)
+
+
+# Register this as the security provider
+register_security_provider(CoreSecurityProvider())
 
 
 # INPUT VALIDATION

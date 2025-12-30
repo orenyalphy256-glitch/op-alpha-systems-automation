@@ -9,6 +9,7 @@ Integrates: Task system + Database logging
 """
 
 from datetime import datetime
+from typing import Any, Dict, List
 
 from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -16,7 +17,7 @@ from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 
 from autom8.alerts import alert_task_failure
-from autom8.core import log
+from autom8.core import log, register_scheduler_provider
 from autom8.models import TaskLog, get_session, init_db
 from autom8.tasks import run_task
 
@@ -251,6 +252,54 @@ def run_job_now(job_id):
     # Execute job function immediately
     job.func(*job.args, **job.kwargs)
     log.info(f"Manually executed job {job_id} successfully")
+
+
+# --- PROVIDER REGISTRATION ---
+class CoreSchedulerProvider:
+    """Proprietary implementation of the SchedulerProvider interface."""
+
+    def init_scheduler(self):
+        return init_scheduler()
+
+    def start_scheduler(self):
+        return start_scheduler()
+
+    def stop_scheduler(self, wait=True):
+        return stop_scheduler(wait=wait)
+
+    def get_jobs(self) -> List[Dict[str, Any]]:
+        return get_scheduled_jobs()
+
+    def schedule_task(self, task_type: str, **kwargs) -> str:
+        # Simple wrapper for dynamic scheduling
+        if scheduler is None:
+            init_scheduler()
+
+        job_id = f"dynamic_{task_type}_{datetime.now().timestamp()}"
+        scheduler.add_job(
+            func=execute_task_with_logging,
+            trigger=IntervalTrigger(**kwargs) if kwargs else "date",
+            args=[task_type],
+            id=job_id,
+            name=f"Dynamic {task_type.capitalize()} Task",
+        )
+        return job_id
+
+    def pause_job(self, job_id: str) -> None:
+        pause_job(job_id)
+
+    def resume_job(self, job_id: str) -> None:
+        resume_job(job_id)
+
+    def remove_job(self, job_id: str) -> None:
+        remove_job(job_id)
+
+    def run_job_now(self, job_id: str) -> None:
+        run_job_now(job_id)
+
+
+# Register this as the scheduler provider
+register_scheduler_provider(CoreSchedulerProvider())
 
 
 # Module exports
