@@ -99,6 +99,8 @@ credentials/
 
 # Security & Key Generation
 generate_keys.py
+autom8/security.py
+autom8/scheduler.py
 
 # Temporary files
 tmp/
