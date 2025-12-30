@@ -46,3 +46,4 @@ statistics = True
 per-file-ignores =
     __init__.py:F401
     ci_pipeline.py:C901
+    interfaces.py:E704

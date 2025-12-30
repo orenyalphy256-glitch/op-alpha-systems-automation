@@ -15,7 +15,7 @@ Tests cover:
 
 import time
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch  # noqa: F401
 
 import pytest
 from apscheduler.schedulers.background import BackgroundScheduler
