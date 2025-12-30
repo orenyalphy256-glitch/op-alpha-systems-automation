@@ -1,0 +1,24 @@
+# Copyright (c) 2025 Alphonce Liguori Oreny. All rights reserved.
+# This software is proprietary and confidential.
+# Unauthorized copying of this file, via any medium is strictly prohibited.
+
+"""
+
+init_database.py - Database initialization script
+Run once to create tables
+"""
+
+from autom8.models import engine, init_db
+
+
+def main():
+    print("Initializing database...")
+    init_db()
+    print(f"Database ready at: {engine.url}")
+    print("\nTables created:")
+    print("  - contacts")
+    print("  - task_logs")
+
+
+if __name__ == "__main__":
+    main()

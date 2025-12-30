@@ -1,0 +1,30 @@
+# BANDIT SECURITY SCANNER CONFIGURATION
+
+# Test IDs to skip (B101 is assert_used, often skipped in tests but good to know)
+skips:
+  - B101
+
+# Directories to exclude from scanning
+exclude_dirs:
+  - /venv/
+  - /.venv/
+  - /tests/
+  - /__pycache__/
+  - /.pytest_cache/
+
+# Test IDs to include
+# COMMENTED OUT TO ENABLE ALL CHECKS (BLACKLIST MODE)
+# tests:
+#   - B201  # Flask debug mode
+#   - B501  # SSL certificate verification
+#   ... (Running all checks is safer)
+
+# Severity levels to report
+severity:
+  - HIGH
+  - MEDIUM
+
+# Confidence levels to report
+confidence:
+  - HIGH
+  - MEDIUM

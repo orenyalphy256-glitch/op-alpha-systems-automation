@@ -1,0 +1,180 @@
+.TH AUTOM8 1 "December 2025" "Autom8 1.0.0" "User Commands"
+.SH NAME
+autom8 \- Enterprise Systems Automation Platform
+.SH SYNOPSIS
+.B autom8
+[\fB\-h\fR|\fB\-\-help\fR]
+[\fB\-v\fR|\fB\-\-version\fR]
+.IR command
+[\fIoptions\fR]
+.SH DESCRIPTION
+.B autom8
+is a production-grade automation platform for modern systems engineering.
+It provides RESTful API services, background task scheduling, and comprehensive
+system monitoring capabilities.
+.SH OPTIONS
+.TP
+.BR \-h ", " \-\-help
+Display help information and exit.
+.TP
+.BR \-v ", " \-\-version
+Display version information and exit.
+.SH COMMANDS
+.SS Service Management
+.TP
+.B api start
+Start the API server
+.TP
+.B api stop
+Stop the API server
+.TP
+.B api restart
+Restart the API server
+.TP
+.B api status
+Check API server status
+.TP
+.B scheduler start
+Start the background scheduler
+.TP
+.B scheduler stop
+Stop the background scheduler
+.TP
+.B scheduler status
+Check scheduler status
+.SS Database Operations
+.TP
+.B db init
+Initialize the database schema
+.TP
+.B db migrate
+Run database migrations
+.TP
+.B db seed
+Seed database with test data
+.TP
+.B db shell
+Open interactive database shell
+.TP
+.B db backup
+Create database backup
+.TP
+.B db restore \fIfile\fR
+Restore database from backup file
+.SS System Operations
+.TP
+.B health
+Perform system health check
+.TP
+.B info
+Display system information
+.TP
+.B metrics
+Show system metrics
+.TP
+.B logs [\fB\-\-tail\fR \fIN\fR]
+Display application logs (optionally tail last N lines)
+.SS Testing
+.TP
+.B test [\fB\-\-coverage\fR]
+Run test suite with optional coverage report
+.TP
+.B test unit
+Run unit tests only
+.TP
+.B test integration
+Run integration tests only
+.SS Development
+.TP
+.B dev setup
+Setup development environment
+.TP
+.B dev lint
+Run code linters
+.TP
+.B dev format
+Format code with Black
+.SS Contact Management
+.TP
+.B contacts list
+List all contacts
+.TP
+.B contacts add
+Add new contact (interactive)
+.TP
+.B contacts delete \fIid\fR
+Delete contact by ID
+.SH EXAMPLES
+.TP
+Start the API server:
+.B autom8 api start
+.TP
+Check system health:
+.B autom8 health
+.TP
+Run tests with coverage:
+.B autom8 test \-\-coverage
+.TP
+Backup database:
+.B autom8 db backup
+.TP
+View last 100 log lines:
+.B autom8 logs \-\-tail 100
+.SH FILES
+.TP
+.I ~/.autom8/config
+User configuration file
+.TP
+.I /etc/autom8/autom8.conf
+System-wide configuration file
+.TP
+.I /var/log/autom8/app.log
+Application log file
+.SH ENVIRONMENT
+.TP
+.B AUTOM8_CONFIG
+Path to configuration file
+.TP
+.B AUTOM8_LOG_LEVEL
+Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+.TP
+.B DATABASE_URL
+Database connection string
+.SH EXIT STATUS
+.TP
+.B 0
+Success
+.TP
+.B 1
+General error
+.TP
+.B 2
+Command not found
+.TP
+.B 3
+Invalid arguments
+.SH SECURITY
+Autom8 implements enterprise-grade security features including:
+.IP \(bu 2
+JWT-based authentication
+.IP \(bu 2
+AES-256 field-level encryption
+.IP \(bu 2
+Rate limiting (200 req/min default)
+.IP \(bu 2
+Security headers (HSTS, CSP)
+.IP \(bu 2
+Input validation and sanitization
+.SH BUGS
+Report bugs at: https://github.com/orenyalphy256-glitch/op-alpha-systems-automation/issues
+.SH AUTHOR
+Written by Alphonce Liguori Oreny (Agent ALO)
+.SH COPYRIGHT
+Copyright \(co 2025 Alphonce Liguori Oreny
+.br
+License: Proprietary (All Rights Reserved)
+.SH SEE ALSO
+.BR autom8-api (1),
+.BR autom8-scheduler (1)
+.PP
+Full documentation: https://github.com/orenyalphy256-glitch/op-alpha-systems-automation

@@ -1,0 +1,114 @@
+# Python bytecode files
+__pycache__/
+*.py[cod]
+*.so
+*$py.class
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environment
+venv/
+ENV/
+env/
+.venv/
+env.bak/
+venv.bak/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+*.swp
+*.swo
+
+# Data & Logs
+data/
+*.db
+*.sqlite
+*.sqlite3
+*.log
+99-Logs/
+logs/
+project-tree.txt
+celerybeat-schedule
+instance/
+node_modules/
+data/*.db
+
+
+# Testing & Coverage
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+coverage_report.txt
+*.cover
+.pytest_cache/
+.tox/
+.hypothesis/
+
+# Linting Reports
+flake-report/
+.flake8-report/
+pylint-report/
+.mypy_cache/
+.ruff_cache/
+bandit*.json
+bandit*.html
+security_report.*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.*
+*.env
+!.env.canary
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets and Credentials
+secrets/
+credentials/
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+
+# Docker
+.dockerignore
+
+# Security & Key Generation
+generate_keys.py
+autom8/security.py
+autom8/scheduler.py
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Backups 
+*.bak
+backup/
+*.backup

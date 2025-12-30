@@ -1,0 +1,49 @@
+# FLAKE8 CONFIGURATION FILE
+# PYTHON linting and style guide enforcement
+
+[flake8]
+# Maximum line length
+max-line-length = 100
+
+# Exclude specific files or directories
+exclude =
+    .git,
+    __pycache__,
+    build,
+    dist,
+    migrations,
+    venv,
+    .venv,
+    .env,
+    *.egg-info,
+    htmlcov,
+    .pytest-cache,
+    .tox,
+    *.pyc
+
+# Error codes to ignore
+# W503: Line break before binary operator
+# E203: Whitespace before ':'
+ignore =
+    W503,
+    E203
+
+# Maximum complexity allowed for a function
+max-complexity = 10
+
+# Show source code
+show-source = True
+
+# Count errors
+count = True
+
+# Statistics
+statistics = True
+
+# Per-file-ignores
+# Ignore unused imports in __init__.py files (imports are checked in other files)
+# Ignore complexity in ci_pipeline.py (run_command is complex but well-tested)
+per-file-ignores =
+    __init__.py:F401
+    ci_pipeline.py:C901
+    interfaces.py:E704

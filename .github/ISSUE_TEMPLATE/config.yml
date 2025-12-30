@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 📚 Documentation
+    url: https://github.com/orenyalphy256-glitch/op-alpha-systems-automation/blob/main/README.md
+    about: Check the documentation for answers
+  - name: 💬 Discussions
+    url: https://github.com/orenyalphy256-glitch/op-alpha-systems-automation/discussions
+    about: Ask questions and discuss ideas with the community
+  - name: 📧 Email Support
+    url: mailto:orenyalphy256@gmail.com
+    about: Contact the maintainer directly for sensitive issues

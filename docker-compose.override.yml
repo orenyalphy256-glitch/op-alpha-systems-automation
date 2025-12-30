@@ -1,0 +1,43 @@
+# AUTOM8 - DEVELOPMENT OVERRIDES
+# Override settings for local development
+
+services:
+  api:
+    # Mount source code for live reload
+    volumes:
+      - .:/app
+
+    # Development environment
+    environment:
+      - DEBUG=true
+      - LOG_LEVEL=DEBUG
+      - FLASK_ENV=development
+      - RELOAD=true
+
+    # No resource limits in development
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+
+    # Build with no cache for development
+    build:
+      cache_from: []
+
+  dashboard:
+    volumes:
+      - .:/app
+
+    environment:
+      - DEBUG=true
+      - LOG_LEVEL=DEBUG
+  # Development-specific services
+  # Uncomment if you want a development database viewer
+  # db-viewer:
+  #   image: sqlitebrowser/sqlitebrowser
+  #   container_name: autom8_db_viewer
+  #   volumes:
+  #     - autom8_data:/data
+  #   networks:
+  #     - autom8_network

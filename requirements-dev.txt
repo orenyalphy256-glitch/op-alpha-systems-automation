@@ -1,0 +1,33 @@
+-r requirements.txt
+
+# Testing
+pytest
+pytest-cov
+coverage
+
+# Linting & formatting
+black
+flake8
+flake8-html
+autoflake
+bandit
+mccabe
+pycodestyle
+pyflakes
+
+# Dev tooling
+pre-commit
+virtualenv
+nodeenv
+identify
+cfgv
+pathspec
+platformdirs
+pluggy
+setuptools
+
+# Profiling / performance (Day 68)
+memory-profiler
+redis
+locust
+py-spy

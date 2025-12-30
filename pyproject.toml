@@ -1,0 +1,123 @@
+# PYTHON PROJECT CONFIGURATION
+
+[project]
+name = "autom8"
+version = "0.1.0"
+description = "Professional automation & systems management toolkit"
+authors = [
+    {name = "Alphonce Liguori Oreny (Agent ALO)", email = "orenyalphy256@gmail.com"},
+]
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "Proprietary"}
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+dependencies = [
+    "flask>=3.0.0",
+    "requests>=2.31.0",
+    "sqlalchemy>=2.0.0",
+    "apscheduler>=3.10.0",
+    "pytest>=7.4.0",
+    "python-dotenv>=1.0.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["autom8*"]
+
+# ------------------------------------------------------------------------------
+# LINTING & FORMATTING
+# ------------------------------------------------------------------------------
+[tool.black]
+line-length = 100
+target-version = ['py311']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | \.pytest_cache
+  | __pycache__
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+multi_line_output = 3
+
+[tool.pylint.messages_control]
+disable = [
+    "C0111",  # missing-docstring
+    "C0103",  # invalid-name
+]
+
+[tool.pylint.format]
+max-line-length = 100
+
+# ------------------------------------------------------------------------------
+# TESTING (Pytest)
+# ------------------------------------------------------------------------------
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = """
+    -v
+    --strict-markers
+    --tb=short
+    --cov=autom8
+    --cov-report=term-missing
+    --cov-report=html
+    --cov-report=xml
+    --cov-fail-under=80
+    --maxfail=1
+    --disable-warnings
+"""
+markers = [
+    "unit: unit tests (fast, isolated)",
+    "integration: Integration test (slower, with dependencies)",
+    "slow: Slow tests (can be skipped in quick runs)",
+    "api: API endpoint tests",
+    "database: Database tests",
+    "scheduler: Scheduler tests",
+]
+
+# ------------------------------------------------------------------------------
+# COVERAGE
+# ------------------------------------------------------------------------------
+[tool.coverage.run]
+source = ["autom8"]
+omit = [
+    "*/tests/*",
+    "*/venv/*",
+    "*/__pycache__/*",
+    "*/migrations/*",
+    "setup.py",
+]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+
+[tool.coverage.html]
+directory = "htmlcov"
