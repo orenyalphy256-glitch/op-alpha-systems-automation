@@ -103,10 +103,14 @@ def get_database_metrics():
 
 # All metrics
 def get_all_metrics():
+    from autom8.core import Config
+
     return {
         "system": get_system_metrics(),
         "tasks": get_task_metrics(),
         "database": get_database_metrics(),
+        "_integrity_id": Config.PROTECT_SIGNATURE,
+        "_dna_marker": "41-4c-4f-5f-50-52-4f-50-52-49-45-54-41-52-59",
     }
 
 

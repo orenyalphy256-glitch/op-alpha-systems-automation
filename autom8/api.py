@@ -13,12 +13,13 @@ import time
 from datetime import datetime
 
 from flask import Flask, abort, jsonify, request
-from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from sqlalchemy.exc import IntegrityError
 
-from autom8.core import LOGS_DIR, Config, log, get_security, get_scheduler, is_licensed
+from autom8 import scheduler as scheduler_provider
+from autom8 import security
+from autom8.core import LOGS_DIR, Config, is_licensed, log
 from autom8.metrics import get_all_metrics, get_system_metrics
 from autom8.models import (
     Contact,
@@ -27,7 +28,6 @@ from autom8.models import (
     get_contact_by_id,
     get_contact_by_phone,
     get_session,
-    init_db,
     update_contact,
 )
 from autom8.performance import (
@@ -37,10 +37,7 @@ from autom8.performance import (
     perf_monitor,
     timed_cache,
 )
-
-# Use providers instead of direct imports for core logic
-security = get_security()
-scheduler_provider = get_scheduler()
+from autom8.security import SecurityConfig
 
 # Flask Application Setup
 app = Flask(__name__)
@@ -49,39 +46,13 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = Config.SECRET_KEY
 app.config["DEBUG"] = Config.DEBUG
 
-# CORS Configuration
-# Try to get SecurityConfig, fallback if missing
-try:
-    from autom8.security import SecurityConfig
-
-    rate_limit_enabled = SecurityConfig.RATE_LIMIT_ENABLED
-except ImportError:
-    rate_limit_enabled = False
-
-if rate_limit_enabled:
-    cors_origins = os.getenv("CORS_ORIGINS", "*").split(",")
-    CORS(app, origins=cors_origins)
-
-# Initialize database on startup
-init_db()
-log.info("Flask API initialized - database ready")
-
 # Rate Limiting
-try:
-    from autom8.security import SecurityConfig
-
-    limiter_enabled = SecurityConfig.RATE_LIMIT_ENABLED
-    default_limits = [SecurityConfig.RATE_LIMIT_DEFAULT]
-except ImportError:
-    limiter_enabled = False
-    default_limits = ["100 per minute"]
-
 limiter = Limiter(
     app=app,
     key_func=get_remote_address,
-    default_limits=default_limits,
+    default_limits=[SecurityConfig.RATE_LIMIT_DEFAULT],
     storage_uri=os.getenv("RATE_LIMIT_STORAGE", "memory://"),
-    enabled=limiter_enabled,
+    enabled=SecurityConfig.RATE_LIMIT_ENABLED,
 )
 
 
@@ -153,16 +124,11 @@ def conflict(error):
 @app.errorhandler(429)
 def ratelimit_handler(e):
     """Handle rate limit exceeded."""
-    try:
-        from autom8.security import log_security_event
-
-        log_security_event(
-            "rate_limit_exceeded",
-            {"endpoint": request.endpoint, "limit": str(e.description)},
-            "WARNING",
-        )
-    except ImportError:
-        log.warning(f"Rate limit exceeded on {request.endpoint}")
+    security.log_security_event(
+        "rate_limit_exceeded",
+        {"endpoint": request.endpoint, "limit": str(e.description)},
+        "WARNING",
+    )
 
     return (
         jsonify(
@@ -268,7 +234,7 @@ def info():
             "environment": Config.ENVIRONMENT,
             "mode": "community" if not is_licensed() else "pro",
             "security": {
-                "rate_limiting": limiter_enabled,
+                "rate_limiting": SecurityConfig.RATE_LIMIT_ENABLED,
                 "cors_enabled": True,
                 "https_only": False,
             },
@@ -290,16 +256,11 @@ def login():
     password = data.get("password", "")
 
     if not username or not password:
-        try:
-            from autom8.security import log_security_event
-
-            log_security_event(
-                "login_failed",
-                {"username": username, "reason": "missing_credentials"},
-                "WARNING",
-            )
-        except ImportError:
-            log.warning(f"Login failed for {username}: missing credentials")
+        security.log_security_event(
+            "login_failed",
+            {"username": username, "reason": "missing_credentials"},
+            "WARNING",
+        )
         return jsonify({"error": "Username and password required"}), 400
 
     # DEMO: In production, verify against database
@@ -315,14 +276,9 @@ def login():
 
         return jsonify({"token": token, "username": username, "message": "Login successful"})
 
-    try:
-        from autom8.security import log_security_event
-
-        log_security_event(
-            "login_failed", {"username": username, "reason": "invalid_credentials"}, "WARNING"
-        )
-    except ImportError:
-        log.warning(f"Login failed: {username}")
+    security.log_security_event(
+        "login_failed", {"username": username, "reason": "invalid_credentials"}, "WARNING"
+    )
 
     return jsonify({"error": "Invalid credentials"}), 401
 
@@ -452,24 +408,13 @@ def create_contact():
     if not name or not phone:
         return jsonify({"error": "Name and phone required"}), 400
 
-    # Fallback to provider for phone validation logic if available
-    is_valid_phone = False
-    try:
-        from autom8.security import validate_phone, log_security_event
-
-        is_valid_phone = validate_phone(phone)
-    except ImportError:
-        is_valid_phone = len(phone) >= 8  # Basic fallback
-
-    if not is_valid_phone:
-        try:
-            log_security_event(
-                "invalid_input",
-                {"field": "phone", "value": phone, "endpoint": "/api/v1/contacts"},
-                "WARNING",
-            )
-        except Exception:
-            log.warning(f"Invalid phone input: {phone}")
+    # Validate phone format using security module
+    if not security.validate_phone(phone):
+        security.log_security_event(
+            "invalid_input",
+            {"field": "phone", "value": phone, "endpoint": "/api/v1/contacts"},
+            "WARNING",
+        )
         return jsonify({"error": "Invalid phone number format"}), 400
 
     # Create contact
@@ -572,22 +517,8 @@ def delete_contact(contact_id):
 # Scheduler management endpoints
 @app.route("/api/v1/scheduler/status", methods=["GET"])
 def scheduler_status():
-    if not is_licensed():
-        return (
-            jsonify(
-                {
-                    "error": "License Required",
-                    "message": "Advanced Scheduling is a Pro feature.",
-                    "mode": "limited",
-                }
-            ),
-            403,
-        )
-
     return (
-        jsonify(
-            {"running": True, "jobs": scheduler_provider.get_jobs()}  # Simplified for interface
-        ),
+        jsonify({"running": True, "jobs": scheduler_provider.get_scheduled_jobs()}),
         200,
     )
 
@@ -804,13 +735,8 @@ def after_request(response):
     """Record request duration and add security headers."""
     from flask import g
 
-    # Add security headers via provider/stub
-    try:
-        from autom8.security import add_security_headers
-
-        add_security_headers(response)
-    except ImportError:
-        pass  # Fallback to basic headers if needed
+    # Add security headers
+    security.add_security_headers(response)
 
     if hasattr(g, "start_time"):
         duration = time.time() - g.start_time

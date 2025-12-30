@@ -26,9 +26,7 @@ def test_contact_model_methods():
 
 
 def test_tasklog_model_methods():
-    t = TaskLog(
-        task_type="backup", status="completed", result_data="ok", error_message=None
-    )
+    t = TaskLog(task_type="backup", status="completed", result_data="ok", error_message=None)
     t.id = 1
     t.started_at = datetime(2025, 1, 1, 10, 0, 0)
     t.completed_at = datetime(2025, 1, 1, 10, 5, 0)
@@ -42,4 +40,3 @@ def test_tasklog_model_methods():
 
     assert "TaskLog" in repr(t)
     assert "backup" in repr(t)
-

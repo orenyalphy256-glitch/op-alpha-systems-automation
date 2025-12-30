@@ -148,12 +148,12 @@ def simulate_n_plus_1_problem():
 
     # N queries for posts (one per user)
     for user_id in users:
-        print(f"   Query {user_id+2}: SELECT * FROM posts WHERE user_id={user_id}")
+        print(f"   Query {user_id + 2}: SELECT * FROM posts WHERE user_id={user_id}")
         time.sleep(0.01)  # Simulate query time
 
     time_bad = time.time() - start
     print(f"   Total time: {time_bad:.4f}s")
-    print(f"   Total queries: 11")
+    print("   Total queries: 11")
 
     # Good: JOIN query
     print("\n✅ Good: Single JOIN query")
@@ -164,7 +164,7 @@ def simulate_n_plus_1_problem():
 
     time_good = time.time() - start
     print(f"   Total time: {time_good:.4f}s")
-    print(f"   Total queries: 1")
+    print("   Total queries: 1")
 
     # Speedup
     speedup = time_bad / time_good if time_good > 0 else float("inf")
@@ -180,7 +180,7 @@ def complex_function():
 
     # Operation 2: List operations (30% time)
     numbers = list(range(10000))
-    sorted_numbers = sorted(numbers, reverse=True)
+    sorted(numbers, reverse=True)
 
     # Operation 3: Dictionary operations (50% time)
     data = {i: i**2 for i in range(10000)}
@@ -200,7 +200,7 @@ def profile_complex_function():
     profiler.enable()
 
     # Run function
-    result = complex_function()
+    complex_function()
 
     profiler.disable()
 
@@ -250,7 +250,7 @@ def test_context_timer():
     print("\n⏱️  Timing code block:")
     with timer("Database query simulation"):
         time.sleep(0.3)
-        result = sum(range(10000))
+        sum(range(10000))
 
     print("\n⏱️  Timing another block:")
     with timer("API call simulation"):

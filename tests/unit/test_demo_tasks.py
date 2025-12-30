@@ -2,8 +2,7 @@
 # This software is proprietary and confidential.
 # Unauthorized copying of this file, via any medium is strictly prohibited.
 
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from autom8 import demo_tasks
 
 
