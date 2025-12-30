@@ -9,9 +9,6 @@ Covers edge cases, error handlers, and specific endpoint logic not covered by in
 """
 
 from unittest.mock import MagicMock, patch
-
-import pytest
-
 from autom8.api import app, validate_contact_data
 
 
@@ -87,28 +84,28 @@ def test_405_handler(client):
 
 @patch("autom8.api.scheduler_provider")
 def test_scheduler_status(mock_scheduler, client):
-    # Mock get_jobs
-    mock_scheduler.get_jobs.return_value = [{"id": "j1"}]
+    # Mock get_scheduled_jobs
+    mock_scheduler.get_scheduled_jobs.return_value = [{"id": "j1"}]
 
     # Test via Flask Client (Standard way)
     res = client.get("/api/v1/scheduler/status")
-    
+
     # Depending on your API implementation, it might check running state
-    # or just return jobs count. 
+    # or just return jobs count.
     # NOTE: If api.py checks scheduler_provider.running, we need to mock that too.
     # But usually status just returns simple info.
-    assert res.status_code == 200 or res.status_code == 403 # 403 if Limited Mode?
+    assert res.status_code == 200 or res.status_code == 403  # 403 if Limited Mode?
     # Actually scheduler status endpoint in api.py might be gated or limited.
-    
+
     # If using Limited Mode, it returns empty/limited info.
     # The endpoint implementation uses scheduler_provider.get_jobs()
-    
+
 
 @patch("autom8.api.scheduler_provider")
 def test_trigger_job(mock_scheduler, client):
     # Success
     res = client.post("/api/v1/scheduler/jobs/j1/run")
-    # API might return 403 if Limited Mode? 
+    # API might return 403 if Limited Mode?
     # If LimitedProvider is executing, it does nothing and returns 200 OK message?
     # Checking api.py implementation:
     # It calls run_job_now.

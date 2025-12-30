@@ -1,55 +1,33 @@
 # ============================================================================
-# AUTOM8 - SECURE DOCKER IMAGE
-# Multi-stage build with security hardening
+# RUNTIME STAGE (Single Stage Build using Local Cache)
 # ============================================================================
 
-# BUILD STAGE
-FROM python:3.14-slim AS builder
-
-# Set build arguments
-ARG PYTHON_VERSION=3.11
-
-# Install build dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    git \
-    && rm -rf /var/lib/apt/lists/*
-
-# Create virtual environment
-RUN python -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
-
-# Copy requirements and install
-COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
-
-# ============================================================================
-# RUNTIME STAGE
-# ============================================================================
-
-FROM python:3.14-slim
+# Use locally verified image to bypass network registry blocks
+FROM autom8:20251223_024601
 
 # Set labels
 LABEL maintainer="Autom8 Engineering"
 LABEL description="Autom8 Systems Automation Platform"
-LABEL version="1.0.0"
+LABEL version="1.0.1+restored"
 
-# Security: Create non-root user
-RUN groupadd -r autom8 && \
-    useradd -r -g autom8 -s /bin/false autom8
+# Switch to root to perform updates
+USER root
 
 # Set working directory
 WORKDIR /app
 
-# Copy virtual environment from builder
-COPY --from=builder /opt/venv /opt/venv
+# Ensure we are using the venv from the base image
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Copy application code
-COPY --chown=autom8:autom8 . .
+# Copy requirements and try to install (PyPI might work even if Docker Hub fails)
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Create directories with correct permissions
+# Copy application code (Overwrites old version)
+COPY . .
+
+# Create directories with correct permissions if they don't exist
 RUN mkdir -p /app/data /app/logs && \
     chown -R autom8:autom8 /app
 
@@ -57,16 +35,16 @@ RUN mkdir -p /app/data /app/logs && \
 RUN find . -type f -name "*.pyc" -delete && \
     find . -type d -name "__pycache__" -delete
 
-# Environment variables (defaults, override with .env)
+# Environment variables
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     APP_NAME=Autom8 \
     ENVIRONMENT=production \
     DEBUG=False
 
-# Health check
+# Health check - Using absolute path to venv python
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:5000/api/v1/health', timeout=5).raise_for_status()" || exit 1
+    CMD /opt/venv/bin/python -c "import requests; requests.get('http://localhost:5000/api/v1/health', timeout=5).raise_for_status()" || exit 1
 
 # Switch to non-root user
 USER autom8

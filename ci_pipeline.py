@@ -186,14 +186,10 @@ def stage_lint():
     success = run_command(
         [sys.executable, "-m", "flake8", "autom8/", "--count", "--statistics"],
         "Flake8 Linting",
-        fail_on_error=False,
+        fail_on_error=True,
     )
 
-    if not success:
-        print_warning("Flake8 found issues. Please fix them before proceeding.")
-        return False
-
-    return True
+    return success
 
 
 def stage_format_check():
@@ -204,15 +200,10 @@ def stage_format_check():
     success = run_command(
         [sys.executable, "-m", "black", "--check", "autom8/"],
         "Black Formatting Check",
-        fail_on_error=False,
+        fail_on_error=True,
     )
 
-    if not success:
-        print_warning("Black found formatting issues.")
-        print_info("Run 'black autom8/' to format the code.")
-        return False
-
-    return True
+    return success
 
 
 def stage_security():

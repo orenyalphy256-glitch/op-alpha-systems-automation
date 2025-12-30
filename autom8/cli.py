@@ -16,16 +16,7 @@ import sys
 from pathlib import Path
 from typing import Tuple
 
-# Import core license check
-try:
-    from autom8.core import is_licensed
-
-    HAS_CORE = True
-except ImportError:
-    HAS_CORE = False
-
-    def is_licensed():
-        return False
+# No license check in simple single-repo mode
 
 
 try:
@@ -190,11 +181,6 @@ def cmd_api_status(args):
 
 def cmd_scheduler_start(args):
     """Start the scheduler"""
-    if not is_licensed():
-        print_warning("Advanced Scheduler is a Pro feature.")
-        print_info("Running in Limited Mode - basic scheduling only.")
-        print_info("Contact: github.com/orenyalphy256-glitch for licensing.")
-
     print_info("Starting Autom8 scheduler...")
     success, stdout, stderr = run_command("python run_scheduler.py")
     if success:
@@ -330,18 +316,7 @@ def cmd_info(args):
     print(f"{Style.BRIGHT}Python:{Style.RESET_ALL} {sys.version.split()[0]}")
     print(f"{Style.BRIGHT}Platform:{Style.RESET_ALL} {sys.platform}")
 
-    # Show license mode
-    if is_licensed():
-        print(
-            f"{Style.BRIGHT}License:{Style.RESET_ALL} " f"{Fore.GREEN}Pro Edition{Style.RESET_ALL}"
-        )
-    else:
-        print(
-            f"{Style.BRIGHT}License:{Style.RESET_ALL} "
-            f"{Fore.YELLOW}Community Edition{Style.RESET_ALL}"
-        )
-        print_info("Upgrade to Pro for advanced scheduling and security features.")
-        print_info("Contact: github.com/orenyalphy256-glitch/op-alpha-systems-automation")
+    print(f"{Style.BRIGHT}License:{Style.RESET_ALL} Proprietary Edition")
 
     # Check if API is running
     try:

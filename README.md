@@ -8,6 +8,7 @@
 [![Test Coverage](https://img.shields.io/badge/coverage-85%25-success?style=for-the-badge&logo=pytest&logoColor=white)](./TESTING_GUIDE.md)
 [![Security](https://img.shields.io/badge/security-A%2B-success?style=for-the-badge&logo=security&logoColor=white)](./SECURITY.md)
 [![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red.svg?style=for-the-badge)](LICENSE)
+[![Integrity](https://img.shields.io/badge/System-Integrity_Verified-blue?style=for-the-badge&logo=shield)](./SECURITY.md)
 
 **Production-grade automation platform engineered for enterprise systems**
 

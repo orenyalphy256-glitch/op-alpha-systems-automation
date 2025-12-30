@@ -4,13 +4,14 @@
 
 """
 
-Load testing with locust.
+load testing with locust.
 Usage: locust -f locustfile.py --host=http://localhost:5000
-Then open: https://localhost:8089
+Then open: http://localhost:8089
 """
 
-from locust import HttpLocust, task, between, HttpUser
 import random
+
+from locust import HttpUser, between, task
 
 
 class AutomUser(HttpUser):
@@ -18,7 +19,7 @@ class AutomUser(HttpUser):
 
     # Wait 1-3 seconds between tasks
     wait_time = between(1, 3)
-    
+
     # Store IDs discovered or created during the test
     discovered_ids = set()
 
@@ -34,7 +35,7 @@ class AutomUser(HttpUser):
             # Handle both list and paginated dict response
             if isinstance(contacts, dict) and "contacts" in contacts:
                 contacts = contacts["contacts"]
-            
+
             if isinstance(contacts, list):
                 for c in contacts:
                     self.discovered_ids.add(c["id"])
@@ -56,7 +57,9 @@ class AutomUser(HttpUser):
             "name": f"User {random.randint(1, 10000)}",
             "phone": f"070{random.randint(1000000, 9999999)}",
         }
-        with self.client.post("/api/v1/contacts", json=contact_data, catch_response=True) as response:
+        with self.client.post(
+            "/api/v1/contacts", json=contact_data, catch_response=True
+        ) as response:
             if response.status_code == 201:
                 new_id = response.json().get("id")
                 if new_id:
@@ -69,7 +72,7 @@ class AutomUser(HttpUser):
         """Get a specific discovered contact."""
         if not self.discovered_ids:
             return
-        
+
         contact_id = random.choice(list(self.discovered_ids))
         self.client.get(f"/api/v1/contacts/{contact_id}")
 
@@ -78,7 +81,7 @@ class AutomUser(HttpUser):
         """Delete a contact and remove from internal list."""
         if not self.discovered_ids:
             return
-            
+
         contact_id = random.choice(list(self.discovered_ids))
         with self.client.delete(f"/api/v1/contacts/{contact_id}", catch_response=True) as response:
             if response.status_code == 200:
