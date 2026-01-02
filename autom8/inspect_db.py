@@ -14,7 +14,7 @@ def main():
     session = get_session()
 
     print("\n" + "=" * 60)
-    print("DATABASE INSPECTION Location:")
+    print("DATABASE INSPECTION REPORT")
     print("=" * 60)
 
     # Database location
