@@ -30,6 +30,7 @@ def main():
                 print(f"Created: {contact.name}")
             except Exception as e:
                 print(f" Skipped {name}: {e}")
+                session.rollback()
 
         print("\nDatabase seeded successfully!")
 
