@@ -107,3 +107,10 @@ temp/
 *.bak
 backup/
 *.backup
+
+# Progress Tracker Logs
+progress_log.json
+progress_log.md
+
+# Progress Tracker
+progress_tracker_autom8.py
