@@ -798,10 +798,15 @@ def index():
 
 
 # MAIN
-if __name__ == "__main__":
+def main():
+    """Entry point for console script."""
     log.info(f"Starting {Config.APP_NAME} API v{Config.APP_VERSION}")
     log.info(f"Environment: {Config.ENVIRONMENT}")
     log.info(f"Debug mode: {Config.DEBUG}")
     log.info(f"Rate limiting: {SecurityConfig.RATE_LIMIT_ENABLED}")
 
     app.run(host=Config.API_HOST, port=Config.API_PORT, debug=Config.DEBUG)
+
+
+if __name__ == "__main__":
+    main()

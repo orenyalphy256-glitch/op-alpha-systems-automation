@@ -8,6 +8,8 @@ scheduler.py - Job Scheduling with APScheduler
 Integrates: Task system + Database logging
 """
 
+import signal
+import time
 from datetime import datetime
 
 from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
@@ -278,3 +280,32 @@ __all__ = [
     "run_job_now",
     "execute_task_with_logging",
 ]
+
+
+def main():
+    """Entry point for console script."""
+    def signal_handler(signum, frame):
+        log.info(f"Received signal {signum}, stopping scheduler...")
+        stop_scheduler()
+        exit(0)
+
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+
+    try:
+        init_scheduler()
+        schedule_all_jobs()
+        start_scheduler()
+
+        # Keep main thread alive
+        while True:
+            time.sleep(1)
+            
+    except Exception as e:
+        log.error(f"Scheduler failed: {e}")
+        stop_scheduler()
+        exit(1)
+
+
+if __name__ == "__main__":
+    main()
