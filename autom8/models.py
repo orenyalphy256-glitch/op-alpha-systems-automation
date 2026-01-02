@@ -10,7 +10,7 @@ Defines: Contact model, database initialization, session management
 
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, Integer, String, create_engine, event
+from sqlalchemy import Column, DateTime, Integer, String, create_engine, event, or_
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 from autom8.core import Config, log
@@ -153,7 +153,13 @@ def list_contacts(session, limit=100, offset=0):
 
 def search_contacts(session, query):
     pattern = f"%{query}%"
-    return session.query(Contact).filter(Contact.name.ilike(pattern)).all()
+    return session.query(Contact).filter(
+        or_(
+            Contact.name.ilike(pattern), 
+            Contact.email.ilike(pattern), 
+            Contact.phone.ilike(pattern)
+            )
+    ).all()
 
 
 def update_contact(session, contact_id, **kwargs):
