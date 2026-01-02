@@ -43,8 +43,7 @@ from autom8.security import SecurityConfig
 app = Flask(__name__)
 
 # Configuration from the environment
-app.config["SECRET_KEY"] = Config.SECRET_KEY
-app.config["DEBUG"] = Config.DEBUG
+app.config.from_object("autom8.core.Config")
 
 # Rate Limiting
 limiter = Limiter(

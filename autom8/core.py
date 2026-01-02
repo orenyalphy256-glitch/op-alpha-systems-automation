@@ -44,13 +44,13 @@ class Config:
     APP_VERSION = os.getenv("APP_VERSION", "1.0.0")
     ENVIRONMENT = os.getenv("ENVIRONMENT") or os.getenv("APP_ENV") or "development"
     DEBUG = (os.getenv("DEBUG") or os.getenv("APP_DEBUG") or "False") == "True"
-    SECRET_KEY = os.getenv("SECRET_KEY", "change-me-in-production")
-    API_HOST = os.getenv("API_HOST", "127.0.0.1")
-    API_PORT = int(os.getenv("API_PORT", "5000"))
+    SECRET_KEY = os.getenv("SECRET_KEY")
+    API_HOST = os.getenv("API_HOST")
+    API_PORT = int(os.getenv("API_PORT", 5000))
     DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DATA_DIR}/system.db")
     DB_ECHO = os.getenv("DB_ECHO", "False") == "True"
-    LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
-    LICENSE_KEY = os.getenv("AUTOM8_LICENSE_KEY", "DEMO-COMMUNITY-MODE")
+    LOG_LEVEL = os.getenv("LOG_LEVEL")
+    AUTOM8_LICENSE_KEY = os.getenv("AUTOM8_LICENSE_KEY")
 
     # Handle potentially nested log paths from .env
     _log_file_env = os.getenv("LOG_FILE", "app.log")
@@ -58,8 +58,8 @@ class Config:
         LOG_FILE = PROJECT_ROOT / _log_file_env
     else:
         LOG_FILE = LOGS_DIR / _log_file_env
-    TIMEZONE = os.getenv("TIMEZONE", "UTC")
-    PROTECT_SIGNATURE = "ALO-v1-PROPRIETARY-98B2-C7"  # Internal protection ID
+    TIMEZONE = os.getenv("TIMEZONE")
+    PROTECT_SIGNATURE = "ALO-v1-PROPRIETARY-98B2-C7"
 
 
 # JSON File Operations
