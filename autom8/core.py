@@ -244,7 +244,7 @@ def is_licensed() -> bool:
     key = Config.LICENSE_KEY
     if not key or key == "DEMO-COMMUNITY-MODE":
         return False
-    return key.startswith("ALO-PRO")
+    return key.startswith("PRO")
 
 
 # Module-Level Exports
