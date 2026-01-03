@@ -720,7 +720,7 @@ def clear_cache():
     )
 
 
-# Add request timing middleware
+# Request timing middleware
 @app.before_request
 def before_request():
     """Start timer for request."""
