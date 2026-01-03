@@ -265,10 +265,9 @@ log.info(f"Debug mode: {Config.DEBUG}")
 # No complex provider registry in single-repo mode
 def is_licensed() -> bool:
     """Check if the system has a valid license key."""
-    key = Config.LICENSE_KEY
+    key = Config.AUTOM8_LICENSE_KEY
     if not key or key == "DEMO-COMMUNITY-MODE":
         return False
-    return key.startswith("PRO")
 
 
 # Module-Level Exports
