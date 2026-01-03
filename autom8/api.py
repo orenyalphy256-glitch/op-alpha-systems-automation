@@ -451,6 +451,7 @@ def create_contact():
 
 
 @app.route("/api/v1/contacts/<int:contact_id>", methods=["PUT"])
+@limiter.limit(SecurityConfig.RATE_LIMIT_CONTACTS_PUT)
 def update_contact_endpoint(contact_id):
     session = get_session()
 
