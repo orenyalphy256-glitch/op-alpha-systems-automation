@@ -50,7 +50,7 @@ limiter = Limiter(
     app=app,
     key_func=get_remote_address,
     default_limits=[SecurityConfig.RATE_LIMIT_DEFAULT],
-    storage_uri=os.getenv("RATE_LIMIT_STORAGE", "memory://"),
+    storage_uri=SecurityConfig.RATE_LIMIT_STORAGE,
     enabled=SecurityConfig.RATE_LIMIT_ENABLED,
 )
 

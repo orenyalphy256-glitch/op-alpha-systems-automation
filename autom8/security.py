@@ -31,31 +31,64 @@ class SecurityConfig:
 
     # JWT settings
     JWT_SECRET_KEY = os.getenv(
-        "JWT_SECRET_KEY",
-        "dev-secret-key-change-in-production",
+        "JWT_SECRET_KEY"
     )
+    if not JWT_SECRET_KEY:
+        raise ValueError(
+            "JWT_SECRET_KEY environment variable is required"
+        )
+    if len(JWT_SECRET_KEY) < 32:
+        raise ValueError(
+            "JWT_SECRET_KEY environment variable must be at least 32 characters long"
+        )
+    
     JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
     JWT_EXPIRATION_HOURS = int(os.getenv("JWT_EXPIRATION_HOURS", "24"))
 
     # Password settings
     PASSWORD_SALT = os.getenv(
-        "PASSWORD_SALT",
-        "default-salt-change-in-production",
+        "PASSWORD_SALT"
     )
-    PASSWORD_MIN_LENGTH = 8
+    if not PASSWORD_SALT:
+        raise ValueError(
+            "PASSWORD_SALT environment variable is required"
+        )
+    if len(PASSWORD_SALT) < 32:
+        raise ValueError(
+            "PASSWORD_SALT environment variable must be at least 32 characters long"
+        )
+    
+    PASSWORD_MIN_LENGTH = os.getenv("PASSWORD_MIN_LENGTH")
 
-    # Rate limiting
-    RATE_LIMIT_ENABLED = os.getenv("RATE_LIMIT_ENABLED", "True") == "True"
+    # Rate limiting (Boolean check)
+    RATE_LIMIT_ENABLED = os.getenv("RATE_LIMIT_ENABLED", "True").lower() == "true"
+
+    # Rate limit values (with safe defaults)
     RATE_LIMIT_DEFAULT = os.getenv("RATE_LIMIT_DEFAULT", "200 per minute")
     RATE_LIMIT_CONTACTS_GET = os.getenv("RATE_LIMIT_CONTACTS_GET", "5000 per minute")
-    RATE_LIMIT_CONTACTS_POST = os.getenv("RATE_LIMIT_CONTACTS_POST", "5000 per minute")
-    RATE_LIMIT_CONTACTS_DELETE = os.getenv("RATE_LIMIT_CONTACTS_DELETE", "2000 per minute")
+    RATE_LIMIT_CONTACTS_POST = os.getenv("RATE_LIMIT_CONTACTS_POST", "1000 per minute")
+    RATE_LIMIT_CONTACTS_PUT = os.getenv("RATE_LIMIT_CONTACTS_PUT", "1000 per minute")
+    RATE_LIMIT_CONTACTS_DELETE = os.getenv("RATE_LIMIT_CONTACTS_DELETE", "500 per minute")
+
+    # Storage backend for rate limiting
+    RATE_LIMIT_STORAGE = os.getenv("RATE_LIMIT_STORAGE", "memory://")
 
     # Encryption
     ENCRYPTION_KEY = os.getenv(
-        "ENCRYPTION_KEY",
-        Fernet.generate_key().decode(),
+        "ENCRYPTION_KEY"
     )
+    if not ENCRYPTION_KEY:
+        raise ValueError(
+            "ENCRYPTION_KEY environment variable is required"
+        )
+    
+    # Validate Fernet key format
+    try:
+        Fernet(ENCRYPTION_KEY.encode())
+    except Exception as e:
+        raise ValueError(
+            "ENCRYPTION_KEY environment variable is invalid"
+        )
 
     # Security Headers
     SECURITY_HEADERS = {

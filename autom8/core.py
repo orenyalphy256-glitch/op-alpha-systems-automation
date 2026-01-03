@@ -43,14 +43,38 @@ class Config:
     APP_NAME = os.getenv("APP_NAME", "Autom8")
     APP_VERSION = os.getenv("APP_VERSION", "1.0.0")
     ENVIRONMENT = os.getenv("ENVIRONMENT") or os.getenv("APP_ENV") or "development"
-    DEBUG = (os.getenv("DEBUG") or os.getenv("APP_DEBUG") or "False") == "True"
+    DEBUG = (os.getenv("DEBUG") or os.getenv("APP_DEBUG") or "False").lower() == "true"
+
     SECRET_KEY = os.getenv("SECRET_KEY")
-    API_HOST = os.getenv("API_HOST")
+    if not SECRET_KEY:
+        raise ValueError(
+            "SECRET_KEY environment variable is not set."
+        )
+    if len(SECRET_KEY) < 32:
+        raise ValueError(
+            "SECRET_KEY environment variable must be at least 32 characters long."
+        )
+    
+    API_HOST = os.getenv("API_HOST", "127.0.0.1")
     API_PORT = int(os.getenv("API_PORT", 5000))
+
     DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DATA_DIR}/system.db")
-    DB_ECHO = os.getenv("DB_ECHO", "False") == "True"
-    LOG_LEVEL = os.getenv("LOG_LEVEL")
+    DB_ECHO = os.getenv("DB_ECHO", "False").lower() == "true"
+
+    LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+
     AUTOM8_LICENSE_KEY = os.getenv("AUTOM8_LICENSE_KEY")
+
+    # Validate production settings
+    if ENVIRONMENT == "production":
+        if DEBUG:
+            raise ValueError(
+                "DEBUG environment variable must be False in production environment."
+            )
+        if "sqlite" in DATABASE_URL.lower():
+            raise ValueError(
+                "SQLite database is not allowed in production environment."
+            )
 
     # Handle potentially nested log paths from .env
     _log_file_env = os.getenv("LOG_FILE", "app.log")
