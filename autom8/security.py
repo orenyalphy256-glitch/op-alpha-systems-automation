@@ -128,12 +128,12 @@ def generate_token(
     additional_claims: Optional[Dict[str, Any]] = None,
 ) -> str:
     """Generate a JWT token for authentication."""
-    expiration = datetime.utcnow() + timedelta(hours=SecurityConfig.JWT_EXPIRATION_HOURS)
+    expiration = datetime.now() + timedelta(hours=SecurityConfig.JWT_EXPIRATION_HOURS)
 
     payload = {
         "user_id": user_id,
         "exp": expiration,
-        "iat": datetime.utcnow(),
+        "iat": datetime.now(),
         "jti": secrets.token_urlsafe(16),
     }
 
