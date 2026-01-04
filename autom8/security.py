@@ -71,7 +71,7 @@ class SecurityConfig:
     RATE_LIMIT_CONTACTS_DELETE = os.getenv("RATE_LIMIT_CONTACTS_DELETE", "3000 per minute")
 
     # Storage backend for rate limiting
-    RATE_LIMIT_STORAGE = os.getenv("RATE_LIMIT_STORAGE", "memory://")
+    RATE_LIMIT_STORAGE = os.getenv("RATE_LIMIT_STORAGE") or None
 
     # Encryption
     ENCRYPTION_KEY = os.getenv(
