@@ -10,7 +10,7 @@ Defines: Contact model, database initialization, session management
 
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, Integer, String, create_engine, event, or_
+from sqlalchemy import Column, DateTime, Integer, String, create_engine, event, or_, Index
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 from autom8.core import Config, log
@@ -26,12 +26,15 @@ engine = create_engine(
     DB_URL,
     echo=Config.DB_ECHO,
     future=True,
-    pool_size=20,
-    max_overflow=30,
-    pool_timeout=60,
+    pool_size=100,
+    max_overflow=200,
+    pool_timeout=5,
+    pool_pre_ping=True,
+    pool_recycle=3600,
     connect_args={
         "check_same_thread": False,
-        "timeout": 30,  # Increase SQLite wait time for locks
+        "timeout": 5,  # Increase SQLite wait time for locks
+        "isolation_level": None,
     },
 )
 
@@ -42,6 +45,9 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
     cursor = dbapi_connection.cursor()
     cursor.execute("PRAGMA journal_mode=WAL")
     cursor.execute("PRAGMA synchronous=NORMAL")
+    cursor.execute("PRAGMA cache_size=64000")
+    cursor.execute("PRAGMA temp_store=MEMORY")
+    cursor.execute("PRAGMA mmap_size=268435456")
     cursor.close()
 
 
@@ -69,11 +75,15 @@ class Contact(Base):
     phone = Column(String(20), nullable=False, unique=True)
 
     # Optional fields
-    email = Column(String(100), nullable=True)
+    email = Column(String(100), nullable=True, index=True)
 
     # Timestamps (auto-managed)
     created_at = Column(DateTime, default=datetime.now, nullable=False)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
+
+    __table_args__ = (
+        Index('idx_contact_search', 'name', 'email', 'phone'),
+    )
 
     def __repr__(self):
         """String representation for debugging."""
