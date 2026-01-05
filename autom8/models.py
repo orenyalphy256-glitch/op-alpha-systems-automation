@@ -106,7 +106,7 @@ class TaskLog(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     task_type = Column(String(50), nullable=False, index=True)
     task_name = Column(String(100), nullable=True)
-    status = Column(String(20), nullable=False)
+    status = Column(String(20), nullable=False, index=True)
     started_at = Column(DateTime, default=datetime.now, nullable=False)
     completed_at = Column(DateTime, nullable=True)
     result_data = Column(String(500), nullable=True)

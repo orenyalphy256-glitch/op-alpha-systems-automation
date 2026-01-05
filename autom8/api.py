@@ -519,6 +519,8 @@ def delete_contact(contact_id):
 # Scheduler management endpoints
 @app.route("/api/v1/scheduler/status", methods=["GET"])
 def scheduler_status():
+    if scheduler_provider is None:
+        return jsonify({"running": False, "jobs": []}), 200
     return (
         jsonify({"running": True, "jobs": scheduler_provider.get_scheduled_jobs()}),
         200,
