@@ -29,8 +29,10 @@ scheduler = None  # Global scheduler instance
 
 
 # Job execution with database logging
-def execute_task_with_logging(task_type, task_name=None):
+def execute_task_with_logging(task_type, task_name=None, **kwargs):
     session = get_session()
+
+    metadata = kwargs.get("_autom8_ver", "N/A")
 
     # Create task log entry
     task_log = TaskLog(
@@ -46,7 +48,7 @@ def execute_task_with_logging(task_type, task_name=None):
         session.commit()
         session.refresh(task_log)
 
-        log.info(f"Starting scheduled task: {task_type} (log ID: {task_log.id})")
+        log.info(f"Starting scheduled task: {task_type} (log ID: {task_log.id}, ver: {metadata})")
 
         result = run_task(task_type, name=task_name)
 
@@ -219,7 +221,7 @@ def get_scheduled_jobs():
                 "trigger": str(job.trigger),
                 "metadata": job.kwargs.get(
                     "_autom8_ver", "N/A"
-                ),  # Include the protection ID if present
+                ),
             }
         )
 
