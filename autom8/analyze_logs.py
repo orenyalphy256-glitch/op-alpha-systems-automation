@@ -105,7 +105,18 @@ def generate_report(hours=24):
 
 
 if __name__ == "__main__":
-    import sys
+    import argparse
 
-    hours = int(sys.argv[1]) if len(sys.argv) > 1 else 24
-    generate_report(hours)
+    parser = argparse.ArgumentParser(
+        description="Analyze autom8 logs and generate a summary report"
+    )
+
+    parser.add_argument(
+        "--hours",
+        type=int,
+        default=24,
+        help="Number of past hours to analyze (default: 24)"
+    )
+
+    args = parser.parse_args()
+    generate_report(args.hours)
