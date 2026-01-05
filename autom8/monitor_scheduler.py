@@ -11,11 +11,15 @@ Run: python -m autom8.monitor_scheduler
 """
 
 import os
+import sys
 import time
 from datetime import datetime
 
 from autom8.models import TaskLog, get_session
 from autom8.scheduler import get_scheduled_jobs
+
+
+sys.stdout.reconfigure(encoding="utf-8")
 
 
 def clear_screen():
