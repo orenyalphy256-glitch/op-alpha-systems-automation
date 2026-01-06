@@ -47,7 +47,13 @@ class Config:
 
     SECRET_KEY = os.getenv("SECRET_KEY")
     if not SECRET_KEY:
-        raise ValueError("SECRET_KEY environment variable is not set.")
+        if ENVIRONMENT == "production":
+            raise ValueError(
+                "SECRET_KEY environment variable is not set and is required in production."
+            )
+        # Default for development/testing
+        SECRET_KEY = "dev-secret-key-at-least-32-chars-long-for-testing"
+
     if len(SECRET_KEY) < 32:
         raise ValueError("SECRET_KEY environment variable must be at least 32 characters long.")
 

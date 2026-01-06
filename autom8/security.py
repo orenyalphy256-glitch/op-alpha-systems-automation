@@ -32,7 +32,10 @@ class SecurityConfig:
     # JWT settings
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
     if not JWT_SECRET_KEY:
-        raise ValueError("JWT_SECRET_KEY environment variable is required")
+        if Config.ENVIRONMENT == "production":
+            raise ValueError("JWT_SECRET_KEY environment variable is required in production")
+        JWT_SECRET_KEY = "dev-jwt-secret-key-at-least-32-chars-long"
+
     if len(JWT_SECRET_KEY) < 32:
         raise ValueError("JWT_SECRET_KEY environment variable must be at least 32 characters long")
 
@@ -42,7 +45,10 @@ class SecurityConfig:
     # Password settings
     PASSWORD_SALT = os.getenv("PASSWORD_SALT")
     if not PASSWORD_SALT:
-        raise ValueError("PASSWORD_SALT environment variable is required")
+        if Config.ENVIRONMENT == "production":
+            raise ValueError("PASSWORD_SALT environment variable is required in production")
+        PASSWORD_SALT = "dev-password-salt-at-least-32-chars-long"
+
     if len(PASSWORD_SALT) < 32:
         raise ValueError("PASSWORD_SALT environment variable must be at least 32 characters long")
 
@@ -64,13 +70,21 @@ class SecurityConfig:
     # Encryption
     ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
     if not ENCRYPTION_KEY:
-        raise ValueError("ENCRYPTION_KEY environment variable is required")
+        if Config.ENVIRONMENT == "production":
+            raise ValueError("ENCRYPTION_KEY environment variable is required in production")
+        # A valid Fernet key for development
+        ENCRYPTION_KEY = "3q2W_f_XpZ1Z0y8G9uS7N-Wv-XwR-Zp-A_B_C_D_E_F="
 
     # Validate Fernet key format
     try:
         Fernet(ENCRYPTION_KEY.encode())
     except Exception:
-        raise ValueError("ENCRYPTION_KEY environment variable is invalid")
+        if Config.ENVIRONMENT == "production":
+            raise ValueError("ENCRYPTION_KEY environment variable is invalid")
+        # Fallback to a fresh key if dev key is somehow invalid
+        from cryptography.fernet import Fernet as F
+
+        ENCRYPTION_KEY = F.generate_key().decode()
 
     # Security Headers
     SECURITY_HEADERS = {
