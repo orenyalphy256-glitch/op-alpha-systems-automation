@@ -47,14 +47,10 @@ class Config:
 
     SECRET_KEY = os.getenv("SECRET_KEY")
     if not SECRET_KEY:
-        raise ValueError(
-            "SECRET_KEY environment variable is not set."
-        )
+        raise ValueError("SECRET_KEY environment variable is not set.")
     if len(SECRET_KEY) < 32:
-        raise ValueError(
-            "SECRET_KEY environment variable must be at least 32 characters long."
-        )
-    
+        raise ValueError("SECRET_KEY environment variable must be at least 32 characters long.")
+
     API_HOST = os.getenv("API_HOST", "127.0.0.1")
     API_PORT = int(os.getenv("API_PORT", 5000))
 
@@ -68,13 +64,9 @@ class Config:
     # Validate production settings
     if ENVIRONMENT == "production":
         if DEBUG:
-            raise ValueError(
-                "DEBUG environment variable must be False in production environment."
-            )
+            raise ValueError("DEBUG environment variable must be False in production environment.")
         if "sqlite" in DATABASE_URL.lower():
-            raise ValueError(
-                "SQLite database is not allowed in production environment."
-            )
+            raise ValueError("SQLite database is not allowed in production environment.")
 
     # Handle potentially nested log paths from .env
     _log_file_env = os.getenv("LOG_FILE", "app.log")

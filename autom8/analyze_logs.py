@@ -112,10 +112,7 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--hours",
-        type=int,
-        default=24,
-        help="Number of past hours to analyze (default: 24)"
+        "--hours", type=int, default=24, help="Number of past hours to analyze (default: 24)"
     )
 
     args = parser.parse_args()

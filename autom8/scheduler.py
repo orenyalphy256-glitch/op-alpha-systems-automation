@@ -219,9 +219,7 @@ def get_scheduled_jobs():
                     job.next_run_time.isoformat() if getattr(job, "next_run_time", None) else "N/A"
                 ),
                 "trigger": str(job.trigger),
-                "metadata": job.kwargs.get(
-                    "_autom8_ver", "N/A"
-                ),
+                "metadata": job.kwargs.get("_autom8_ver", "N/A"),
             }
         )
 
@@ -286,6 +284,7 @@ __all__ = [
 
 def main():
     """Entry point for console script."""
+
     def signal_handler(signum, frame):
         log.info(f"Received signal {signum}, stopping scheduler...")
         stop_scheduler()
@@ -302,7 +301,7 @@ def main():
         # Keep main thread alive
         while True:
             time.sleep(1)
-            
+
     except Exception as e:
         log.error(f"Scheduler failed: {e}")
         stop_scheduler()

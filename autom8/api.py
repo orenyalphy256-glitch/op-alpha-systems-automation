@@ -8,7 +8,6 @@ api.py - Flask REST API for Contact Management
 Implements: RESTful endpoints using SQLAlchemy ORM
 """
 
-import os
 import time
 from datetime import datetime
 
@@ -265,7 +264,7 @@ def login():
         return jsonify({"error": "Username and password required"}), 400
 
     # DEMO: In production, verify against database
-    if username == "demo" and password == "password123":
+    if username == "demo" and password == "password123":  # nosec B105 - Demo credentials only
         token = security.generate_token(username, {"role": "user"})
 
         try:

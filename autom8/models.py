@@ -81,9 +81,7 @@ class Contact(Base):
     created_at = Column(DateTime, default=datetime.now, nullable=False)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
 
-    __table_args__ = (
-        Index('idx_contact_search', 'name', 'email', 'phone'),
-    )
+    __table_args__ = (Index("idx_contact_search", "name", "email", "phone"),)
 
     def __repr__(self):
         """String representation for debugging."""
@@ -163,13 +161,17 @@ def list_contacts(session, limit=100, offset=0):
 
 def search_contacts(session, query):
     pattern = f"%{query}%"
-    return session.query(Contact).filter(
-        or_(
-            Contact.name.ilike(pattern), 
-            Contact.email.ilike(pattern), 
-            Contact.phone.ilike(pattern)
+    return (
+        session.query(Contact)
+        .filter(
+            or_(
+                Contact.name.ilike(pattern),
+                Contact.email.ilike(pattern),
+                Contact.phone.ilike(pattern),
             )
-    ).all()
+        )
+        .all()
+    )
 
 
 def update_contact(session, contact_id, **kwargs):

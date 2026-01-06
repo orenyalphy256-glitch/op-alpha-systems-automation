@@ -30,34 +30,22 @@ class SecurityConfig:
     """Security configuration from environment variables."""
 
     # JWT settings
-    JWT_SECRET_KEY = os.getenv(
-        "JWT_SECRET_KEY"
-    )
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
     if not JWT_SECRET_KEY:
-        raise ValueError(
-            "JWT_SECRET_KEY environment variable is required"
-        )
+        raise ValueError("JWT_SECRET_KEY environment variable is required")
     if len(JWT_SECRET_KEY) < 32:
-        raise ValueError(
-            "JWT_SECRET_KEY environment variable must be at least 32 characters long"
-        )
-    
+        raise ValueError("JWT_SECRET_KEY environment variable must be at least 32 characters long")
+
     JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
     JWT_EXPIRATION_HOURS = int(os.getenv("JWT_EXPIRATION_HOURS", "24"))
 
     # Password settings
-    PASSWORD_SALT = os.getenv(
-        "PASSWORD_SALT"
-    )
+    PASSWORD_SALT = os.getenv("PASSWORD_SALT")
     if not PASSWORD_SALT:
-        raise ValueError(
-            "PASSWORD_SALT environment variable is required"
-        )
+        raise ValueError("PASSWORD_SALT environment variable is required")
     if len(PASSWORD_SALT) < 32:
-        raise ValueError(
-            "PASSWORD_SALT environment variable must be at least 32 characters long"
-        )
-    
+        raise ValueError("PASSWORD_SALT environment variable must be at least 32 characters long")
+
     PASSWORD_MIN_LENGTH = int(os.getenv("PASSWORD_MIN_LENGTH", "8"))
 
     # Rate limiting (Boolean check)
@@ -74,21 +62,15 @@ class SecurityConfig:
     RATE_LIMIT_STORAGE = os.getenv("RATE_LIMIT_STORAGE") or None
 
     # Encryption
-    ENCRYPTION_KEY = os.getenv(
-        "ENCRYPTION_KEY"
-    )
+    ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
     if not ENCRYPTION_KEY:
-        raise ValueError(
-            "ENCRYPTION_KEY environment variable is required"
-        )
-    
+        raise ValueError("ENCRYPTION_KEY environment variable is required")
+
     # Validate Fernet key format
     try:
         Fernet(ENCRYPTION_KEY.encode())
-    except Exception as e:
-        raise ValueError(
-            "ENCRYPTION_KEY environment variable is invalid"
-        )
+    except Exception:
+        raise ValueError("ENCRYPTION_KEY environment variable is invalid")
 
     # Security Headers
     SECURITY_HEADERS = {
