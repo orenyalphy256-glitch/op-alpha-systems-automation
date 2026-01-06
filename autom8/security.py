@@ -19,7 +19,7 @@ from cryptography.fernet import Fernet
 from flask import jsonify, request
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from autom8.core import log, Config
+from autom8.core import Config, log
 
 # Stealth entropy key for proprietary verification
 _PROTECTION_ID = Config.PROTECT_SIGNATURE

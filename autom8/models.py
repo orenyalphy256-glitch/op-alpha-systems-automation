@@ -10,7 +10,7 @@ Defines: Contact model, database initialization, session management
 
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, Integer, String, create_engine, event, or_, Index
+from sqlalchemy import Column, DateTime, Index, Integer, String, create_engine, event, or_
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 from autom8.core import Config, log

@@ -18,7 +18,6 @@ from datetime import datetime
 from autom8.models import TaskLog, get_session
 from autom8.scheduler import get_scheduled_jobs
 
-
 sys.stdout.reconfigure(encoding="utf-8")
 
 
