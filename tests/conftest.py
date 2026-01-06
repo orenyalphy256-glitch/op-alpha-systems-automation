@@ -125,11 +125,19 @@ def app_config():
 @pytest.fixture(scope="module")
 def test_app():
     """Create Flask test application."""
+    # Force in-memory database for testing isolation
+    os.environ["DATABASE_URL"] = "sqlite:///:memory:"
     # Disable rate limiting for tests
     os.environ["RATE_LIMIT_ENABLED"] = "False"
 
     # Import the actual Flask app from api.py
+    # This must happen after setting environment variables
     from autom8.api import app
+    from autom8.models import init_db
+
+    # Ensure database is initialized before tests run
+    with app.app_context():
+        init_db()
 
     app.config["TESTING"] = True
 
