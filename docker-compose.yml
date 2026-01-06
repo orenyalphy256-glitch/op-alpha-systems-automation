@@ -72,7 +72,7 @@ services:
     # Labels for organization
     labels:
       com.autom8.service: "api"
-      com.autom8.version: "1.0"
+      com.autom8.version: "1.0.0"
       com.autom8.description: "Main API and Scheduler Service"
 
   # MONITORING DASHBOARD SERVICE
@@ -126,7 +126,7 @@ services:
     # Labels
     labels:
       com.autom8.service: "dashboard"
-      com.autom8.version: "1.0"
+      com.autom8.version: "1.0.0"
       com.autom8.description: "Monitoring Dashboard"
 
   # DATABASE INITIALIZATION SERVICE (Run Once)
