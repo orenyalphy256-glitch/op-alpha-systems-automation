@@ -12,7 +12,7 @@ echo.
 REM Check if Docker is running
 docker info >nul 2>&1
 if errorlevel 1 (
-    echo ERROR: Docker is not running!
+    echo ❌ ERROR: Docker is not running!
     echo.
     echo Please start Docker Desktop and try again.
     echo.
@@ -20,12 +20,12 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo Docker is running
+echo ✅ Docker is running
 echo.
 
 REM Check environment
 if exist .env (
-    echo Environment file found
+    echo ✅ Environment file found
 ) else (
     echo  WARNING: .env file not found
     echo    Using default values
@@ -33,13 +33,13 @@ if exist .env (
 echo.
 
 REM Start services
-echo Starting services...
+echo 🚀 Starting services...
 echo.
 docker compose up -d
 
 if errorlevel 1 (
     echo.
-    echo Failed to start services
+    echo ❌ Failed to start services
     echo.
     pause
     exit /b 1
@@ -55,7 +55,7 @@ REM Wait a moment for services to initialize
 timeout /t 3 /nobreak >nul
 
 REM Show status
-echo Service Status:
+echo 📊 Service Status:
 echo.
 docker compose ps
 
