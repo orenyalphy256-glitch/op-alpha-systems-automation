@@ -1,7 +1,7 @@
 # Dockerfile - Build instructions for autom8 api service
 
 # Base image
-FROM python:3.11-slim
+FROM python:3.14-slim
 
 # Metadata
 LABEL maintainer="Alphonce Liguori Oreny <orenyalphy256@gmail.com>"
