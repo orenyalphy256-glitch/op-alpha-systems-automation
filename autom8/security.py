@@ -58,7 +58,7 @@ class SecurityConfig:
             "PASSWORD_SALT environment variable must be at least 32 characters long"
         )
     
-    PASSWORD_MIN_LENGTH = os.getenv("PASSWORD_MIN_LENGTH")
+    PASSWORD_MIN_LENGTH = int(os.getenv("PASSWORD_MIN_LENGTH", "8"))
 
     # Rate limiting (Boolean check)
     RATE_LIMIT_ENABLED = os.getenv("RATE_LIMIT_ENABLED", "True").lower() == "true"
@@ -128,12 +128,13 @@ def generate_token(
     additional_claims: Optional[Dict[str, Any]] = None,
 ) -> str:
     """Generate a JWT token for authentication."""
-    expiration = datetime.now() + timedelta(hours=SecurityConfig.JWT_EXPIRATION_HOURS)
+    now = datetime.now()
+    expiration = now + timedelta(hours=SecurityConfig.JWT_EXPIRATION_HOURS)
 
     payload = {
         "user_id": user_id,
-        "exp": expiration,
-        "iat": datetime.now(),
+        "exp": int(expiration.timestamp()),
+        "iat": int(now.timestamp()),
         "jti": secrets.token_urlsafe(16),
     }
 
