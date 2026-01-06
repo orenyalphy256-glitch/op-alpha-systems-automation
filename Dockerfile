@@ -1,56 +1,47 @@
-# ============================================================================
-# RUNTIME STAGE (Single Stage Build using Local Cache)
-# ============================================================================
+# Dockerfile - Build instructions for autom8 api service
 
-# Use locally verified image to bypass network registry blocks
-FROM autom8:20251223_024601
+# Base image
+FROM python:3.11-slim
 
-# Set labels
-LABEL maintainer="Autom8 Engineering"
-LABEL description="Autom8 Systems Automation Platform"
-LABEL version="1.0.1+restored"
+# Metadata
+LABEL maintainer="Alphonce Liguori Oreny <orenyalphy256@gmail.com>"
+LABEL description="Autom8 Systems Automation Platform API Service"
+LABEL version="1.0.0"
 
-# Switch to root to perform updates
-USER root
+# System dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    git \
+    && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
+# Application setup
 WORKDIR /app
 
-# Ensure we are using the venv from the base image
-ENV PATH="/opt/venv/bin:$PATH"
-
-# Copy requirements and try to install (PyPI might work even if Docker Hub fails)
+# Copy requirements first (for layer caching)
 COPY requirements.txt .
+
+# Install python dependencies
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copy application code (Overwrites old version)
+# Copy application code
 COPY . .
 
-# Create directories with correct permissions if they don't exist
-RUN mkdir -p /app/data /app/logs && \
-    chown -R autom8:autom8 /app
+# Install application in editable mode
+RUN pip install -e .
 
-# Security: Remove unnecessary files
-RUN find . -type f -name "*.pyc" -delete && \
-    find . -type d -name "__pycache__" -delete
+# Runtime configuration
+RUN mkdir -p /app/data /app/logs
 
-# Environment variables
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    APP_NAME=Autom8 \
-    ENVIRONMENT=production \
-    DEBUG=False
-
-# Health check - Using absolute path to venv python
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD /opt/venv/bin/python -c "import requests; requests.get('http://localhost:5000/api/v1/health', timeout=5).raise_for_status()" || exit 1
-
-# Switch to non-root user
-USER autom8
-
-# Expose port
 EXPOSE 5000
 
-# Run application
-CMD ["python", "-m", "autom8.api"]
+# environment variables
+ENV FLASK_APP=run_api.py
+ENV PYTHONUNBUFFERED=1
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:5000/api/v1/health')" || exit 1
+
+# Default command
+CMD ["python", "run_combined.py"]
