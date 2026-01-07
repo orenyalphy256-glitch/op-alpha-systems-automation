@@ -10,7 +10,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="autom8",
-    version="0.1.0",
+    version="1.0.0",
     description="Autom8 Systems Automation Platform",
     author="Alphonce Liguori Oreny (Agent ALO)",
     author_email="orenyalphy256@gmail.com",
