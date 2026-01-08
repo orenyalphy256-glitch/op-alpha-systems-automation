@@ -8,6 +8,7 @@ Performance profiling examples.
 """
 
 import time
+import sys
 import cProfile
 import pstats
 import io
@@ -15,6 +16,9 @@ from functools import lru_cache
 from memory_profiler import profile as memory_profile
 
 from autom8.performance import timeit, timer, cached, function_cache
+
+
+sys.stdout.reconfigure(encoding="utf-8")
 
 
 # EXAMPLE 1: CPU-INTENSIVE FUNCTION
