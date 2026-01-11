@@ -10,13 +10,13 @@ Purpose: Centralize common functions used across the application
 
 import json
 import logging
-import os
 import sys
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
-
+from autom8.config import Config
 from dotenv import load_dotenv
+from autom8.ownership import OwnershipAuthority
 
 # Load environment variables from .env file
 load_dotenv()
@@ -36,52 +36,16 @@ LOGS_DIR = PROJECT_ROOT / "logs"
 LOGS_DIR.mkdir(exist_ok=True)
 
 
-# Configuration from the environment
-class Config:
-    """Application configuration from environment variables."""
+def validate_runtime():
+    if Config.ENVIRONMENT in ("production", "staging"):
+        if not Config.SECRET_KEY:
+            raise RuntimeError("SECRET_KEY is required in production/staging environments")
 
-    APP_NAME = os.getenv("APP_NAME", "Autom8")
-    APP_VERSION = os.getenv("APP_VERSION", "1.0.0")
-    ENVIRONMENT = os.getenv("ENVIRONMENT") or os.getenv("APP_ENV") or "development"
-    DEBUG = (os.getenv("DEBUG") or os.getenv("APP_DEBUG") or "False").lower() == "true"
+        if len(Config.SECRET_KEY) < 32:
+            raise RuntimeError("SECRET_KEY must be at least 32 characters long")
 
-    SECRET_KEY = os.getenv("SECRET_KEY")
-    if not SECRET_KEY:
-        if ENVIRONMENT == "production":
-            raise ValueError(
-                "SECRET_KEY environment variable is not set and is required in production."
-            )
-        # Default for development/testing
-        SECRET_KEY = "dev-secret-key-at-least-32-chars-long-for-testing"
-
-    if len(SECRET_KEY) < 32:
-        raise ValueError("SECRET_KEY environment variable must be at least 32 characters long.")
-
-    API_HOST = os.getenv("API_HOST", "127.0.0.1")
-    API_PORT = int(os.getenv("API_PORT", 5000))
-
-    DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DATA_DIR}/system.db")
-    DB_ECHO = os.getenv("DB_ECHO", "False").lower() == "true"
-
-    LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
-
-    AUTOM8_LICENSE_KEY = os.getenv("AUTOM8_LICENSE_KEY")
-
-    # Validate production settings
-    if ENVIRONMENT == "production":
-        if DEBUG:
-            raise ValueError("DEBUG environment variable must be False in production environment.")
-        if "sqlite" in DATABASE_URL.lower():
-            raise ValueError("SQLite database is not allowed in production environment.")
-
-    # Handle potentially nested log paths from .env
-    _log_file_env = os.getenv("LOG_FILE", "app.log")
-    if "logs/" in _log_file_env or "logs\\" in _log_file_env:
-        LOG_FILE = PROJECT_ROOT / _log_file_env
-    else:
-        LOG_FILE = LOGS_DIR / _log_file_env
-    TIMEZONE = os.getenv("TIMEZONE")
-    PROTECT_SIGNATURE = "ALO-v1-PROPRIETARY-98B2-C7"
+        if Config.ENVIRONMENT == "production" and Config.DEBUG:
+            raise RuntimeError("DEBUG must be False in production environment")
 
 
 # JSON File Operations
@@ -124,7 +88,7 @@ class JSONFormatter(logging.Formatter):
             "message": record.getMessage(),
             "module": record.funcName,
             "line": record.lineno,
-            "_pid": Config.PROTECT_SIGNATURE,  # Stealth signature for proprietary tracking
+            "integrity_verified": OwnershipAuthority.integrity_verified(),
         }
 
         # Add exception info if present
@@ -249,7 +213,7 @@ def setup_logging(
 
     root_logger.info(f"Advanced logging configured for {app_name}")
     root_logger.info(f"Log files: {LOGS_DIR}")
-    root_logger.info(f"Integrity check: {Config.PROTECT_SIGNATURE}")
+    root_logger.info(f"Integrity status: {OwnershipAuthority.integrity_verified()}")
 
     return root_logger
 
@@ -262,10 +226,7 @@ log.info(f"Debug mode: {Config.DEBUG}")
 
 # No complex provider registry in single-repo mode
 def is_licensed() -> bool:
-    """Check if the system has a valid license key."""
-    key = Config.AUTOM8_LICENSE_KEY
-    if not key or key == "DEMO-COMMUNITY-MODE":
-        return False
+    return OwnershipAuthority.is_licensed()
 
 
 # Module-Level Exports
@@ -284,4 +245,6 @@ __all__ = [
     "is_licensed",
 ]
 
-# AUTOM8_PROTECT_ डीएनए_MARKER = "41-4c-4f-5f-50-52-4f-50-52-49-45-54-41-52-59"
+
+# Validate runtime configuration on import
+validate_runtime()

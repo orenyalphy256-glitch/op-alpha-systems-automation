@@ -19,10 +19,12 @@ from cryptography.fernet import Fernet
 from flask import jsonify, request
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from autom8.core import Config, log
+from autom8.core import log
+from autom8.config import Config
+from autom8.ownership import OwnershipAuthority
 
-# Stealth entropy key for proprietary verification
-_PROTECTION_ID = Config.PROTECT_SIGNATURE
+# Internal security markers derived from authority (no raw signature)
+_SECURITY_ID = OwnershipAuthority.integrity_token()
 
 
 # CONFIGURATION
@@ -281,9 +283,9 @@ def add_security_headers(response):
 
 # API KEY MANAGEMENT
 def generate_api_key() -> str:
-    """Generate a secure random API key with proprietary salt."""
-    # Salted with internal protection ID
-    return secrets.token_urlsafe(32) + f".{_PROTECTION_ID[:8]}"
+    """Generate a secure random API key with integrity marker."""
+    # Salted with derived integrity token instead of raw signature
+    return secrets.token_urlsafe(32) + f".{_SECURITY_ID[:8]}"
 
 
 def hash_api_key(api_key: str) -> str:
