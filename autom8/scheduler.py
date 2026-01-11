@@ -18,11 +18,11 @@ from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 
 from autom8.alerts import alert_task_failure
-from autom8.core import Config, log
+from autom8.core import log
 from autom8.models import TaskLog, get_session, init_db
 from autom8.tasks import run_task
+from autom8.ownership import OwnershipAuthority
 
-_PID = Config.PROTECT_SIGNATURE
 
 # Scheduler configuration
 scheduler = None  # Global scheduler instance
@@ -32,7 +32,7 @@ scheduler = None  # Global scheduler instance
 def execute_task_with_logging(task_type, task_name=None, **kwargs):
     session = get_session()
 
-    metadata = kwargs.get("_autom8_ver", "N/A")
+    authorized = kwargs.get("authorized", False)
 
     # Create task log entry
     task_log = TaskLog(
@@ -48,7 +48,9 @@ def execute_task_with_logging(task_type, task_name=None, **kwargs):
         session.commit()
         session.refresh(task_log)
 
-        log.info(f"Starting scheduled task: {task_type} (log ID: {task_log.id}, ver: {metadata})")
+        log.info(
+            f"Starting scheduled task: {task_type} (log ID: {task_log.id}, auth: {authorized})"
+        )
 
         result = run_task(task_type, name=task_name)
 
@@ -133,7 +135,7 @@ def schedule_backup_job():
         name="Daily Backup Task",
         replace_existing=True,
         next_run_time=datetime.now(),  # Run immediately on first start
-        kwargs={"_autom8_ver": _PID},
+        kwargs={"authorized": OwnershipAuthority.is_licensed()},
     )
 
     log.info("Backup job scheduled successfully")
@@ -150,7 +152,7 @@ def schedule_cleanup_job():
         id="cleanup_job",
         name="Hourly Cleanup Task",
         replace_existing=True,
-        kwargs={"_autom8_ver": _PID},
+        kwargs={"authorized": OwnershipAuthority.is_licensed()},
     )
 
     log.info("Cleanup job scheduled successfully")
@@ -167,7 +169,7 @@ def schedule_report_job():
         id="report_job",
         name="Daily Report Task",
         replace_existing=True,
-        kwargs={"_autom8_ver": _PID},
+        kwargs={"authorized": OwnershipAuthority.is_licensed()},
     )
 
     log.info("Report job scheduled successfully")
@@ -219,7 +221,7 @@ def get_scheduled_jobs():
                     job.next_run_time.isoformat() if getattr(job, "next_run_time", None) else "N/A"
                 ),
                 "trigger": str(job.trigger),
-                "metadata": job.kwargs.get("_autom8_ver", "N/A"),
+                "authorized": job.kwargs.get("authorized", False),
             }
         )
 

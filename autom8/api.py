@@ -18,7 +18,7 @@ from sqlalchemy.exc import IntegrityError
 
 from autom8 import scheduler as scheduler_provider
 from autom8 import security
-from autom8.core import LOGS_DIR, Config, is_licensed, log
+from autom8.core import LOGS_DIR, log
 from autom8.metrics import get_all_metrics, get_system_metrics
 from autom8.models import (
     Contact,
@@ -37,12 +37,14 @@ from autom8.performance import (
     timed_cache,
 )
 from autom8.security import SecurityConfig
+from autom8.config import Config
+from autom8.ownership import OwnershipAuthority
 
 # Flask Application Setup
 app = Flask(__name__)
 
 # Configuration from the environment
-app.config.from_object("autom8.core.Config")
+app.config.from_object("autom8.config.Config")
 
 # Rate Limiting
 limiter = Limiter(
@@ -232,7 +234,8 @@ def info():
             "name": Config.APP_NAME,
             "version": Config.APP_VERSION,
             "environment": Config.ENVIRONMENT,
-            "mode": "community" if not is_licensed() else "pro",
+            "licensed": OwnershipAuthority.is_licensed(),
+            "integrity": "verified" if OwnershipAuthority.integrity_verified() else "compromised",
             "security": {
                 "rate_limiting": SecurityConfig.RATE_LIMIT_ENABLED,
                 "cors_enabled": True,
@@ -749,7 +752,9 @@ def after_request(response):
         # Add performance header
         response.headers["X-Response-Time"] = f"{duration:.4f}s"
         # Add proprietary heartbeat for integrity monitoring
-        response.headers["X-Proprietary-Heartbeat"] = Config.PROTECT_SIGNATURE
+        response.headers["X-Autom8-Integrity"] = (
+            "ok" if OwnershipAuthority.is_licensed() else "unlicensed"
+        )
 
     return response
 
