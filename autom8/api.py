@@ -330,17 +330,9 @@ def _get_contacts_internal(limit_arg, offset_arg):
         query = session.query(Contact)
         total = query.count()
 
-        contacts = (
-            query.order_by(Contact.name)
-            .offset(offset)
-            .limit(limit)
-            .all()
-        )
+        contacts = query.order_by(Contact.name).offset(offset).limit(limit).all()
 
-        contacts_list = [
-            serialize_contact(c)
-            for c in contacts
-        ]
+        contacts_list = [serialize_contact(c) for c in contacts]
 
         return {
             "contacts": contacts_list,
