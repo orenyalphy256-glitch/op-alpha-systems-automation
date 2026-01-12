@@ -147,6 +147,17 @@ def create_contact(session, name, phone, email=None):
     return contact
 
 
+def serialize_contact(contact):
+    return {
+        "id": contact.id,
+        "name": contact.name,
+        "phone": contact.phone,
+        "email": contact.email,
+        "created_at": contact.created_at.isoformat() if contact.created_at else None,
+        "updated_at": contact.updated_at.isoformat() if contact.updated_at else None,
+    }
+
+
 def get_contact_by_id(session, contact_id):
     return session.query(Contact).filter(Contact.id == contact_id).first()
 

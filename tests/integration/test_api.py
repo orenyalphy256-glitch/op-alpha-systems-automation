@@ -93,8 +93,10 @@ class TestContactsEndpoints:
         # Assert
         assert response.status_code == 200
         data = json.loads(response.data)
-        # API returns a direct list
-        assert isinstance(data, list)
+        # API returns a dictionary with contacts list
+        assert isinstance(data, dict)
+        assert "contacts" in data
+        assert isinstance(data["contacts"], list)
         # Note: May not be empty if database has existing data
 
     def test_create_contact_success(self, client):
@@ -347,7 +349,7 @@ class TestAPIWorkflows:
         # Get all contacts
         all_response = client.get("/api/v1/contacts")
         assert all_response.status_code == 200
-        all_contacts = json.loads(all_response.data)
+        all_contacts = json.loads(all_response.data)["contacts"]
         assert len(all_contacts) >= 3
 
         # Verify each contact exists
