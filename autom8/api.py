@@ -25,6 +25,7 @@ from autom8.models import (
     SessionLocal,
     TaskLog,
     get_contact_by_id,
+    serialize_contact,
     get_contact_by_phone,
     get_session,
     update_contact,
@@ -312,60 +313,43 @@ def protected():
 
 @app.route("/api/v1/contacts", methods=["GET"])
 def get_contacts():
-    """Get contacts with optional pagination."""
-    # Rate limiting handled by decorator if autom8.security is available
     limit_arg = request.args.get("limit")
     offset_arg = request.args.get("offset")
 
-    # Use a cached helper that takes parameters to ensure cache uniqueness
     result = _get_contacts_internal(limit_arg, offset_arg)
-
-    if isinstance(result, dict) and "is_paginated" in result:
-        # We need to make a copy to avoid mutating the cached object
-        result_copy = result.copy()
-        result_copy.pop("is_paginated")
-        return jsonify(result_copy)
-
     return jsonify(result)
 
 
 @cached(cache_obj=timed_cache)
 def _get_contacts_internal(limit_arg, offset_arg):
-    # If no pagination params, return legacy list format
-    # This maintains compatibility with existing tests
-    is_paginated = limit_arg is not None or offset_arg is not None
-
     limit = int(limit_arg) if limit_arg else 100
     offset = int(offset_arg) if offset_arg else 0
 
     session = SessionLocal()
     try:
         query = session.query(Contact)
-        contacts = query.order_by(Contact.name).offset(offset).limit(limit).all()
+        total = query.count()
+
+        contacts = (
+            query.order_by(Contact.name)
+            .offset(offset)
+            .limit(limit)
+            .all()
+        )
 
         contacts_list = [
-            {
-                "id": c.id,
-                "name": c.name,
-                "phone": c.phone,
-                "created_at": c.created_at.isoformat() if c.created_at else None,
-            }
+            serialize_contact(c)
             for c in contacts
         ]
 
-        if is_paginated:
-            # We return dicts from the internal function so they are serializable
-            # and don't cache a Response object if possible (though Response is fine too)
-            total = query.count()
-            return {
+        return {
+            "contacts": contacts_list,
+            "meta": {
                 "total": total,
                 "limit": limit,
                 "offset": offset,
-                "contacts": contacts_list,
-                "is_paginated": True,
-            }
-
-        return contacts_list
+            },
+        }
     finally:
         session.close()
 
@@ -385,14 +369,7 @@ def get_contact(contact_id):
         if not contact:
             return jsonify({"error": "Contact not found"}), 404
 
-        return jsonify(
-            {
-                "id": contact.id,
-                "name": contact.name,
-                "phone": contact.phone,
-                "created_at": contact.created_at.isoformat(),
-            }
-        )
+        return jsonify(serialize_contact(contact)), 200
     finally:
         session.close()
 
@@ -432,14 +409,7 @@ def create_contact():
         log.info(f"Contact created: {name}")
 
         return (
-            jsonify(
-                {
-                    "id": contact.id,
-                    "name": contact.name,
-                    "phone": contact.phone,
-                    "created_at": contact.created_at.isoformat(),
-                }
-            ),
+            jsonify(serialize_contact(contact)),
             201,
         )
     except IntegrityError:
@@ -481,7 +451,7 @@ def update_contact_endpoint(contact_id):
 
         log.info(f"Updated contact ID {contact_id}")
 
-        return jsonify(updated.to_dict()), 200
+        return jsonify(serialize_contact(updated)), 200
 
     except IntegrityError as e:
         session.rollback()
