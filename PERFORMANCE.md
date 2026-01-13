@@ -26,8 +26,8 @@ Autom8 is engineered for performance from the ground up, utilizing asynchronous 
 |--------|-------------------------------|----------|
 | API Latency (p95) | < 150ms | 45ms |
 | DB Query Execution | < 30ms | 8ms |
-| API Rate Limit (Default) | 200 req/min | Configurable |
-| API Rate Limit (Bulk) | 5000 req/min | High-load |
+| API Rate Limit (Default) | 5,000 req/min | Fixed Contract |
+| API Rate Limit (Burst) | 5,000+ req/min | High-load |
 | Peak CPU Utilization | < 60% | 15% |
 
 ---
@@ -46,10 +46,10 @@ The system monitors hardware utilization in real-time using native system probes
 
 ```bash
 # JSON Health & Performance Report
-curl http://localhost:5000/api/v1/performance/health
+curl http://localhost:5000/api/v1/metrics
 
 # Detailed Hardware Analytics
-curl http://localhost:5000/api/v1/performance/system
+curl http://localhost:5000/api/v1/metrics/system
 ```
 
 ---
@@ -140,7 +140,7 @@ locust -f locustfile.py --host=http://localhost:5000
 - [ ] Validate database index utilization.
 
 ### Continuous Monitoring
-- [ ] Monitor `/api/v1/performance/stats` for request anomalies.
+- [ ] Monitor `/api/v1/task_logs/stats` for request anomalies.
 - [ ] Review slow log outputs periodically.
 - [ ] Conduct monthly stress tests to identify new bottlenecks.
 

@@ -31,83 +31,45 @@ Autom8 is built as a **multi-tier, service-oriented architecture** designed for 
 
 ## Design Philosophy
 
-### 1. **Security by Design**
+### 1. **Governed API (Frozen Contract)**
+Autom8 follows a "Contract First" approach. The API is not just a set of endpoints; it is a governed product with frozen fields and static response shapes to ensure long-term stability for integrators.
 
-Security is not an afterthought but a foundational principle:
+### 2. **Zone-Based Trust Architecture**
+The system is divided into three strict trust zones:
+- **Zone 1 (Internal Data)**: `models.py`, `core.py`. High trust, raw database access.
+- **Zone 2 (API Contract)**: `serializers/`. The firewall. Pure functions that shape and whitelist data.
+- **Zone 3 (Public API)**: `api.py`. Low trust, handles routing, authentication, and header governance.
 
-- **Defense in Depth**: Multiple security layers (authentication, encryption, rate limiting)
-- **Least Privilege**: Components have minimal required permissions
-- **Fail Secure**: System defaults to secure state on errors
-- **Audit Everything**: All critical operations are logged
-
-### 2. **Performance First**
-
-Performance optimizations are built-in from the start:
-
-- **Multi-tier Caching**: LRU + TTL caching at multiple levels
-- **Lazy Loading**: Resources loaded only when needed
-- **Connection Pooling**: Database connections reused efficiently
-- **Asynchronous Operations**: Non-blocking I/O where appropriate
-
-### 3. **Developer Experience**
-
-The codebase is designed to be maintainable and extensible:
-
-- **Clear Abstractions**: Well-defined interfaces between components
-- **Comprehensive Documentation**: Every public API is documented
-- **Type Hints**: Python type annotations throughout
-- **Consistent Patterns**: Similar problems solved similarly
+### 3. **Performance Immunity**
+By utilizing flat database models with zero foreign key relationships, the system is inherently immune to:
+- **N+1 Query Problems**: All resource data is eagerly loaded in a single query.
+- **Lazy Loading Exceptions**: Objects are fully materialized before reaching the Serializer layer.
 
 ---
 
-## Architecture Layers
+## Architecture Layers (The Zone Model)
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     PRESENTATION LAYER                       │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │  REST API    │  │  CLI Tool    │  │  Dashboard   │      │
-│  │  (Flask)     │  │  (argparse)  │  │  (HTML/JS)   │      │
-│  └──────────────┘  └──────────────┘  └──────────────┘      │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│                    MIDDLEWARE LAYER                          │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │ Auth/JWT     │  │ Rate Limiter │  │ CORS Handler │      │
-│  └──────────────┘  └──────────────┘  └──────────────┘      │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │ Validation   │  │ Profiling    │  │ Error Handler│      │
-│  └──────────────┘  └──────────────┘  └──────────────┘      │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│                   BUSINESS LOGIC LAYER                       │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │ Contact Mgmt │  │ Task Sched.  │  │ Metrics      │      │
-│  │ Service      │  │ Service      │  │ Service      │      │
-│  └──────────────┘  └──────────────┘  └──────────────┘      │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │ Alert System │  │ Performance  │  │ Security     │      │
-│  │              │  │ Monitor      │  │ Service      │      │
-│  └──────────────┘  └──────────────┘  └──────────────┘      │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│                    DATA ACCESS LAYER                         │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │ ORM Models   │  │ Cache Layer  │  │ Query Builder│      │
-│  │ (SQLAlchemy) │  │ (LRU/TTL)    │  │              │      │
-│  └──────────────┘  └──────────────┘  └──────────────┘      │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│                   PERSISTENCE LAYER                          │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │ SQLite (Dev) │  │ PostgreSQL   │  │ File System  │      │
-│  │              │  │ (Production) │  │ (Logs/Data)  │      │
-│  └──────────────┘  └──────────────┘  └──────────────┘      │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    subgraph "Zone 3: Public API (External Transition)"
+        A[api.py: Routing & Flask]
+        B[security.py: Auth & Limiting]
+    end
+
+    subgraph "Zone 2: API Contract (Serializers)"
+        C[serializers/: Whitelisting & Shaping]
+    end
+
+    subgraph "Zone 1: Internal logic (Internal Core)"
+        D[models.py: SQLAlchemy Models]
+        E[core.py: Configuration & Logging]
+        F[scheduler.py: Task Execution]
+    end
+
+    A -->|consumes| C
+    C -->|serializes| D
+    B -->|protects| A
+    F -->|logs to| D
 ```
 
 ---
@@ -116,228 +78,67 @@ The codebase is designed to be maintainable and extensible:
 
 ### Core Components
 
-#### 1. **API Service** (`api.py`)
+#### 1. **Public API (Zone 3)** (`api.py`)
 
-**Responsibility**: HTTP request handling and routing
-
-**Key Features**:
-- RESTful endpoint implementation
-- Request validation and sanitization
-- Response formatting
-- Error handling and recovery
-
-**Dependencies**:
-- Flask web framework
-- Security service for authentication
-- Business logic services
-
-**Design Pattern**: MVC (Model-View-Controller)
-
----
-
-#### 2. **Security Service** (`security.py`)
-
-**Responsibility**: Authentication, authorization, and encryption
+**Responsibility**: Routing and Public Contract Governance.
 
 **Key Features**:
-- JWT token generation and validation
-- AES-256 field-level encryption
-- Password hashing (bcrypt)
-- Rate limiting enforcement
-- Security header injection
-
-**Design Pattern**: Singleton (for encryption key management)
+- Implementation of the stable `/api/v1/` contract.
+- Header injection for Performance (`X-Response-Time`) and Integrity (`X-Autom8-Integrity`).
+- Sanitization of error responses (hiding internal details).
 
 ---
 
-#### 3. **Scheduler Service** (`scheduler.py`)
+#### 2. **Serializer Layer (Zone 2)** (`serializers/`)
 
-**Responsibility**: Background task scheduling and execution
+**Responsibility**: Data Whitelisting and Shape Enforcement.
 
 **Key Features**:
-- Cron-style job scheduling
-- Job persistence
-- Failure recovery
-- Job monitoring and alerting
-
-**Technology**: APScheduler with SQLAlchemy job store
-
-**Design Pattern**: Observer (for job event notifications)
+- **Frozen Contracts**: Guarantees that fields never disappear or change types.
+- **Purity**: Pure functions that never query the database or depend on global state.
+- **Zero Polymorphism**: Returns static shapes (nulls over missing keys).
 
 ---
 
-#### 4. **Performance Monitor** (`performance.py`)
+#### 3. **Security Service** (`security.py`)
 
-**Responsibility**: System performance tracking and optimization
+**Responsibility**: Authentication, Encryption, and Hardening.
 
 **Key Features**:
-- Request timing middleware
-- CPU/Memory profiling
-- Query performance tracking
-- Performance metrics collection
-
-**Design Pattern**: Decorator (for profiling functions)
-
----
-
-#### 5. **Metrics Service** (`metrics.py`)
-
-**Responsibility**: System metrics collection and reporting
-
-**Key Features**:
-- CPU, memory, disk usage tracking
-- Custom metric collection
-- Metric aggregation
-- Alerting on thresholds
-
-**Design Pattern**: Observer (for metric subscribers)
-
----
-
-#### 6. **Data Models** (`models.py`)
-
-**Responsibility**: Database schema and ORM mappings
-
-**Models**:
-- `Contact`: Contact management with encrypted fields
-- `Task`: Scheduled task definitions
-- `Metric`: System metrics storage
-- `AuditLog`: Security audit trail
-
-**Design Pattern**: Active Record (via SQLAlchemy)
-
----
-
-## Data Flow
-
-### Request Processing Flow
-
-```mermaid
-graph TD
-    A[Client Request] --> B[Flask Router]
-    B --> C{Authentication Required?}
-    C -->|Yes| D[JWT Validation]
-    C -->|No| E[Rate Limiter]
-    D --> E
-    E --> F{Rate Limit OK?}
-    F -->|No| G[429 Too Many Requests]
-    F -->|Yes| H[Input Validation]
-    H --> I{Valid Input?}
-    I -->|No| J[400 Bad Request]
-    I -->|Yes| K[Business Logic]
-    K --> L{Cache Hit?}
-    L -->|Yes| M[Return Cached]
-    L -->|No| N[Database Query]
-    N --> O[Cache Result]
-    O --> P[Format Response]
-    M --> P
-    P --> Q[Security Headers]
-    Q --> R[Return Response]
-```
-
-### Background Job Flow
-
-```mermaid
-graph TD
-    A[Scheduler Trigger] --> B[Load Job Definition]
-    B --> C[Check Job Status]
-    C --> D{Job Enabled?}
-    D -->|No| E[Skip Execution]
-    D -->|Yes| F[Execute Job]
-    F --> G{Success?}
-    G -->|Yes| H[Update Last Run]
-    G -->|No| I[Log Error]
-    I --> J{Retry?}
-    J -->|Yes| K[Schedule Retry]
-    J -->|No| L[Send Alert]
-    H --> M[Record Metrics]
-    K --> M
-    L --> M
-```
+- JWT token lifecycle management.
+- **Sanitization**: Deep input cleansing to prevent injection.
+- **Encryption**: AES-256 (Fernet) for data at rest.
+- **Hashing**: PBKDF2 with SHA256 (secure storage).
+- **Rate Limiting**: Default **5,000 req/min** for enterprise stability.
 
 ---
 
 ## Security Architecture
 
-### Authentication Flow
-
-```mermaid
-sequenceDiagram
-    participant Client
-    participant API
-    participant Security
-    participant Database
-
-    Client->>API: POST /auth/login
-    API->>Security: validate_credentials()
-    Security->>Database: Query user
-    Database-->>Security: User data
-    Security->>Security: Verify password
-    Security->>Security: Generate JWT
-    Security-->>API: Access + Refresh tokens
-    API-->>Client: 200 OK + Tokens
-    
-    Note over Client,API: Subsequent requests
-    
-    Client->>API: GET /api/v1/contacts
-    API->>Security: validate_token()
-    Security->>Security: Verify signature
-    Security->>Security: Check expiration
-    Security-->>API: User context
-    API->>Database: Query contacts
-    Database-->>API: Contact data
-    API-->>Client: 200 OK + Data
-```
+### Authentication & Hashing
+- **Hashing Algorithm**: PBKDF2:SHA256 with 16-length salt.
+- **Token Strategy**: JWT (HS256) with 24-hour expiration by default.
 
 ### Encryption Strategy
+- **Mechanism**: Fernet (Symmetric encryption using AES-128/AES-256 in CBC mode).
+- **Scope**: Applied to PII data (phone, email) before database persistence.
 
-**Field-Level Encryption**:
-- Sensitive fields (phone numbers, emails) encrypted at rest
-- AES-256-GCM encryption
-- Unique initialization vector per record
-- Encryption keys stored in environment variables
-
-**Transport Security**:
-- HTTPS enforced in production
-- TLS 1.2+ required
-- HSTS headers enabled
+### Transport & Headers
+- **Integrity**: Every response carries a cryptographic heartbeat via `X-Autom8-Integrity`.
+- **Timing**: `X-Response-Time` exposes backend latency on every call for transparency.
 
 ---
 
 ## Performance Architecture
 
+### N+1 Immunity
+Autom8 is architecturally immune to the N+1 query problem. By maintaining a flat model structure in `models.py` and avoiding lazy-loaded relationships, all resource data is fetched in a single, efficient database round-trip.
+
 ### Caching Strategy
-
-**Multi-Tier Caching**:
-
-1. **Application Cache** (LRU)
-   - In-memory cache for frequently accessed data
-   - 1000 item limit
-   - Automatic eviction of least recently used
-
-2. **TTL Cache**
-   - Time-based expiration
-   - 5-minute default TTL
-   - Configurable per endpoint
-
-3. **Query Result Cache**
-   - Database query results cached
-   - Invalidated on writes
-   - Reduces database load by ~70%
-
-### Database Optimization
-
-**Query Optimization**:
-- Indexed columns: `id`, `created_at`, `email`
-- Eager loading for relationships
-- Query result pagination
-- Connection pooling (5-20 connections)
-
-**Performance Targets**:
-- API response time (p50): <50ms
-- API response time (p95): <120ms
-- Database query time: <10ms
-- Cache hit rate: >80%
+The system employs a multi-tier caching strategy focused on **Eventual Consistency**:
+- **Application LRU**: Fast in-memory access for high-frequency reads.
+- **Timed TTL**: 5-minute default expiration for system-wide consistency.
+- **Write-Through Potential**: While reads are cached, writes (Create/Update/Delete) currently rely on TTL expiration. For "Immediate Consistency," cache clearing must be explicitly invoked on write paths.
 
 ---
 
@@ -496,54 +297,16 @@ class MetricsCollector:
 
 ---
 
-## Database Schema
+## Database Design
 
-### Entity Relationship Diagram
+### Model Strategy
+- **Flat Table Design**: Minimizes complex joins and maximizes horizontal scalability.
+- **Deterministic Sorting**: Lists (like Contacts) are explicitly ordered (`Contact.name`) in the internal query layer to prevent paging jitter.
 
-```mermaid
-erDiagram
-    CONTACT {
-        int id PK
-        string name
-        string phone_encrypted
-        string email_encrypted
-        datetime created_at
-        datetime updated_at
-    }
-    
-    TASK {
-        int id PK
-        string name
-        string schedule
-        boolean enabled
-        datetime last_run
-        datetime next_run
-    }
-    
-    METRIC {
-        int id PK
-        string metric_type
-        float value
-        datetime timestamp
-    }
-    
-    AUDIT_LOG {
-        int id PK
-        string action
-        string user
-        string details
-        datetime timestamp
-    }
-```
-
-### Indexing Strategy
-
-**Indexed Columns**:
-- `contact.id` (Primary Key, Clustered)
-- `contact.email` (Unique, Non-clustered)
-- `contact.created_at` (Non-clustered, for sorting)
-- `task.next_run` (Non-clustered, for scheduler)
-- `metric.timestamp` (Non-clustered, for time-series queries)
+### Indexing
+- `Contact.name`: Optimized for sorting and search.
+- `Contact.email`: Unique index for fast lookups.
+- `TaskLog.task_type`: Indexed for status monitoring.
 
 ---
 
@@ -631,46 +394,20 @@ erDiagram
 
 ---
 
-## Future Architecture Enhancements
+## Future Architecture & Readiness
 
-### Planned Improvements
+### 1. Deprecation Readiness
+The system is built to evolve without violence. It features a per-route `@deprecated` decorator (API Layer) and a centralized discovery notice system (`/info`). This allows for a 4-channel signaling process (Headers, Notices, Logs, Docs).
 
-1. **Microservices Migration**
-   - Split into separate services (API, Scheduler, Metrics)
-   - Service mesh for inter-service communication
-   - Independent scaling
-
-2. **Event-Driven Architecture**
-   - Message queue (RabbitMQ/Kafka)
-   - Event sourcing for audit trail
-   - CQRS pattern for read/write separation
-
-3. **Advanced Caching**
-   - Redis for distributed caching
-   - Cache warming strategies
-   - Intelligent cache invalidation
-
-4. **Enhanced Monitoring**
-   - Prometheus for metrics
-   - Grafana for visualization
-   - Distributed tracing (Jaeger)
+### 2. Multi-Cloud & Scaling
+The stateless nature of the `v1` API and the usage of standard environment variables for secret management (JWT, Fernet) makes Autom8 ready for Kubernetes / Docker Swarm orchestration.
 
 ---
 
 ## Conclusion
 
-The Autom8 architecture is designed for **security, performance, and scalability**. Through careful component design, proven design patterns, and a well-thought-out technology stack, the system delivers enterprise-grade automation capabilities while maintaining simplicity and maintainability.
-
-**Key Strengths**:
-- ✅ Security-first design with multiple protection layers
-- ✅ High performance through intelligent caching
-- ✅ Modular architecture for easy maintenance
-- ✅ Production-ready with comprehensive monitoring
-- ✅ Scalable design supporting future growth
+The Autom8 architecture has shifted from a generic multi-tier pattern to a **Hardened Zone Architecture**. By freezing the contract at Zone 2 (Serializers) and enforcing security at Zone 3 (API), the system provides the predictability and performance required for enterprise automation.
 
 ---
 
-*For more details, see:*
-- [API Documentation](API.md)
-- [Deployment Guide](DEPLOYMENT.md)
-- [Architecture Diagrams](architecture-diagram.md)
+*Last Updated: January 14, 2026*

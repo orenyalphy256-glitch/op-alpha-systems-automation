@@ -75,8 +75,9 @@ curl http://localhost:5000/api/v1/health
 ```json
 {
   "status": "healthy",
-  "timestamp": "2025-12-20T14:42:00Z",
-  "version": "1.0.0"
+  "service": "Autom8 API",
+  "version": "1.0.0",
+  "environment": "development"
 }
 ```
 
@@ -94,7 +95,9 @@ curl -X POST http://localhost:5000/api/v1/contacts \
   "id": 1,
   "name": "John Doe",
   "phone": "0701234567",
-  "created_at": "2025-12-20T14:42:00Z"
+  "email": null,
+  "created_at": "2026-01-14T10:00:00Z",
+  "updated_at": "2026-01-14T10:00:00Z"
 }
 ```
 

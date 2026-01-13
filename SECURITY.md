@@ -40,9 +40,9 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
 *   **Least Privilege:** Grant the minimum necessary permissions.
 
 ### 3. API Security
-*   **Rate Limiting:** Multi-tiered throttling (200 req/min default) with high-capacity overrides for contacts (5000 req/min).
-*   **Input Validation:** Sanitize and validate all incoming data using `autom8.security` utilities.
-*   **Headers:** Standard security headers (HSTS, X-Frame-Options) are automatically injected.
+*   **Rate Limiting**: Multi-tiered throttling scaled to **5,000 req/min** by default for enterprise-grade protection.
+*   **Input Validation**: Deep sanitization and whitelisting of all incoming data using `security.sanitize_input` to prevent XSS and injection.
+*   **Headers**: Automatic injection of `X-Autom8-Integrity` (integrity validation) and `X-Response-Time` (latency transparency) alongside standard security headers.
 
 ### 4. Data Protection
 *   **Encryption:** Sensitive data at rest should be encrypted using the configured `ENCRYPTION_KEY`.
