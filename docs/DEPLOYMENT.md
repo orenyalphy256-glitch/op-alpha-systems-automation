@@ -107,8 +107,10 @@ ENCRYPTION_KEY=<generate-32-byte-key>
 ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com
 
 # Rate Limiting
-RATE_LIMIT_DEFAULT=200
-RATE_LIMIT_OVERRIDE=5000
+RATE_LIMIT_ENABLED=True
+RATE_LIMIT_DEFAULT=5000 per minute
+RATE_LIMIT_CONTACTS_GET=5000 per minute
+RATE_LIMIT_CONTACTS_POST=5000 per minute
 
 # Logging
 LOG_LEVEL=INFO
@@ -602,8 +604,10 @@ sudo systemctl enable redis-server
 
 Update `.env`:
 ```env
-CACHE_TYPE=redis
-CACHE_REDIS_URL=redis://localhost:6379/0
+UPDATE_RATE_LIMIT=True
+# Specific overrides if needed
+RATE_LIMIT_CONTACTS_PUT=4000 per minute
+RATE_LIMIT_CONTACTS_DELETE=3000 per minute
 ```
 
 ---

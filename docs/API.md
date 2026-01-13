@@ -68,9 +68,9 @@ Authorization: Bearer <refresh_token>
 
 ## Rate Limiting
 
-**Default Rate Limit**: 200 requests per minute
+**Default Rate Limit**: 5,000 requests per minute
 
-**Override Rate Limit**: 5000 requests per minute (for specific endpoints)
+**Governance**: Rate limits are enforced at the system boundary to ensure enterprise-grade stability.
 
 **Headers**:
 - `X-RateLimit-Limit`: Maximum requests allowed
@@ -81,8 +81,7 @@ Authorization: Bearer <refresh_token>
 ```json
 {
   "error": "Rate limit exceeded",
-  "message": "Too many requests. Please try again later.",
-  "retry_after": 60
+  "message": "Too many requests. Please try again later."
 }
 ```
 
@@ -92,14 +91,12 @@ Authorization: Bearer <refresh_token>
 
 ### Standard Error Response
 
+Autom8 follows a sanitized error policy. In production, detailed stack traces are logged internally, while the API returns generic, safe messages.
+
 ```json
 {
   "error": "Error Type",
-  "message": "Human-readable error message",
-  "details": {
-    "field": "Additional context"
-  },
-  "timestamp": "2025-12-20T14:42:00Z"
+  "message": "Human-readable error message"
 }
 ```
 
@@ -112,21 +109,47 @@ Authorization: Bearer <refresh_token>
 | 204 | No Content | Request successful, no content to return |
 | 400 | Bad Request | Invalid request parameters |
 | 401 | Unauthorized | Authentication required or failed |
-| 403 | Forbidden | Insufficient permissions |
+| 403 | Forbidden | Access denied |
 | 404 | Not Found | Resource not found |
 | 409 | Conflict | Resource already exists |
-| 422 | Unprocessable Entity | Validation failed |
 | 429 | Too Many Requests | Rate limit exceeded |
-| 500 | Internal Server Error | Server error |
-| 503 | Service Unavailable | Service temporarily unavailable |
+| 500 | Internal Server Error | Sanitized server error |
 
 ---
 
 ## Endpoints
 
-### Health & Status
+### Discovery & Status
 
-#### GET /health
+#### GET /api/v1/info
+
+Check API information, versioning, and governance notices.
+
+**Authentication**: Not required
+
+**Response**:
+```json
+{
+  "name": "Autom8",
+  "version": "1.0.0",
+  "environment": "production",
+  "licensed": true,
+  "integrity": "verified",
+  "security": {
+    "rate_limiting": true,
+    "cors_enabled": true,
+    "https_only": false
+  },
+  "notices": [
+    "v1 is stable but we recommend monitoring for future v2 announcements."
+  ],
+  "documentation": "https://github.com/..."
+}
+```
+
+---
+
+#### GET /api/v1/health
 
 Check API health status.
 
@@ -136,9 +159,9 @@ Check API health status.
 ```json
 {
   "status": "healthy",
-  "timestamp": "2025-12-20T14:42:00Z",
+  "service": "Autom8 API",
   "version": "1.0.0",
-  "uptime": 3600
+  "environment": "production"
 }
 ```
 
@@ -164,21 +187,19 @@ Get system metrics.
 
 ### Contacts
 
-#### GET /contacts
+#### GET /api/v1/contacts
 
-Retrieve all contacts.
+Retrieve a paginated list of contacts.
 
 **Authentication**: Required
 
 **Query Parameters**:
-- `page` (integer, optional): Page number (default: 1)
-- `per_page` (integer, optional): Items per page (default: 20, max: 100)
-- `sort` (string, optional): Sort field (default: "created_at")
-- `order` (string, optional): Sort order - "asc" or "desc" (default: "desc")
+- `limit` (integer, optional): Number of items to return (default: 100)
+- `offset` (integer, optional): Number of items to skip (default: 0)
 
 **Example Request**:
 ```http
-GET /api/v1/contacts?page=1&per_page=10&sort=name&order=asc
+GET /api/v1/contacts?limit=10&offset=0
 Authorization: Bearer <token>
 ```
 
@@ -195,209 +216,59 @@ Authorization: Bearer <token>
       "updated_at": "2025-12-20T10:00:00Z"
     }
   ],
-  "pagination": {
-    "page": 1,
-    "per_page": 10,
+  "meta": {
     "total": 45,
-    "pages": 5
+    "limit": 10,
+    "offset": 0
   }
 }
 ```
 
 ---
 
-#### GET /contacts/{id}
+#### GET /api/v1/contacts/{id}
 
 Retrieve a specific contact by ID.
 
 **Authentication**: Required
 
-**Path Parameters**:
-- `id` (integer, required): Contact ID
-
-**Example Request**:
-```http
-GET /api/v1/contacts/1
-Authorization: Bearer <token>
-```
-
-**Response** (200 OK):
-```json
-{
-  "id": 1,
-  "name": "John Doe",
-  "phone": "0701234567",
-  "email": "john@example.com",
-  "created_at": "2025-12-20T10:00:00Z",
-  "updated_at": "2025-12-20T10:00:00Z"
-}
-```
-
-**Error Response** (404 Not Found):
-```json
-{
-  "error": "Not Found",
-  "message": "Contact with ID 1 not found"
-}
-```
-
 ---
 
-#### POST /contacts
+#### POST /api/v1/contacts
 
 Create a new contact.
 
 **Authentication**: Required
 
-**Request Body**:
-```json
-{
-  "name": "Jane Smith",
-  "phone": "0702345678",
-  "email": "jane@example.com"
-}
-```
-
 **Validation Rules**:
-- `name`: Required, 2-100 characters
-- `phone`: Required, valid phone format (10 digits starting with 07)
-- `email`: Optional, valid email format
-
-**Response** (201 Created):
-```json
-{
-  "id": 2,
-  "name": "Jane Smith",
-  "phone": "0702345678",
-  "email": "jane@example.com",
-  "created_at": "2025-12-20T14:42:00Z",
-  "updated_at": "2025-12-20T14:42:00Z"
-}
-```
-
-**Error Response** (400 Bad Request):
-```json
-{
-  "error": "Validation Error",
-  "message": "Invalid input data",
-  "details": {
-    "phone": "Phone number must be 10 digits starting with 07"
-  }
-}
-```
-
-**Error Response** (409 Conflict):
-```json
-{
-  "error": "Conflict",
-  "message": "Contact with phone 0702345678 already exists"
-}
-```
+- `name`: Required, sanitized string.
+- `phone`: Required, valid formats: `07...`, `+2547...`, `2547...`, `01...`.
+- `email`: Optional, valid format.
 
 ---
 
-#### PUT /contacts/{id}
+### Task Logs
 
-Update an existing contact.
+#### GET /api/v1/task_logs
 
-**Authentication**: Required
-
-**Path Parameters**:
-- `id` (integer, required): Contact ID
-
-**Request Body**:
-```json
-{
-  "name": "Jane Smith Updated",
-  "phone": "0702345678",
-  "email": "jane.new@example.com"
-}
-```
-
-**Response** (200 OK):
-```json
-{
-  "id": 2,
-  "name": "Jane Smith Updated",
-  "phone": "0702345678",
-  "email": "jane.new@example.com",
-  "created_at": "2025-12-20T14:42:00Z",
-  "updated_at": "2025-12-20T15:00:00Z"
-}
-```
-
----
-
-#### DELETE /contacts/{id}
-
-Delete a contact.
-
-**Authentication**: Required
-
-**Path Parameters**:
-- `id` (integer, required): Contact ID
-
-**Response** (204 No Content):
-```
-(No content)
-```
-
-**Error Response** (404 Not Found):
-```json
-{
-  "error": "Not Found",
-  "message": "Contact with ID 999 not found"
-}
-```
-
----
-
-### Performance
-
-#### GET /performance/stats
-
-Get performance statistics.
-
-**Authentication**: Not required
-
-**Response** (200 OK):
-```json
-{
-  "request_count": 1523,
-  "average_response_time": 45.2,
-  "p50_response_time": 38.5,
-  "p95_response_time": 95.3,
-  "p99_response_time": 150.7,
-  "error_rate": 0.02,
-  "cache_hit_rate": 0.85
-}
-```
-
----
-
-#### GET /performance/profile
-
-Get detailed performance profile.
+Retrieve a list of task execution logs.
 
 **Authentication**: Required
 
 **Response** (200 OK):
 ```json
 {
-  "endpoints": [
+  "count": 1,
+  "logs": [
     {
-      "path": "/api/v1/contacts",
-      "method": "GET",
-      "avg_time": 42.5,
-      "call_count": 450,
-      "error_count": 2
-    }
-  ],
-  "slowest_queries": [
-    {
-      "query": "SELECT * FROM contacts WHERE...",
-      "duration": 125.3,
-      "count": 5
+      "id": 123,
+      "task_type": "BackupTask",
+      "task_name": "Daily Backup",
+      "status": "completed",
+      "started_at": "2026-01-14T01:00:00Z",
+      "completed_at": "2026-01-14T01:05:00Z",
+      "result": "Backup successful",
+      "error": null
     }
   ]
 }
@@ -405,28 +276,20 @@ Get detailed performance profile.
 
 ---
 
-### Tasks (Scheduler)
+#### GET /api/v1/task_logs/stats
 
-#### GET /tasks
-
-List all scheduled tasks.
+Get task execution statistics.
 
 **Authentication**: Required
 
 **Response** (200 OK):
 ```json
 {
-  "tasks": [
-    {
-      "id": "cleanup_logs",
-      "name": "Log Cleanup",
-      "schedule": "0 2 * * *",
-      "enabled": true,
-      "last_run": "2025-12-20T02:00:00Z",
-      "next_run": "2025-12-21T02:00:00Z",
-      "status": "success"
-    }
-  ]
+  "total_executions": 100,
+  "completed": 95,
+  "failed": 5,
+  "running": 0,
+  "success_rate": 95.0
 }
 ```
 
@@ -740,40 +603,64 @@ GET /api/v1/contacts?sort=created_at&order=desc
 
 ---
 
-## Webhooks (Future Feature)
+### Metrics & Monitoring
 
-*Coming soon: Webhook support for real-time notifications*
+#### GET /api/v1/metrics
+
+Get application-level metrics (request counts, latency per endpoint).
+
+**Authentication**: Not required
+
+---
+
+#### GET /api/v1/metrics/system
+
+Get system-level metrics (CPU, Memory, Disk).
+
+**Authentication**: Not required
+
+---
+
+#### GET /api/v1/logs/errors
+
+Retrieve recent system error logs (internal visibility).
+
+**Authentication**: Required
 
 ---
 
 ## API Versioning
 
-The API uses URL-based versioning (`/api/v1/`). When breaking changes are introduced, a new version will be released (`/api/v2/`) while maintaining backward compatibility with v1.
+The API uses URL-based versioning (`/api/v1/`). 
 
-**Current Version**: v1
-**Deprecation Policy**: Versions are supported for 12 months after deprecation notice
+**Current Version**: `v1` (FROZEN)
+
+**Governance Policy**:
+- Existing fields in `v1` are never removed or renamed.
+- New features are added in an additive, non-breaking manner.
+- Breaking changes require the launch of `/api/v2`.
+
+**Deprecation Readiness**:
+- The system supports Header-Based signaling for planned deprecation.
+- Human-readable notices are broadcast via the `/api/v1/info` endpoint.
 
 ---
 
 ## Security Best Practices
 
-1. **Always use HTTPS in production**
-2. **Store tokens securely** (never in localStorage for web apps)
-3. **Implement token refresh** before expiration
-4. **Validate all input** on client side
-5. **Handle errors gracefully**
-6. **Respect rate limits**
-7. **Use environment variables** for sensitive data
+1. **Authentication**: All data-modifying requests require a valid JWT.
+2. **Integrity**: Monitor the `X-Autom8-Integrity` header to ensure system health.
+3. **Rate Limits**: Respect the 5,000 req/min limit to ensure shared stability.
+4. **Sanitization**: All input is sanitized; all output is shaped by serializers to prevent data leakage.
 
 ---
 
 ## Support
 
 For API issues or questions:
-- **Documentation**: [Full Docs](../README.md)
-- **Issues**: [GitHub Issues](https://github.com/orenyalphy256-glitch/op-alpha-systems-automation/issues)
 - **Email**: orenyalphy256@gmail.com
+- **Maintainer**: Alphonce Liguori Oreny (Agent ALO)
 
 ---
 
-*Last Updated: December 20, 2025*
+*Last Updated: January 14, 2026*

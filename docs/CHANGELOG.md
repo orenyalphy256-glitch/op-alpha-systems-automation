@@ -5,9 +5,16 @@ All notable changes to Autom8 will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2025-12-20
+## [1.0.0] - 2026-01-14
 
 ### Added
+- **API Governance Framework**
+  - Standardized Serializer layer (Zone 2) as the Single Source of Truth for contracts.
+  - Hardened Zone Trust Architecture (Data -> Serializers -> API).
+  - Deprecation Signaling Infrastructure (HTTP Headers, Discovery Notices, Audit Logs).
+- **Hardened Monitoring**
+  - Standardized `X-Autom8-Integrity` and `X-Response-Time` headers.
+  - New discovery endpoint `/api/v1/info` for governance broadcasts.
 - **Core Features**
   - RESTful API with Flask framework
   - JWT-based authentication with refresh tokens
@@ -18,14 +25,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Security**
   - AES-256 field-level encryption for sensitive data
-  - Multi-tier rate limiting (200 req/min default, 5000 override)
+  - Adaptive rate limiting scaled to **5,000 req/min** by default.
   - Security headers (HSTS, CSP, X-Frame-Options)
   - Input validation and sanitization
   - Audit logging for critical operations
 
 - **Performance**
   - Multi-tier caching (LRU + TTL)
-  - Database query optimization
+  - Database query optimization (N+1 immunity)
   - Request timing middleware
   - Load testing with Locust
   - Performance metrics collection
@@ -38,12 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Automated testing with 85%+ coverage
 
 - **Documentation**
-  - Complete API reference
-  - Architecture documentation
-  - Deployment guide
-  - Testing guide
-  - Security documentation
-  - Performance optimization guide
+  - Fully synchronized documentation suite (`README`, `API`, `ARCHITECTURE`, `SECURITY`, `PERFORMANCE`).
+  - Alignment of all guides with the Hardened Zone model.
 
 - **Testing**
   - Unit tests for all core components
@@ -53,22 +56,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 85%+ code coverage
 
 ### Changed
-- Migrated from basic authentication to JWT tokens
-- Upgraded rate limiting from 100 to 200 req/min default
-- Optimized database queries for 70% performance improvement
-- Enhanced error handling and logging
+- **API Contracts (v1 Frozen)**
+  - Standardized resource wrappers for Contacts (`contacts` + `meta`) and Task Logs (`logs` + `count`).
+  - Switched pagination from `page`/`per_page` to standard `limit`/`offset`.
+- **Security Enhancements**
+  - Migrated from basic authentication to JWT tokens.
+  - Upgraded password hashing to PBKDF2:SHA256.
 
 ### Fixed
-- JWT token expiration validation
-- Database connection pooling issues
-- Memory leaks in caching layer
-- Race conditions in scheduler
-
-### Security
-- Implemented field-level encryption for PII
-- Added CSRF protection
-- Enhanced password hashing with bcrypt
-- Implemented secure session management
+- Outdated documentation references to 200 req/min rate limits.
+- Inconsistent health and metric endpoint response examples.
+- Multi-tier architecture diagrams to reflect the actual Zone Trust model.
+- Database connection pooling and memory leak issues in the caching layer.
 
 ## [0.1.0] - 2025-11-01
 
