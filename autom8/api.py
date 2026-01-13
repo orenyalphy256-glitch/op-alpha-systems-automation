@@ -25,10 +25,17 @@ from autom8.models import (
     SessionLocal,
     TaskLog,
     get_contact_by_id,
-    serialize_contact,
     get_contact_by_phone,
     get_session,
     update_contact,
+)
+from autom8.serializers import (
+    serialize_contact,
+    serialize_contacts_page,
+    serialize_health_check,
+    serialize_system_info,
+    serialize_task_logs_list,
+    serialize_task_stats,
 )
 from autom8.performance import (
     cached,
@@ -217,12 +224,12 @@ def validate_contact_data(data, required_fields=None):
 def health():
     """Health check endpoint."""
     return jsonify(
-        {
-            "status": "healthy",
-            "service": Config.APP_NAME,
-            "version": Config.APP_VERSION,
-            "environment": Config.ENVIRONMENT,
-        }
+        serialize_health_check(
+            status="healthy",
+            service=Config.APP_NAME,
+            version=Config.APP_VERSION,
+            environment=Config.ENVIRONMENT,
+        )
     )
 
 
@@ -231,19 +238,19 @@ def health():
 def info():
     """API information endpoint."""
     return jsonify(
-        {
-            "name": Config.APP_NAME,
-            "version": Config.APP_VERSION,
-            "environment": Config.ENVIRONMENT,
-            "licensed": OwnershipAuthority.is_licensed(),
-            "integrity": "verified" if OwnershipAuthority.integrity_verified() else "compromised",
-            "security": {
+        serialize_system_info(
+            app_name=Config.APP_NAME,
+            version=Config.APP_VERSION,
+            environment=Config.ENVIRONMENT,
+            is_licensed=OwnershipAuthority.is_licensed(),
+            integrity_status=OwnershipAuthority.integrity_verified(),
+            security_config={
                 "rate_limiting": SecurityConfig.RATE_LIMIT_ENABLED,
                 "cors_enabled": True,
                 "https_only": False,
             },
-            "documentation": "https://github.com/orenyalphy256-glitch/op-alpha-systems-automation",
-        }
+            doc_url="https://github.com/orenyalphy256-glitch/op-alpha-systems-automation",
+        )
     )
 
 
@@ -332,16 +339,7 @@ def _get_contacts_internal(limit_arg, offset_arg):
 
         contacts = query.order_by(Contact.name).offset(offset).limit(limit).all()
 
-        contacts_list = [serialize_contact(c) for c in contacts]
-
-        return {
-            "contacts": contacts_list,
-            "meta": {
-                "total": total,
-                "limit": limit,
-                "offset": offset,
-            },
-        }
+        return serialize_contacts_page(contacts, total, offset, limit)
     finally:
         session.close()
 
@@ -555,9 +553,8 @@ def get_task_logs():
         logs = query.limit(limit).all()
 
         # Serialize
-        result = [log.to_dict() for log in logs]
-
-        return jsonify({"count": len(result), "logs": result}), 200
+        # Serialize
+        return jsonify(serialize_task_logs_list(logs, count=len(logs))), 200
 
     finally:
         session.close()
@@ -579,13 +576,13 @@ def get_task_stats():
 
         return (
             jsonify(
-                {
-                    "total_executions": total,
-                    "completed": completed,
-                    "failed": failed,
-                    "running": running,
-                    "success_rate": round(success_rate, 2),
-                }
+                serialize_task_stats(
+                    total=total,
+                    completed=completed,
+                    failed=failed,
+                    running=running,
+                    success_rate=success_rate,
+                )
             ),
             200,
         )

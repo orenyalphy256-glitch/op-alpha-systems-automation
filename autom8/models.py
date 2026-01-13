@@ -87,15 +87,7 @@ class Contact(Base):
         """String representation for debugging."""
         return f"<Contact(id={self.id}, name='{self.name}', phone='{self.phone}')>"
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "phone": self.phone,
-            "email": self.email,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
-        }
+    # to_dict removed: Use autom8.serializers.contacts.serialize_contact instead
 
 
 class TaskLog(Base):
@@ -113,17 +105,7 @@ class TaskLog(Base):
     def __repr__(self):
         return f"<TaskLog(id={self.id}, type='{self.task_type}', status='{self.status}')>"
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "task_type": self.task_type,
-            "task_name": self.task_name,
-            "status": self.status,
-            "started_at": self.started_at.isoformat() if self.started_at else None,
-            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
-            "result_data": self.result_data,
-            "error_message": self.error_message,
-        }
+    # to_dict removed: Use autom8.serializers.tasklogs.serialize_task_log instead
 
 
 # Database Initialization
@@ -147,15 +129,7 @@ def create_contact(session, name, phone, email=None):
     return contact
 
 
-def serialize_contact(contact):
-    return {
-        "id": contact.id,
-        "name": contact.name,
-        "phone": contact.phone,
-        "email": contact.email,
-        "created_at": contact.created_at.isoformat() if contact.created_at else None,
-        "updated_at": contact.updated_at.isoformat() if contact.updated_at else None,
-    }
+# serialize_contact removed: Use autom8.serializers.contacts.serialize_contact instead
 
 
 def get_contact_by_id(session, contact_id):

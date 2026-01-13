@@ -15,7 +15,6 @@ setup(
     author="Alphonce Liguori Oreny (Agent ALO)",
     author_email="orenyalphy256@gmail.com",
     license="Proprietary",
-
     packages=find_packages(exclude=["tests", "tests.*", "tests.*.*", "logs", "logs.*"]),
     python_requires=">=3.9",
     install_requires=[

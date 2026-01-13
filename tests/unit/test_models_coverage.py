@@ -3,6 +3,8 @@
 
 from datetime import datetime
 from autom8.models import Contact, TaskLog
+from autom8.serializers.contacts import serialize_contact
+from autom8.serializers.tasklogs import serialize_task_log
 
 
 def test_contact_model_methods():
@@ -11,7 +13,8 @@ def test_contact_model_methods():
     c.created_at = datetime(2025, 1, 1, 10, 0, 0)
     c.updated_at = datetime(2025, 1, 1, 10, 0, 0)
 
-    d = c.to_dict()
+    # Use serializer instead of to_dict
+    d = serialize_contact(c)
     assert d["id"] == 1
     assert d["name"] == "Test"
     assert d["phone"] == "123"
@@ -31,12 +34,13 @@ def test_tasklog_model_methods():
     t.started_at = datetime(2025, 1, 1, 10, 0, 0)
     t.completed_at = datetime(2025, 1, 1, 10, 5, 0)
 
-    d = t.to_dict()
+    # Use serializer instead of to_dict
+    d = serialize_task_log(t)
     assert d["id"] == 1
     assert d["task_type"] == "backup"
     assert d["status"] == "completed"
-    assert d["result_data"] == "ok"
-    # duration_seconds is not in to_dict
+    assert d["result"] == "ok"  # checking mapped field 'result'
+    # duration_seconds is not in serializer output generally
 
     assert "TaskLog" in repr(t)
     assert "backup" in repr(t)
