@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Autom8 Logo](file:///C:/Users/user/.gemini/antigravity/brain/ac73bdea-7c26-48e9-aeff-d41eb7dfa07a/autom8_logo_premium_1768346041803.png)
+![Autom8 Logo](assets/logo.png)
 
 [![Stable Version](https://img.shields.io/badge/API-v1.0.0--Stable-blue?style=for-the-badge&logo=openapi-initiative&logoColor=white)](./docs/CHANGELOG.md)
 [![Security Scan](https://img.shields.io/badge/Security-A%2B-success?style=for-the-badge&logo=security&logoColor=white)](./SECURITY.md)
