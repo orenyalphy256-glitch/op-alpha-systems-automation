@@ -17,70 +17,15 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 
-from autom8.alerts import alert_task_failure
+from autom8.config import Config
 from autom8.core import log
-from autom8.models import TaskLog, get_session, init_db
-from autom8.tasks import run_task
 from autom8.ownership import OwnershipAuthority
+from autom8.services.execution_service import ExecutionService
+from autom8.services.startup_service import reconcile_zombie_tasks
 
 
-# Scheduler configuration
-scheduler = None  # Global scheduler instance
-
-
-# Job execution with database logging
-def execute_task_with_logging(task_type, task_name=None, **kwargs):
-    session = get_session()
-
-    authorized = kwargs.get("authorized", False)
-
-    # Create task log entry
-    task_log = TaskLog(
-        task_type=task_type,
-        task_name=task_name or task_type,
-        status="running",
-        started_at=datetime.now(),
-    )
-
-    try:
-        # Add log entry
-        session.add(task_log)
-        session.commit()
-        session.refresh(task_log)
-
-        log.info(
-            f"Starting scheduled task: {task_type} (log ID: {task_log.id}, auth: {authorized})"
-        )
-
-        result = run_task(task_type, name=task_name)
-
-        # Update log entry
-        task_log.status = "completed"
-        task_log.completed_at = datetime.now()
-        task_log.result_data = str(result)[:500]  # Truncate if too huge
-
-        session.commit()
-
-        log.info(f"Completed scheduled task: {task_type} (log ID: {task_log.id})")
-
-        return result
-
-    except Exception as e:
-        task_log.status = "failed"
-        task_log.completed_at = datetime.now()
-        task_log.error_message = str(e)[:500]
-
-        session.commit()
-
-        log.error(f"Failed scheduled task: {task_type} (log ID: {task_log.id}): {e}")
-
-        # Send alert
-        alert_task_failure(task_type, str(e))
-
-        return {"status": "failed", "error": str(e)}
-
-    finally:
-        session.close()
+# Global scheduler instance
+scheduler = None
 
 
 # Scheduler event listeners
@@ -100,12 +45,10 @@ def init_scheduler():
         log.warning("Scheduler already initialized")
         return scheduler
 
-    # Ensure database is initialized
-    init_db()
-
     # Create scheduler with thread pool executor
+    # Use Config for timezone
     scheduler = BackgroundScheduler(
-        timezone="UTC",
+        timezone=Config.TIMEZONE,
         job_defaults={
             "coalesce": False,  # Run all missed jobs not just latest
             "max_instances": 3,  # Allow up to 3 concurrent instances of the same job
@@ -128,8 +71,8 @@ def schedule_backup_job():
         raise RuntimeError("Scheduler not initialized. Call init_scheduler() first.")
 
     scheduler.add_job(
-        func=execute_task_with_logging,
-        trigger=IntervalTrigger(hours=24),
+        func=ExecutionService.execute_task,
+        trigger=IntervalTrigger(hours=Config.BACKUP_INTERVAL_HOURS),
         args=["backup"],
         id="backup_job",
         name="Daily Backup Task",
@@ -146,7 +89,7 @@ def schedule_cleanup_job():
         raise RuntimeError("Scheduler not initialized. Call init_scheduler() first.")
 
     scheduler.add_job(
-        func=execute_task_with_logging,
+        func=ExecutionService.execute_task,
         trigger=IntervalTrigger(hours=1),
         args=["cleanup"],
         id="cleanup_job",
@@ -163,8 +106,8 @@ def schedule_report_job():
         raise RuntimeError("Scheduler not initialized. Call init_scheduler() first.")
 
     scheduler.add_job(
-        func=execute_task_with_logging,
-        trigger=CronTrigger(hour=9, minute=0),
+        func=ExecutionService.execute_task,
+        trigger=CronTrigger.from_crontab(Config.REPORT_CRON_EXPRESSION),
         args=["report"],
         id="report_job",
         name="Daily Report Task",
@@ -280,7 +223,6 @@ __all__ = [
     "resume_job",
     "remove_job",
     "run_job_now",
-    "execute_task_with_logging",
 ]
 
 
@@ -296,6 +238,9 @@ def main():
     signal.signal(signal.SIGTERM, signal_handler)
 
     try:
+        # Reconcile tasks before starting
+        reconcile_zombie_tasks()
+
         init_scheduler()
         schedule_all_jobs()
         start_scheduler()
