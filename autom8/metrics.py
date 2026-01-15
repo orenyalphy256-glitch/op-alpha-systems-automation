@@ -15,8 +15,8 @@ import psutil
 
 from autom8.core import log
 from autom8.models import Contact, TaskLog, get_session
-from autom8.performance import cached, timed_cache
 from autom8.ownership import OwnershipAuthority
+from autom8.performance import cached, timed_cache
 
 psutil.cpu_percent(interval=None)
 

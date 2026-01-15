@@ -19,8 +19,8 @@ VIOLATION OF THESE RULES WILL CAUSE CRITICAL SYSTEM FAILURE.
 """
 
 from .contacts import serialize_contact, serialize_contacts_page
+from .info import serialize_health_check, serialize_system_info
 from .tasklogs import serialize_task_log, serialize_task_logs_list, serialize_task_stats
-from .info import serialize_system_info, serialize_health_check
 
 __all__ = [
     "serialize_contact",

@@ -14,8 +14,10 @@ import sys
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
-from autom8.config import Config
+
 from dotenv import load_dotenv
+
+from autom8.config import Config
 from autom8.ownership import OwnershipAuthority
 
 # Load environment variables from .env file
