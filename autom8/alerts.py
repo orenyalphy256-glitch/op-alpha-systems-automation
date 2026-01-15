@@ -14,7 +14,9 @@ import smtplib
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from string import Template
 
+from pathlib import Path
 from autom8.core import log
 
 # Email configuration
@@ -24,6 +26,28 @@ SMTP_USERNAME = os.getenv("SMTP_USERNAME", "")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
 SMTP_USE_TLS = os.getenv("SMTP_USE_TLS", "True") == "True"
 ALERT_EMAIL = os.getenv("ALERT_EMAIL")
+
+# Template Caching
+_TEMPLATE_CACHE = None
+
+
+def _get_alert_template():
+    """Load and cache the HTML alert template."""
+    global _TEMPLATE_CACHE
+    if _TEMPLATE_CACHE is not None:
+        return _TEMPLATE_CACHE
+
+    template_path = Path(__file__).parent / "templates" / "alert_email.html"
+    try:
+        if template_path.exists():
+            with open(template_path, "r", encoding="utf-8") as f:
+                _TEMPLATE_CACHE = Template(f.read())
+            return _TEMPLATE_CACHE
+    except Exception as e:
+        log.error(f"Error loading alert template: {e}")
+
+    # Minimal fallback template if file missing
+    return Template("<html><body><h2>Alert</h2><p>${task_type}: ${error_message}</p></body></html>")
 
 
 # Alert functions
@@ -57,37 +81,22 @@ def send_email_alert(subject, body, to_email=None):
 
 def alert_task_failure(task_type, error_message):
     subject = f"Task Failure: {task_type}"
-    body = f"""
-    <html>
-    <body>
-        <h2>Task Execution Failed</h2>
-        <p><strong>Task:</strong> {task_type}</p>
-        <p><strong>Time:</strong> {datetime.now().isoformat()}Z</p>
-        <p><strong>Error:</strong></p>
-        <pre>{error_message}</pre>
-        <hr>
-        <p><em>This is an automated email alert from Autom8 System</em></p>
-    </body>
-    </html>
-    """
+    template = _get_alert_template()
+    body = template.substitute(
+        task_type=task_type,
+        error_message=error_message,
+        timestamp=datetime.now().isoformat() + "Z",
+    )
     send_email_alert(subject, body)
 
 
 def alert_system_issue(issue_type, details):
     subject = f"System Issue: {issue_type}"
-    body = f"""
-    <html>
-    <body>
-        <h2>System Issue Detected</h2>
-        <p><strong>Issue Type:</strong> {issue_type}</p>
-        <p><strong>Time:</strong> {datetime.now().isoformat()}Z</p>
-        <p><strong>Details:</strong></p>
-        <pre>{details}</pre>
-        <hr>
-        <p><em>Immediate action may be required</em></p>
-    </body>
-    </html>
-    """
+    template = _get_alert_template()
+    # Using the same template but mapping labels
+    body = template.substitute(
+        task_type=issue_type, error_message=details, timestamp=datetime.now().isoformat() + "Z"
+    )
     send_email_alert(subject, body)
 
 
