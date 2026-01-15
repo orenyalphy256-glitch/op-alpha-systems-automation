@@ -3,7 +3,6 @@
 # Unauthorized copying of this file, via any medium is strictly prohibited.
 
 """
-
 Advanced Unit Tests for Scheduler Logic
 Covers init, start/stop, listeners, and job helpers.
 """
@@ -15,7 +14,6 @@ import pytest
 
 from autom8 import scheduler
 from autom8.scheduler import (
-    execute_task_with_logging,
     get_scheduled_jobs,
     init_scheduler,
     job_error_listener,
@@ -39,8 +37,7 @@ def reset_scheduler():
 
 
 @patch("autom8.scheduler.BackgroundScheduler")
-@patch("autom8.scheduler.init_db")
-def test_init_scheduler(mock_db, mock_bg):
+def test_init_scheduler(mock_bg):
     # First init
     s = init_scheduler()
     assert s is not None
@@ -147,30 +144,3 @@ def test_listeners(mock_log):
     event.exception = ValueError("Fail")
     job_error_listener(event)
     mock_log.error.assert_called()
-
-
-@patch("autom8.scheduler.TaskLog")
-@patch("autom8.scheduler.get_session")
-@patch("autom8.scheduler.run_task")
-def test_execute_task_logging(mock_run, mock_session, mock_task_log_cls):
-    mock_db = MagicMock()
-    mock_session.return_value = mock_db
-
-    # Mock TaskLog instance
-    mock_log_instance = MagicMock()
-    mock_log_instance.id = 123
-    mock_task_log_cls.return_value = mock_log_instance
-
-    # Success Case
-    mock_run.return_value = "OK"
-    res = execute_task_with_logging("backup")
-    assert res == "OK"
-    assert mock_db.commit.call_count == 2  # Create + Update
-
-    # Check that TaskLog was instantiated
-    mock_task_log_cls.assert_called()
-
-    # Failure Case
-    mock_run.side_effect = Exception("Boom")
-    res = execute_task_with_logging("backup")
-    assert res["status"] == "failed"
