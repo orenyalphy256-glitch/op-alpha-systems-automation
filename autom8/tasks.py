@@ -10,8 +10,17 @@ Implements: Factory Pattern, Abstract Base Class (ABC)
 
 from abc import ABC, abstractmethod
 from datetime import datetime
+from pathlib import Path
 
 from autom8.core import DATA_DIR, log, save_json
+
+
+class TaskConfig:
+    """Container for task configuration to decouple from hardcoded paths/patterns."""
+
+    def __init__(self, base_path=None, filename_pattern=None):
+        self.base_path = Path(base_path) if base_path else DATA_DIR
+        self.filename_pattern = filename_pattern
 
 
 # Abstract Base Class - Task Interface
@@ -21,13 +30,15 @@ class Task(ABC):
     All task types must inherit from this and implement execute().
     """
 
-    def __init__(self, name=None):
+    def __init__(self, name=None, config=None):
         """
-        Initialize task with optional name and timestamp.
+        Initialize task with optional name and config injection.
         Args:
             name (str): Human-readable task name
+            config (TaskConfig): Configuration object
         """
         self.name = name or self.__class__.__name__
+        self.config = config or TaskConfig()
         self.created_at = datetime.now()
         self.status = "pending"
 
@@ -58,9 +69,10 @@ class BackupTask(Task):
         """Run backup procedure."""
         self.log_start()
         try:
-            # Simulate backup operation
+            # Simulate backup operation using injected config
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            backup_file = DATA_DIR / f"backup_{timestamp}.json"
+            pattern = self.config.filename_pattern or "backup_{}.json"
+            backup_file = self.config.base_path / pattern.format(timestamp)
 
             # Create backup data
             backup_data = {"timestamp": timestamp, "type": "full_backup", "status": "completed"}
@@ -111,9 +123,10 @@ class ReportTask(Task):
         """Generate and save report"""
         self.log_start()
         try:
-            # Simulate report creation
+            # Simulate report creation using injected config
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            report_file = DATA_DIR / f"report_{timestamp}.json"
+            pattern = self.config.filename_pattern or "report_{}.json"
+            report_file = self.config.base_path / pattern.format(timestamp)
 
             # Generate report data
             report_data = {
@@ -154,7 +167,13 @@ class TaskFactory:
         if task_class is None:
             available = ", ".join(cls._task_registry.keys())
             raise ValueError(f"Unknown task type: '{task_type}'. " f"Available types: {available}")
-        return task_class(name=name)
+
+        # In a real system, we'd load these from Config per task type
+        from autom8.config import Config
+
+        config = TaskConfig(base_path=Config.DATA_DIR)
+
+        return task_class(name=name, config=config)
 
     @classmethod
     def register(cls, task_type, task_class):
