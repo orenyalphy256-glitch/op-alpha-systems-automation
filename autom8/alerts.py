@@ -14,9 +14,9 @@ import smtplib
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from pathlib import Path
 from string import Template
 
-from pathlib import Path
 from autom8.core import log
 
 # Email configuration

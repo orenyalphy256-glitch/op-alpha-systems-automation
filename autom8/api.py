@@ -18,6 +18,7 @@ from sqlalchemy.exc import IntegrityError
 
 from autom8 import scheduler as scheduler_provider
 from autom8 import security
+from autom8.config import Config
 from autom8.core import LOGS_DIR, log
 from autom8.metrics import get_all_metrics, get_system_metrics
 from autom8.models import (
@@ -29,14 +30,7 @@ from autom8.models import (
     get_session,
     update_contact,
 )
-from autom8.serializers import (
-    serialize_contact,
-    serialize_contacts_page,
-    serialize_health_check,
-    serialize_system_info,
-    serialize_task_logs_list,
-    serialize_task_stats,
-)
+from autom8.ownership import OwnershipAuthority
 from autom8.performance import (
     cached,
     check_system_health,
@@ -45,8 +39,14 @@ from autom8.performance import (
     timed_cache,
 )
 from autom8.security import SecurityConfig
-from autom8.config import Config
-from autom8.ownership import OwnershipAuthority
+from autom8.serializers import (
+    serialize_contact,
+    serialize_contacts_page,
+    serialize_health_check,
+    serialize_system_info,
+    serialize_task_logs_list,
+    serialize_task_stats,
+)
 
 # Flask Application Setup
 app = Flask(__name__)

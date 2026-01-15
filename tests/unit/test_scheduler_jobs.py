@@ -5,6 +5,7 @@
 from unittest.mock import MagicMock, patch
 
 from autom8 import scheduler
+from autom8.services.execution_service import ExecutionService
 
 
 @patch("autom8.scheduler.scheduler")
@@ -15,7 +16,7 @@ def test_schedule_helpers(mock_sched_obj):
     # Test backup schedule
     scheduler.schedule_backup_job()
     args, kwargs = mock_sched_obj.add_job.call_args
-    assert kwargs["func"] == scheduler.execute_task_with_logging
+    assert kwargs["func"] == ExecutionService.execute_task
     assert kwargs["id"] == "backup_job"
 
     # Test cleanup schedule

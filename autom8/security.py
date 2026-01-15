@@ -19,8 +19,8 @@ from cryptography.fernet import Fernet
 from flask import jsonify, request
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from autom8.core import log
 from autom8.config import Config
+from autom8.core import log
 from autom8.ownership import OwnershipAuthority
 
 # Internal security markers derived from authority (no raw signature)

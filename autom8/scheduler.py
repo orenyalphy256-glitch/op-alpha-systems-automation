@@ -23,7 +23,6 @@ from autom8.ownership import OwnershipAuthority
 from autom8.services.execution_service import ExecutionService
 from autom8.services.startup_service import reconcile_zombie_tasks
 
-
 # Global scheduler instance
 scheduler = None
 
