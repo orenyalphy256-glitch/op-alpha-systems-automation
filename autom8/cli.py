@@ -10,7 +10,9 @@ Complete CLI for managing the Autom8 automation platform.
 """
 
 import argparse
+import os
 import shlex
+import signal
 import subprocess  # nosec B404 - subprocess used safely with input validation
 import sys
 from pathlib import Path
@@ -107,6 +109,14 @@ def cmd_api_start(args):
     print_info("Starting Autom8 API server...")
     success, stdout, stderr = run_command("python -m autom8.api")
     if success:
+        # Save PID for graceful shutdown
+        try:
+            pid = os.getpid()
+            with open("autom8.pid", "w") as f:
+                f.write(str(pid))
+        except Exception as e:
+            print_warning(f"Could not save PID file: {e}")
+
         print_success("API server started successfully")
         print_info("API running at http://localhost:5000")
     else:
@@ -116,16 +126,42 @@ def cmd_api_start(args):
 
 
 def cmd_api_stop(args):
-    """Stop the API server"""
+    """Stop the API server using PID file or process search"""
     print_info("Stopping Autom8 API server...")
-    # On Windows, use taskkill; on Unix, use pkill
+
+    # Try graceful shutdown with PID first
+    try:
+        with open("autom8.pid", "r") as f:
+            pid = int(f.read().strip())
+        os.kill(pid, signal.SIGTERM)
+        # Clean up PID file
+        try:
+            os.remove("autom8.pid")
+        except Exception:
+            pass
+        print_success("API server stopped gracefully")
+        return 0
+    except (FileNotFoundError, ValueError, ProcessLookupError):
+        pass
+    except Exception as e:
+        print_warning(f"Graceful shutdown failed: {e}")
+
+    # Fallback to process search if PID approach fails
+    print_info("Using process search as fallback...")
     if sys.platform == "win32":
-        success, _, _ = run_command('taskkill /F /IM python.exe /FI "WINDOWTITLE eq autom8*"')
+        cmd = 'taskkill /F /IM python.exe /FI "WINDOWTITLE eq autom8*"'
     else:
-        success, _, _ = run_command("pkill -f 'python.*autom8.api'")
+        cmd = "pkill -f 'python.*autom8.api'"
+
+    success, _, _ = run_command(cmd)
 
     if success:
         print_success("API server stopped")
+        # Clean up PID file if exists
+        try:
+            os.remove("autom8.pid")
+        except Exception:
+            pass
     else:
         print_warning("No running API server found")
     return 0
