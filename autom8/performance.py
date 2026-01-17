@@ -30,6 +30,13 @@ class PerformanceMonitor:
         """Initialize performance monitor."""
         self.metrics = {"requests": [], "slow_queries": [], "cache_hits": 0, "cache_misses": 0}
 
+    def _calculate_cache_hit_rate(self) -> float:
+        """Calculate cache hit rate percentage."""
+        total = self.metrics["cache_hits"] + self.metrics["cache_misses"]
+        if total == 0:
+            return 0.0
+        return (self.metrics["cache_hits"] / total) * 100
+
     def record_request(self, endpoint: str, duration: float):
         """Record a request with its endpoint and duration."""
         self.metrics["requests"].append(
@@ -48,7 +55,8 @@ class PerformanceMonitor:
         if not self.metrics["requests"]:
             return {"message": "No requests recorded."}
 
-        durations = [r["duration"] for r in self.metrics["requests"]]
+        durations = sorted([r["duration"] for r in self.metrics["requests"]])
+        n = len(durations)
 
         return {
             "total_requests": len(self.metrics["requests"]),
@@ -57,14 +65,10 @@ class PerformanceMonitor:
             "max_response_time": max(durations),
             "slow_requests": len(self.metrics["slow_queries"]),
             "cache_hit_rate": self._calculate_cache_hit_rate(),
+            "p50": durations[int(n * 0.5)] if n > 0 else 0,
+            "p90": durations[int(n * 0.9)] if n else 0,
+            "p99": durations[int(n * 0.99)] if n else 0,
         }
-
-    def _calculate_cache_hit_rate(self) -> float:
-        """Calculate cache hit rate percentage."""
-        total = self.metrics["cache_hits"] + self.metrics["cache_misses"]
-        if total == 0:
-            return 0.0
-        return (self.metrics["cache_hits"] / total) * 100
 
 
 # Global performance monitor instance
