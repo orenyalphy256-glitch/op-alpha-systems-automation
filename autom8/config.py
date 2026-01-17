@@ -38,7 +38,6 @@ class Config:
     ENABLE_PRO = os.getenv("AUTOM8_PRO", "false").lower() == "true"
     AUTOM8_LICENSE_KEY = os.getenv("AUTOM8_LICENSE_KEY")
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
-    TIMEZONE = os.getenv("TIMEZONE", "UTC")
 
     # Scheduling Configuration
     BACKUP_INTERVAL_HOURS = int(os.getenv("BACKUP_INTERVAL_HOURS", 24))
