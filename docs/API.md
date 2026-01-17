@@ -28,41 +28,29 @@ Complete REST API documentation for the Autom8 automation platform.
 
 ## Authentication
 
-### JWT Token Authentication
+### JWT Token Authentication (Development Reference)
 
-Most endpoints require JWT authentication. Include the token in the `Authorization` header:
+The Autom8 system includes JWT token infrastructure for future authentication implementation. 
+Currently, **no endpoints enforce authentication**, but the infrastructure is available for developers.
 
+**Token Structure** (if implemented):
 ```http
 Authorization: Bearer <your_jwt_token>
 ```
 
-### Obtaining Tokens
+### Token Reference Implementation
 
-```http
-POST /auth/login
-Content-Type: application/json
+See `/api/v1/auth/protected` endpoint for an example of how to verify JWT tokens in your own implementation.
 
-{
-  "username": "admin",
-  "password": "your_password"
-}
-```
+This endpoint demonstrates:
+- Extracting tokens from Authorization headers
+- Verifying token signatures
+- Decoding token claims
 
-**Response**:
-```json
-{
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "expires_in": 3600
-}
-```
-
-### Refreshing Tokens
-
-```http
-POST /auth/refresh
-Authorization: Bearer <refresh_token>
-```
+**Note**: To implement real authentication, you will need to:
+1. Create a User model in `autom8/models.py`
+2. Implement credential verification
+3. Add token verification decorators to endpoints that require authentication
 
 ---
 
@@ -191,8 +179,6 @@ Get system metrics.
 
 Retrieve a paginated list of contacts.
 
-**Authentication**: Required
-
 **Query Parameters**:
 - `limit` (integer, optional): Number of items to return (default: 100)
 - `offset` (integer, optional): Number of items to skip (default: 0)
@@ -200,7 +186,6 @@ Retrieve a paginated list of contacts.
 **Example Request**:
 ```http
 GET /api/v1/contacts?limit=10&offset=0
-Authorization: Bearer <token>
 ```
 
 **Response** (200 OK):
@@ -230,7 +215,7 @@ Authorization: Bearer <token>
 
 Retrieve a specific contact by ID.
 
-**Authentication**: Required
+**Response**: Contact object (200 OK) or error (404 Not Found)
 
 ---
 
@@ -238,12 +223,21 @@ Retrieve a specific contact by ID.
 
 Create a new contact.
 
-**Authentication**: Required
+**Request Body**:
+```json
+{
+  "name": "John Doe",
+  "phone": "0701234567",
+  "email": "john@example.com"
+}
+```
 
 **Validation Rules**:
 - `name`: Required, sanitized string.
 - `phone`: Required, valid formats: `07...`, `+2547...`, `2547...`, `01...`.
 - `email`: Optional, valid format.
+
+**Response**: Newly created contact (201 Created)
 
 ---
 
@@ -253,7 +247,10 @@ Create a new contact.
 
 Retrieve a list of task execution logs.
 
-**Authentication**: Required
+**Query Parameters**:
+- `task_type` (string, optional): Filter by task type
+- `status` (string, optional): Filter by status
+- `limit` (integer, optional): Number of items to return (default: 50)
 
 **Response** (200 OK):
 ```json
@@ -279,8 +276,6 @@ Retrieve a list of task execution logs.
 #### GET /api/v1/task_logs/stats
 
 Get task execution statistics.
-
-**Authentication**: Required
 
 **Response** (200 OK):
 ```json
@@ -396,20 +391,11 @@ Enable or disable a task.
 
 ### Complete Workflow Example
 
-#### 1. Authenticate
-
-```bash
-curl -X POST http://localhost:5000/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username": "admin", "password": "password"}'
-```
-
-#### 2. Create Contact
+#### 1. Create Contact
 
 ```bash
 curl -X POST http://localhost:5000/api/v1/contacts \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <token>" \
   -d '{
     "name": "Alice Johnson",
     "phone": "0703456789",
@@ -417,11 +403,16 @@ curl -X POST http://localhost:5000/api/v1/contacts \
   }'
 ```
 
-#### 3. List Contacts
+#### 2. List Contacts
 
 ```bash
-curl -X GET http://localhost:5000/api/v1/contacts \
-  -H "Authorization: Bearer <token>"
+curl -X GET http://localhost:5000/api/v1/contacts
+```
+
+#### 3. Get Specific Contact
+
+```bash
+curl -X GET http://localhost:5000/api/v1/contacts/1
 ```
 
 #### 4. Update Contact
@@ -429,7 +420,6 @@ curl -X GET http://localhost:5000/api/v1/contacts \
 ```bash
 curl -X PUT http://localhost:5000/api/v1/contacts/1 \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <token>" \
   -d '{
     "name": "Alice Johnson Updated",
     "phone": "0703456789",
@@ -440,8 +430,7 @@ curl -X PUT http://localhost:5000/api/v1/contacts/1 \
 #### 5. Delete Contact
 
 ```bash
-curl -X DELETE http://localhost:5000/api/v1/contacts/1 \
-  -H "Authorization: Bearer <token>"
+curl -X DELETE http://localhost:5000/api/v1/contacts/1
 ```
 
 ---
@@ -455,15 +444,7 @@ import requests
 BASE_URL = "http://localhost:5000/api/v1"
 headers = {"Content-Type": "application/json"}
 
-# 1. Authenticate
-response = requests.post(
-    f"{BASE_URL}/auth/login",
-    json={"username": "admin", "password": "password"}
-)
-token = response.json()["access_token"]
-headers["Authorization"] = f"Bearer {token}"
-
-# 2. Create contact
+# 1. Create contact
 contact_data = {
     "name": "Bob Wilson",
     "phone": "0704567890",
@@ -477,19 +458,19 @@ response = requests.post(
 contact = response.json()
 print(f"Created contact: {contact['id']}")
 
-# 3. Get all contacts
+# 2. Get all contacts
 response = requests.get(f"{BASE_URL}/contacts", headers=headers)
 contacts = response.json()["contacts"]
 for contact in contacts:
     print(f"{contact['name']}: {contact['phone']}")
 
-# 4. Get specific contact
+# 3. Get specific contact
 contact_id = 1
 response = requests.get(f"{BASE_URL}/contacts/{contact_id}", headers=headers)
 contact = response.json()
 print(contact)
 
-# 5. Update contact
+# 4. Update contact
 update_data = {"name": "Bob Wilson Updated"}
 response = requests.put(
     f"{BASE_URL}/contacts/{contact_id}",
@@ -497,7 +478,7 @@ response = requests.put(
     headers=headers
 )
 
-# 6. Delete contact
+# 5. Delete contact
 response = requests.delete(f"{BASE_URL}/contacts/{contact_id}", headers=headers)
 print(f"Status: {response.status_code}")
 ```
@@ -512,19 +493,7 @@ const axios = require('axios');
 const BASE_URL = 'http://localhost:5000/api/v1';
 
 async function main() {
-  // 1. Authenticate
-  const authResponse = await axios.post(`${BASE_URL}/auth/login`, {
-    username: 'admin',
-    password: 'password'
-  });
-  
-  const token = authResponse.data.access_token;
-  const headers = {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
-  };
-  
-  // 2. Create contact
+  // 1. Create contact
   const contactData = {
     name: 'Charlie Brown',
     phone: '0705678901',
@@ -533,6 +502,29 @@ async function main() {
   
   const createResponse = await axios.post(
     `${BASE_URL}/contacts`,
+    contactData
+  );
+  
+  const contactId = createResponse.data.id;
+  console.log(`Created contact: ${contactId}`);
+  
+  // 2. Get all contacts
+  const listResponse = await axios.get(`${BASE_URL}/contacts`);
+  console.log('Contacts:', listResponse.data.contacts);
+  
+  // 3. Update contact
+  const updateResponse = await axios.put(
+    `${BASE_URL}/contacts/${contactId}`,
+    { name: 'Charlie Brown Updated' }
+  );
+  
+  // 4. Delete contact
+  await axios.delete(`${BASE_URL}/contacts/${contactId}`);
+  console.log('Contact deleted');
+}
+
+main().catch(console.error);
+```
     contactData,
     { headers }
   );

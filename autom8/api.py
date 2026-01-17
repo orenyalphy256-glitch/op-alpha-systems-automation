@@ -19,6 +19,7 @@ from sqlalchemy.exc import IntegrityError
 from autom8 import scheduler as scheduler_provider
 from autom8 import security
 from autom8.config import Config
+from autom8.config_validator import ConfigValidator
 from autom8.core import LOGS_DIR, log
 from autom8.metrics import get_all_metrics, get_system_metrics
 from autom8.models import (
@@ -53,6 +54,9 @@ app = Flask(__name__)
 
 # Configuration from the environment
 app.config.from_object("autom8.config.Config")
+
+# Validate configuration before proceeding
+ConfigValidator.validate_and_exit_if_invalid()
 
 # Rate Limiting
 limiter = Limiter(
@@ -252,46 +256,6 @@ def info():
             doc_url="https://github.com/orenyalphy256-glitch/op-alpha-systems-automation",
         )
     )
-
-
-@app.route("/api/v1/auth/login", methods=["POST"])
-@limiter.limit("5 per minute")  # Strict rate limit on login
-def login():
-    """
-    Demo login endpoint.
-    """
-    data = request.get_json()
-
-    # Sanitize input using provider
-    username = security.sanitize_input(data.get("username", ""))
-    password = data.get("password", "")
-
-    if not username or not password:
-        security.log_security_event(
-            "login_failed",
-            {"username": username, "reason": "missing_credentials"},
-            "WARNING",
-        )
-        return jsonify({"error": "Username and password required"}), 400
-
-    # DEMO: In production, verify against database
-    if username == "demo" and password == "password123":  # nosec B105 - Demo credentials only
-        token = security.generate_token(username, {"role": "user"})
-
-        try:
-            from autom8.security import log_security_event
-
-            log_security_event("login_success", {"username": username}, "INFO")
-        except ImportError:
-            log.info(f"Login success: {username}")
-
-        return jsonify({"token": token, "username": username, "message": "Login successful"})
-
-    security.log_security_event(
-        "login_failed", {"username": username, "reason": "invalid_credentials"}, "WARNING"
-    )
-
-    return jsonify({"error": "Invalid credentials"}), 401
 
 
 @app.route("/api/v1/auth/protected", methods=["GET"])
