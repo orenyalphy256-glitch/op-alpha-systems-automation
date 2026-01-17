@@ -358,7 +358,8 @@ def create_contact():
         session.add(contact)
         session.commit()
 
-        # Cache will auto-expire per TTL, avoiding stampede during write-heavy tests
+        # Clear GET contacts cache to ensure new contact appears immediately
+        clear_contacts_cache()
 
         log.info(f"Contact created: {name}")
 
@@ -401,7 +402,8 @@ def update_contact_endpoint(contact_id):
 
         updated = update_contact(session, contact_id, **data)
 
-        # Cache will auto-expire per TTL, avoiding stampede during write-heavy tests
+        # Clear GET contacts cache to ensure updated contact appears immediately
+        clear_contacts_cache()
 
         log.info(f"Updated contact ID {contact_id}")
 
@@ -429,7 +431,8 @@ def delete_contact(contact_id):
         session.delete(contact)
         session.commit()
 
-        # Cache will auto-expire per TTL, avoiding stampede during write-heavy tests
+        # Clear GET contacts cache to ensure deleted contact is removed immediately
+        clear_contacts_cache()
 
         log.info(f"Contact deleted: ID {contact_id}")
 
