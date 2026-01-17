@@ -82,14 +82,17 @@ class TestRunCommand:
 class TestAPICommands:
     """Test API management commands"""
 
+    @patch("builtins.open", new_callable=mock_open)
     @patch("autom8.cli.run_command")
-    def test_cmd_api_start_success(self, mock_run):
-        """Test successful API start"""
+    def test_cmd_api_start_success(self, mock_run, mock_file):
+        """Test successful API start with PID file creation"""
         mock_run.return_value = (True, "output", "")
         args = Mock()
         result = cli.cmd_api_start(args)
         assert result == 0
         mock_run.assert_called_once()
+        # Verify PID file was attempted to be written
+        mock_file.assert_called()
 
     @patch("autom8.cli.run_command")
     def test_cmd_api_start_failure(self, mock_run):
@@ -99,18 +102,45 @@ class TestAPICommands:
         result = cli.cmd_api_start(args)
         assert result == 1
 
+    @patch("os.remove")
+    @patch("os.kill")
+    @patch("builtins.open", new_callable=mock_open, read_data="1234")
+    def test_cmd_api_stop_with_pid_file(self, mock_file, mock_kill, mock_remove):
+        """Test API stop using PID file"""
+        args = Mock()
+        result = cli.cmd_api_stop(args)
+        assert result == 0
+        mock_kill.assert_called_once()
+        mock_remove.assert_called()
+
     @patch("autom8.cli.run_command")
-    def test_cmd_api_stop(self, mock_run):
-        """Test API stop command"""
+    @patch("builtins.open", side_effect=FileNotFoundError)
+    def test_cmd_api_stop_fallback_to_process_search(self, mock_file, mock_run):
+        """Test API stop falls back to process search when PID file missing"""
         mock_run.return_value = (True, "", "")
         args = Mock()
         result = cli.cmd_api_stop(args)
         assert result == 0
+        mock_run.assert_called_once()
 
+    @patch("os.remove")
+    @patch("os.kill", side_effect=ProcessLookupError)
+    @patch("builtins.open", new_callable=mock_open, read_data="9999")
     @patch("autom8.cli.run_command")
+    def test_cmd_api_stop_graceful_fails_then_fallback(
+        self, mock_run, mock_file, mock_kill, mock_remove
+    ):
+        """Test API stop falls back when graceful shutdown fails"""
+        mock_run.return_value = (True, "", "")
+        args = Mock()
+        result = cli.cmd_api_stop(args)
+        assert result == 0
+        mock_kill.assert_called_once()
+        mock_run.assert_called_once()
+
     @patch("autom8.cli.cmd_api_stop")
     @patch("autom8.cli.cmd_api_start")
-    def test_cmd_api_restart(self, mock_start, mock_stop, mock_run):
+    def test_cmd_api_restart(self, mock_start, mock_stop):
         """Test API restart command"""
         mock_stop.return_value = 0
         mock_start.return_value = 0
