@@ -369,7 +369,7 @@ def create_contact():
         )
     except IntegrityError:
         session.rollback()
-        log.warning(f"Attempt to create duplicate contact: {name} ({phone})")
+        log.warning("Attempt to create duplicate contact: phone number already exists")
         return jsonify({"error": "Contact with this phone number already exists"}), 409
     except Exception as e:
         session.rollback()
