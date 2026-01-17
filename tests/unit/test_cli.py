@@ -558,6 +558,143 @@ class TestContactCommands:
         result = cli.cmd_contacts_delete(args)
         assert result == 1
 
+    @patch("requests.get")
+    def test_cmd_contacts_search_by_name(self, mock_get):
+        """Test successful search by name"""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "contacts": [
+                {"id": 1, "name": "Bitter", "phone": "0701234567", "email": "bitter@example.com"},
+                {"id": 2, "name": "John Bitter", "phone": "0702345678", "email": "john.bitter@example.com"},
+                {"id": 3, "name": "Jane Smith", "phone": "0703456789", "email": "jane@example.com"},
+            ]
+        }
+        mock_get.return_value = mock_response
+
+        args = Mock()
+        args.name = "Bitter"
+        args.phone = None
+        args.email = None
+        result = cli.cmd_contacts_search(args)
+        assert result == 0
+        mock_get.assert_called_once_with("http://localhost:5000/api/v1/contacts", timeout=5)
+
+    @patch("requests.get")
+    def test_cmd_contacts_search_by_phone(self, mock_get):
+        """Test successful search by phone"""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "contacts": [
+                {"id": 1, "name": "John Doe", "phone": "0701234567", "email": "john@example.com"},
+                {"id": 2, "name": "Jane Smith", "phone": "0702345678", "email": "jane@example.com"},
+            ]
+        }
+        mock_get.return_value = mock_response
+
+        args = Mock()
+        args.name = None
+        args.phone = "0701234567"
+        args.email = None
+        result = cli.cmd_contacts_search(args)
+        assert result == 0
+
+    @patch("requests.get")
+    def test_cmd_contacts_search_by_email(self, mock_get):
+        """Test successful search by email"""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "contacts": [
+                {"id": 1, "name": "John Doe", "phone": "0701234567", "email": "john@example.com"},
+                {"id": 2, "name": "Jane Smith", "phone": "0702345678", "email": "jane@example.com"},
+            ]
+        }
+        mock_get.return_value = mock_response
+
+        args = Mock()
+        args.name = None
+        args.phone = None
+        args.email = "john@example.com"
+        result = cli.cmd_contacts_search(args)
+        assert result == 0
+
+    @patch("requests.get")
+    def test_cmd_contacts_search_multiple_parameters(self, mock_get):
+        """Test search with multiple parameters"""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "contacts": [
+                {"id": 1, "name": "John Doe", "phone": "0701234567", "email": "john@example.com"},
+                {"id": 2, "name": "Jane Smith", "phone": "0702345678", "email": "jane@example.com"},
+                {"id": 3, "name": "Bitter", "phone": "0703456789", "email": "bitter@example.com"},
+            ]
+        }
+        mock_get.return_value = mock_response
+
+        args = Mock()
+        args.name = "John"
+        args.phone = "070"
+        args.email = None
+        result = cli.cmd_contacts_search(args)
+        assert result == 0
+
+    @patch("requests.get")
+    def test_cmd_contacts_search_no_results(self, mock_get):
+        """Test search with no matching contacts"""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "contacts": [
+                {"id": 1, "name": "John Doe", "phone": "0701234567", "email": "john@example.com"},
+                {"id": 2, "name": "Jane Smith", "phone": "0702345678", "email": "jane@example.com"},
+            ]
+        }
+        mock_get.return_value = mock_response
+
+        args = Mock()
+        args.name = "NonExistent"
+        args.phone = None
+        args.email = None
+        result = cli.cmd_contacts_search(args)
+        assert result == 0
+
+    def test_cmd_contacts_search_no_parameters(self):
+        """Test search with no parameters"""
+        args = Mock()
+        args.name = None
+        args.phone = None
+        args.email = None
+        result = cli.cmd_contacts_search(args)
+        assert result == 1
+
+    @patch("requests.get")
+    def test_cmd_contacts_search_api_failure(self, mock_get):
+        """Test search with API failure"""
+        mock_get.side_effect = Exception("Connection error")
+        args = Mock()
+        args.name = "Bitter"
+        args.phone = None
+        args.email = None
+        result = cli.cmd_contacts_search(args)
+        assert result == 1
+
+    @patch("requests.get")
+    def test_cmd_contacts_search_api_error_response(self, mock_get):
+        """Test search with API error response"""
+        mock_response = Mock()
+        mock_response.status_code = 500
+        mock_get.return_value = mock_response
+
+        args = Mock()
+        args.name = "Bitter"
+        args.phone = None
+        args.email = None
+        result = cli.cmd_contacts_search(args)
+        assert result == 1
+
 
 class TestMainFunction:
     """Test main CLI function"""

@@ -73,27 +73,11 @@ def print_warning(message):
 def run_command(cmd, cwd=None) -> Tuple[bool, str, str]:
     """
     Run a shell command safely and return result.
-
-    Security: Uses shlex.split() to safely parse commands.
-    Never uses shell=True to prevent command injection.
-    All commands are from trusted internal sources only.
-
-    Args:
-        cmd: Command string or list (from trusted internal sources)
-        cwd: Optional working directory
-
-    Returns:
-        Tuple of (success: bool, stdout: str, stderr: str)
     """
     try:
         # Parse string safely or use list directly
         cmd_list = shlex.split(cmd) if isinstance(cmd, str) else cmd
 
-        # nosec B603 - Using subprocess safely:
-        # - No shell=True (prevents injection)
-        # - Commands are hardcoded/trusted (not user input)
-        # - Using list format (safe execution)
-        # - Proper timeout prevents hanging
         result = subprocess.run(  # nosec B603
             cmd_list,
             cwd=cwd,
@@ -546,6 +530,90 @@ def cmd_contacts_add(args):
         return 1
 
 
+def _filter_contacts_by_search(contacts, name, phone, email):
+    """Filter contacts based on search criteria"""
+    filtered = []
+    for contact in contacts:
+        # Check if any search criteria matches
+        name_match = name and name.lower() in contact.get("name", "").lower()
+        phone_match = phone and phone in contact.get("phone", "")
+        email_match = email and email.lower() in contact.get("email", "").lower()
+
+        if name_match or phone_match or email_match:
+            filtered.append(contact)
+    return filtered
+
+
+def _get_search_description(name, phone, email):
+    """Get search description for logging"""
+    descriptions = []
+    if name:
+        descriptions.append(f"name '{name}'")
+    if phone:
+        descriptions.append(f"phone '{phone}'")
+    if email:
+        descriptions.append(f"email '{email}'")
+    return " or ".join(descriptions)
+
+
+def _display_search_results(filtered_contacts):
+    """Display search results"""
+    if filtered_contacts:
+        print(f"\n{Style.BRIGHT}Contacts:{Style.RESET_ALL}")
+        for contact in filtered_contacts:
+            email_str = ""
+            if contact.get("email"):
+                email_str = f" - {contact.get('email')}"
+            cid = contact["id"]
+            name = contact["name"]
+            phone = contact["phone"]
+            print(f"  [{cid}] {name} - {phone}{email_str}")
+    else:
+        print_info("No contacts found matching your search")
+
+
+def cmd_contacts_search(args):
+    """Search for contacts by name, phone, or email"""
+    # Check if at least one search parameter is provided
+    if not args.name and not args.phone and not args.email:
+        error_msg = (
+            "At least one search parameter required. "
+            "Use: autom8 contacts search --name <name> | "
+            "--phone <phone> | --email <email>"
+        )
+        print_error(error_msg)
+        return 1
+
+    try:
+        import requests
+
+        response = requests.get("http://localhost:5000/api/v1/contacts", timeout=5)
+
+        if response.status_code == 200:
+            data = response.json()
+            all_contacts = data.get("contacts", [])
+
+            # Filter contacts based on search parameters
+            filtered_contacts = _filter_contacts_by_search(
+                all_contacts, args.name, args.phone, args.email
+            )
+
+            # Get search description
+            search_desc = _get_search_description(args.name, args.phone, args.email)
+
+            print_info(f"Searching for contacts with {search_desc}...")
+
+            # Display results
+            _display_search_results(filtered_contacts)
+            return 0
+        else:
+            print_error("Failed to search contacts")
+            return 1
+    except Exception as e:
+        print_error(f"Failed to search contacts: {e}")
+        return 1
+
+
 def cmd_contacts_delete(args):
     """Delete contact by ID"""
     if not args.id:
@@ -558,8 +626,9 @@ def cmd_contacts_delete(args):
 
         response = requests.delete(f"http://localhost:5000/api/v1/contacts/{args.id}", timeout=5)
 
-        if response.status_code == 204:
-            print_success(f"Contact {args.id} deleted")
+        # Accept both 200 and 204 as success (200 = OK with message, 204 = No Content)
+        if response.status_code in [200, 204]:
+            print_success(f"Contact {args.id} deleted successfully")
             return 0
         else:
             print_error(
@@ -665,6 +734,11 @@ For more information, visit: https://github.com/orenyalphy256-glitch/op-alpha-sy
         func=cmd_contacts_list
     )
     contacts_subparsers.add_parser("add", help="Add contact").set_defaults(func=cmd_contacts_add)
+    search_parser = contacts_subparsers.add_parser("search", help="Search contacts")
+    search_parser.add_argument("--name", help="Search by contact name (partial match)")
+    search_parser.add_argument("--phone", help="Search by phone number")
+    search_parser.add_argument("--email", help="Search by email address")
+    search_parser.set_defaults(func=cmd_contacts_search)
     delete_parser = contacts_subparsers.add_parser("delete", help="Delete contact")
     delete_parser.add_argument("id", type=int, help="Contact ID")
     delete_parser.set_defaults(func=cmd_contacts_delete)

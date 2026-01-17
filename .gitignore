@@ -116,3 +116,7 @@ progress_log.md
 progress_tracker_autom8.py
 # Generated Overview
 autom8_comprehensive_overview.txt
+# System backup files
+system_backup_*.tar.gz
+autom8_backup_*.zip
+autom8_backup_202601*.tar.gz
