@@ -2,8 +2,6 @@
 
 <div align="center">
 
-![Autom8 Logo](assets/logo.png)
-
 [![Stable Version](https://img.shields.io/badge/API-v1.0.0--Stable-blue?style=for-the-badge&logo=openapi-initiative&logoColor=white)](./docs/CHANGELOG.md)
 [![Security Scan](https://img.shields.io/badge/Security-A%2B-success?style=for-the-badge&logo=security&logoColor=white)](./SECURITY.md)
 [![Test Coverage](https://img.shields.io/badge/Coverage-85%25--success?style=for-the-badge&logo=pytest&logoColor=white)](./TESTING_GUIDE.md)
@@ -151,6 +149,6 @@ Autom8 is actively seeking strategic partnerships and investment to accelerate t
 **[LICENSE](LICENSE) • [SECURITY](SECURITY.md) • [CONTRIBUTING](docs/CONTRIBUTING.md)**
 
 Built with precision by **Alphonce Liguori Oreny**.
-*© 2025 ALO Systems. All Rights Reserved.*
+*© 2026 ALO Systems. All Rights Reserved.*
 
 </div>
