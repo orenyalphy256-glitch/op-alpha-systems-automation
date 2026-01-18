@@ -146,7 +146,7 @@ class ConfigValidator:
         env = environment or Config.ENVIRONMENT
 
         # Only enforce critical vars
-        if env in ("production", "staging", "development"):
+        if env in ("production", "staging"):
             errors.extend(ConfigValidator._validate_critical_vars())
 
         # Validate format of specific variables
