@@ -13,7 +13,8 @@ from datetime import datetime
 from sqlalchemy import Column, DateTime, Index, Integer, String, create_engine, event, or_
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-from autom8.core import Config, log
+from autom8.core import log
+from autom8.config import Config
 
 # Database Configuration
 
@@ -87,8 +88,6 @@ class Contact(Base):
         """String representation for debugging."""
         return f"<Contact(id={self.id}, name='{self.name}', phone='{self.phone}')>"
 
-    # to_dict removed: Use autom8.serializers.contacts.serialize_contact instead
-
 
 class TaskLog(Base):
     __tablename__ = "task_logs"
@@ -104,8 +103,6 @@ class TaskLog(Base):
 
     def __repr__(self):
         return f"<TaskLog(id={self.id}, type='{self.task_type}', status='{self.status}')>"
-
-    # to_dict removed: Use autom8.serializers.tasklogs.serialize_task_log instead
 
 
 # Database Initialization
@@ -127,9 +124,6 @@ def create_contact(session, name, phone, email=None):
     session.refresh(contact)
     log.info(f"Created contact: {contact}")
     return contact
-
-
-# serialize_contact removed: Use autom8.serializers.contacts.serialize_contact instead
 
 
 def get_contact_by_id(session, contact_id):
