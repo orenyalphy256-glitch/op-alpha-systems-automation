@@ -70,9 +70,6 @@ limiter = Limiter(
 )
 
 
-# Security Headers
-
-
 # Error Handlers
 @app.errorhandler(400)
 def bad_request(error):
@@ -224,7 +221,7 @@ def validate_contact_data(data, required_fields=None):
 
 # API Routes - Contacts
 @app.route("/api/v1/health", methods=["GET"])
-@limiter.exempt  # No rate limit on health check
+@limiter.exempt
 def health():
     """Health check endpoint."""
     return jsonify(
