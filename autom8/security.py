@@ -251,11 +251,7 @@ def validate_phone(phone: str) -> bool:
     import re
 
     patterns = [
-        r"^07\d{8}$",
-        r"^\+2547\d{8}$",
-        r"^2547\d{8}$",
-        r"^01\d{8}$",
-        r"^\+2541\d{8}$",
+        r"^\+[1-9]\d{1,14}$",
     ]
 
     for pattern in patterns:

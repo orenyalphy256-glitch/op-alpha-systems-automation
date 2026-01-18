@@ -142,7 +142,7 @@ def timer(name: str = "Operation"):
 function_cache = LRUCache(maxsize=256)
 
 # TTL Cache for time-sensitive data (short duration for responsiveness)
-timed_cache = TTLCache(maxsize=128, ttl=10)  # 10 seconds
+timed_cache = TTLCache(maxsize=128, ttl=10)
 
 
 def cached(cache_obj=None, key_func=None):

@@ -279,15 +279,6 @@ def protected():
     )
 
 
-@app.route("/api/v1/contacts", methods=["GET"])
-def get_contacts():
-    limit_arg = request.args.get("limit")
-    offset_arg = request.args.get("offset")
-
-    result = _get_contacts_internal(limit_arg, offset_arg)
-    return jsonify(result)
-
-
 @cached(cache_obj=timed_cache)
 def _get_contacts_internal(limit_arg, offset_arg):
     limit = int(limit_arg) if limit_arg else 100
@@ -303,6 +294,15 @@ def _get_contacts_internal(limit_arg, offset_arg):
         return serialize_contacts_page(contacts, total, offset, limit)
     finally:
         session.close()
+
+
+@app.route("/api/v1/contacts", methods=["GET"])
+def get_contacts():
+    limit_arg = request.args.get("limit")
+    offset_arg = request.args.get("offset")
+
+    result = _get_contacts_internal(limit_arg, offset_arg)
+    return jsonify(result)
 
 
 # Clear cache helpers to be called after modifications
