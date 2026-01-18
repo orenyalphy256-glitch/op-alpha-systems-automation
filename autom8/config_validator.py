@@ -61,39 +61,6 @@ class ConfigValidator:
     }
 
     @staticmethod
-    def validate_startup(environment: str = None) -> Tuple[bool, List[str]]:
-        """
-        Validate all required configuration at startup.
-
-        Args:
-            environment: Environment type (production/staging/development).
-                        If None, will read from ENVIRONMENT env var.
-
-        Returns:
-            Tuple of (is_valid: bool, errors: List[str])
-        """
-        from autom8.config import Config
-
-        errors = []
-        env = environment or Config.ENVIRONMENT
-
-        # Only enforce critical vars in production/staging
-        if env in ("production", "staging"):
-            errors.extend(ConfigValidator._validate_critical_vars())
-
-        # Validate format of specific variables
-        errors.extend(ConfigValidator._validate_format_vars())
-
-        # Validate variable lengths
-        errors.extend(ConfigValidator._validate_variable_lengths(env))
-
-        # Validate Fernet key if present
-        if os.getenv("ENCRYPTION_KEY"):
-            errors.extend(ConfigValidator._validate_fernet_key())
-
-        return len(errors) == 0, errors
-
-    @staticmethod
     def _validate_critical_vars() -> List[str]:
         """Check that all critical variables are set."""
         errors = []
@@ -122,7 +89,7 @@ class ConfigValidator:
 
             value = os.getenv(var_name)
             if not value:
-                continue  # Already caught by _validate_critical_vars
+                continue
 
             min_len = config["min_length"]
             if len(value) < min_len:
@@ -172,15 +139,31 @@ class ConfigValidator:
         return errors
 
     @staticmethod
+    def validate_startup(environment: str = None) -> Tuple[bool, List[str]]:
+        from autom8.config import Config
+
+        errors = []
+        env = environment or Config.ENVIRONMENT
+
+        # Only enforce critical vars
+        if env in ("production", "staging", "development"):
+            errors.extend(ConfigValidator._validate_critical_vars())
+
+        # Validate format of specific variables
+        errors.extend(ConfigValidator._validate_format_vars())
+
+        # Validate variable lengths
+        errors.extend(ConfigValidator._validate_variable_lengths(env))
+
+        # Validate Fernet key if present
+        if os.getenv("ENCRYPTION_KEY"):
+            errors.extend(ConfigValidator._validate_fernet_key())
+
+        return len(errors) == 0, errors
+    
+    @staticmethod
     def validate_and_exit_if_invalid(environment: str = None) -> None:
-        """
-        Validate configuration and exit with error if invalid.
-
-        This should be called early in application startup.
-
-        Args:
-            environment: Environment type (defaults to Config.ENVIRONMENT)
-        """
+        """Validate configuration and exit if invalid."""
         is_valid, errors = ConfigValidator.validate_startup(environment)
 
         if not is_valid:
