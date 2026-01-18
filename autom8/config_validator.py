@@ -160,7 +160,7 @@ class ConfigValidator:
             errors.extend(ConfigValidator._validate_fernet_key())
 
         return len(errors) == 0, errors
-    
+
     @staticmethod
     def validate_and_exit_if_invalid(environment: str = None) -> None:
         """Validate configuration and exit if invalid."""
