@@ -27,9 +27,6 @@ def serialize_system_info(
 
 
 def serialize_health_check(status, service, version, environment):
-    """
-    Serialize simple health check response.
-    """
     return {
         "status": status,
         "service": service,

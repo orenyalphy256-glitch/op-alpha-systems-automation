@@ -19,8 +19,8 @@ def serialize_task_log(log_entry):
         "status": log_entry.status,
         "started_at": log_entry.started_at.isoformat() if log_entry.started_at else None,
         "completed_at": log_entry.completed_at.isoformat() if log_entry.completed_at else None,
-        "result": log_entry.result_data,  # Renaming 'result_data' to 'result' for cleaner API
-        "error": log_entry.error_message,  # Renaming 'error_message' to 'error'
+        "result": log_entry.result_data,
+        "error": log_entry.error_message,
     }
 
 
