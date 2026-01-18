@@ -3,7 +3,6 @@
 # Unauthorized copying of this file, via any medium is strictly prohibited.
 
 """
-
 Integration tests for Flask API endpoints.
 
 Tests cover:
@@ -22,15 +21,18 @@ from sqlalchemy.orm import sessionmaker
 
 from autom8.models import Base
 
-# Helper function for unique phone numbers
+# Helper function for unique phone numbers (INTERNATIONAL FORMAT)
 _phone_counter = 0
 
 
 def get_unique_phone():
-    """Generate a unique phone number based on timestamp and counter."""
+    """Generate a unique phone number in international format."""
     global _phone_counter
     _phone_counter += 1
-    return f"07{(int(time.time() * 1000) + _phone_counter) % 100000000:08d}"
+    # Generate unique 9-digit number
+    unique_num = (int(time.time() * 1000) + _phone_counter) % 1000000000
+    # Return in international format: +254 (Kenya country code) + 9 digits
+    return f"+254{unique_num:09d}"
 
 
 # Fixtures
@@ -101,7 +103,7 @@ class TestContactsEndpoints:
 
     def test_create_contact_success(self, client):
         """Test creating a new contact."""
-        # Arrange - Use unique phone number
+        # Arrange - Use unique phone number in international format
         new_contact = {"name": "Test User", "phone": get_unique_phone()}
 
         # Act
@@ -119,7 +121,7 @@ class TestContactsEndpoints:
     def test_create_contact_missing_name(self, client):
         """Test creating contact without name fails."""
         # Arrange
-        invalid_contact = {"phone": "0700000000"}
+        invalid_contact = {"phone": get_unique_phone()}
 
         # Act
         response = client.post(
@@ -141,6 +143,22 @@ class TestContactsEndpoints:
 
         # Assert
         assert response.status_code == 400
+
+    def test_create_contact_invalid_phone_format(self, client):
+        """Test creating contact with invalid phone format fails."""
+        # Arrange - Use local format (should fail)
+        invalid_contact = {"name": "Test User", "phone": "0712345678"}
+
+        # Act
+        response = client.post(
+            "/api/v1/contacts", data=json.dumps(invalid_contact), content_type="application/json"
+        )
+
+        # Assert
+        assert response.status_code == 400
+        data = json.loads(response.data)
+        assert "error" in data
+        assert "phone" in data["error"].lower()
 
     def test_get_contact_by_id(self, client):
         """Test getting specific contact by ID."""

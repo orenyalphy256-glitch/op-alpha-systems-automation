@@ -38,5 +38,6 @@ def test_security_validation_edges():
     assert validate_email("test@example.com") is True
     assert validate_email("invalid") is False
 
-    assert validate_phone("0712345678") is True
+    # International format
+    assert validate_phone("+1234567890") is True
     assert validate_phone("123") is False
