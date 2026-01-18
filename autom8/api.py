@@ -693,7 +693,7 @@ def index():
         jsonify(
             {
                 "service": "Autom8 API",
-                "version": "1.0",
+                "version": "1.0.0",
                 "endpoints": {
                     "health": "/api/v1/health",
                     "contacts": {
