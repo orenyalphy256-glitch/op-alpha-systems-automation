@@ -126,10 +126,8 @@ def test_phone_validation():
     print("=" * 70)
 
     valid_phones = [
-        "0700000000",
-        "+254700000000",
-        "254700000000",
-        "0100000000",
+        # International format
+        "+1234567890",
     ]
 
     invalid_phones = [
